@@ -22,9 +22,9 @@ func (board *Board) Print() {
             fmt.Printf("%d ",(f/8)+1)
         }
         if board.me & bit != 0 {
-            fmt.Printf("\033[31;1m●\033[0m ")
+            fmt.Printf("○ ")
         } else if board.opp & bit != 0 {
-            fmt.Printf("\033[34;1m●\033[0m ")
+            fmt.Printf("● ")
         } else if moves & bit != 0 {
             fmt.Printf("- ")
         } else {
@@ -39,6 +39,26 @@ func (board *Board) Print() {
 
 }
 
+func movesPartial(me,mask,n uint64) uint64 {
+    flip_l := mask & (me << n)
+    flip_l |= mask & (flip_l << n)
+    mask_l := mask & (mask << n)
+    flip_l |= mask_l & (flip_l << (2*n))
+    flip_l |= mask_l & (flip_l << (2*n))
+    flip_r := mask & (me >> n)
+    flip_r |= mask & (flip_r >> n)
+    mask_r := mask & (mask >> n)
+    flip_r |= mask_r & (flip_r >> (2*n))
+    flip_r |= mask_r & (flip_r >> (2*n))
+    return (flip_l << n) | (flip_r >> n)
+}
+
 func (board *Board) Moves() uint64 {
-    return 0
+    // this function is a modified version of code from Edax
+    mask := board.opp & 0x7E7E7E7E7E7E7E7E
+    res := movesPartial(board.me,mask,1)
+    res |= movesPartial(board.me,mask,7)
+    res |= movesPartial(board.me,mask,9)
+    res |= movesPartial(board.me,board.opp,8)
+    return res & ^(board.me | board.opp)
 }
