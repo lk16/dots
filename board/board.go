@@ -2,7 +2,6 @@ package board
 
 import (
     "fmt"
-    "github.com/willf/bitset"
 )
 
 type Board struct {
@@ -44,7 +43,7 @@ func (board *Board) Print() {
             case 1:
                 fmt.Printf("● ")
             case -1:
-                if moves.Test(f) {
+                if moves & uint64(1) << f != 0 {
                     fmt.Printf("- ")
                 } else {
                     fmt.Printf("  ")
@@ -72,15 +71,18 @@ func movesPartial(me,mask,n uint64) uint64 {
     return (flip_l << n) | (flip_r >> n)
 }
 
-func (board *Board) Moves() bitset.BitSet {
+func (board *Board) Moves() uint64 {
     // this function is a modified version of code from Edax
     mask := board.opp & 0x7E7E7E7E7E7E7E7E
+
     res := movesPartial(board.me,mask,1)
     res |= movesPartial(board.me,mask,7)
     res |= movesPartial(board.me,mask,9)
     res |= movesPartial(board.me,board.opp,8)
     
-    return *bitset.From([]uint64{res & ^(board.me | board.opp)})
+    empties := ^(board.me | board.opp)
+
+    return res & empties
 }
 
 
