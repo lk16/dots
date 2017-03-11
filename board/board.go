@@ -70,12 +70,15 @@ func movesPartial(me,mask,n bitset) bitset {
 func (board *Board) Moves() bitset {
     // this function is a modified version of code from Edax
     mask := board.opp & 0x7E7E7E7E7E7E7E7E
+
     res := movesPartial(board.me,mask,1)
     res |= movesPartial(board.me,mask,7)
     res |= movesPartial(board.me,mask,9)
     res |= movesPartial(board.me,board.opp,8)
     
-    return res & ^(board.me | board.opp)
+    empties := ^(board.me | board.opp)
+
+    return res & empties
 }
 
 
