@@ -1,5 +1,9 @@
 package board
 
+import (
+    "math/rand"
+)
+
 type bitset uint64
 
 func (bs bitset) Count() uint {
@@ -32,4 +36,10 @@ func (bs bitset) LastBit() bitset {
         }
     }
     return 0
+}
+
+func RandomBitset() bitset {
+    high := bitset(rand.Uint32())
+    low := bitset(rand.Uint32())
+    return (high << 32) | low
 }
