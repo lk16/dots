@@ -1,18 +1,19 @@
 package board
 
-func first_bit(bitset uint64) uint64 {
-    for i:=uint(0); i<64; i++ {
-        if (bitset & (1 << i)) != 0 {
-            return 1 << i
-        }
+import "github.com/willf/bitset"
+
+func first_bit(set uint64) uint64 {
+    i,e := bitset.From([]uint64{set}).NextSet(0)
+    if !e {
+        return 0
     }
-    return 0
+    return 1 << i
 }
 
-func last_bit(bitset uint64) uint64 {
+func last_bit(set uint64) uint64 {
     i:=uint(63)
     for {
-        if (bitset & (1 << i)) != 0 {
+        if (set & (1 << i)) != 0 {
             return 1 << i
         }
         i--
