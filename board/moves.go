@@ -1,67 +1,43 @@
 package board
 
-import "github.com/willf/bitset"
-
-func first_bit(set uint64) uint64 {
-    i,e := bitset.From([]uint64{set}).NextSet(0)
-    if !e {
-        return 0
-    }
-    return 1 << i
-}
-
-func last_bit(set uint64) uint64 {
-    i:=uint(63)
-    for {
-        if (set & (1 << i)) != 0 {
-            return 1 << i
-        }
-        i--
-        if i == 0 {
-            break
-        }
-    }
-    return 0
-}
-
-func (board *Board) doMoveToHigherBits(line uint64) uint64 {
+func (board *Board) doMoveToHigherBits(line bitset) bitset {
     line_mask := line & board.me
-    bit := first_bit(line_mask)
-    line &= bit - 1
+    bit := line_mask.FirstBit()
+    line &= bitset(bit - 1)
     if (bit != 0) && (line & board.opp == line) {
         return line
     }
     return 0
 }
 
-func (board *Board) doMoveToLowerBits(line uint64) uint64 {
+func (board *Board) doMoveToLowerBits(line bitset) bitset {
     line_mask := line & board.me
-    bit := last_bit(line_mask) 
+    bit := line_mask.LastBit() 
     if line_mask != 0 {
             bit -= 1
     }
-    line &= ^((bit << 1) - 1)
+    line &= bitset(^((bit << 1) - 1))
     if (bit != 0) && (line & board.opp == line) {
         return line 
     }
     return 0
 }
 
-func (board *Board) doMove0() uint64 {
+func (board *Board) doMove0() bitset {
     flipped := board.doMoveToHigherBits(0x00000000000000FE)
     flipped |= board.doMoveToHigherBits(0x0101010101010100)
     flipped |= board.doMoveToHigherBits(0x8040201008040200)
     return flipped
 }
 
-func (board *Board) doMove1() uint64 {
+func (board *Board) doMove1() bitset {
     flipped := board.doMoveToHigherBits(0x00000000000000FC)
     flipped |= board.doMoveToHigherBits(0x0202020202020200)
     flipped |= board.doMoveToHigherBits(0x0080402010080400)
     return flipped
 }
 
-func (board *Board) doMove2() uint64 {
+func (board *Board) doMove2() bitset {
     flipped := board.doMoveToHigherBits(0x00000000000000F8)
     flipped |= board.doMoveToHigherBits(0x0000000000010200)
     flipped |= board.doMoveToHigherBits(0x0404040404040400)
@@ -70,7 +46,7 @@ func (board *Board) doMove2() uint64 {
     return flipped
 }
 
-func (board *Board) doMove3() uint64 {
+func (board *Board) doMove3() bitset {
     flipped := board.doMoveToHigherBits(0x00000000000000F0)
     flipped |= board.doMoveToHigherBits(0x0000000001020400)
     flipped |= board.doMoveToHigherBits(0x0808080808080800)
@@ -79,7 +55,7 @@ func (board *Board) doMove3() uint64 {
     return flipped
 }
 
-func (board *Board) doMove4() uint64 {
+func (board *Board) doMove4() bitset {
     flipped := board.doMoveToHigherBits(0x00000000000000E0)
     flipped |= board.doMoveToHigherBits(0x0000000102040800)
     flipped |= board.doMoveToHigherBits(0x1010101010101000)
@@ -88,7 +64,7 @@ func (board *Board) doMove4() uint64 {
     return flipped
 }
 
-func (board *Board) doMove5() uint64 {
+func (board *Board) doMove5() bitset {
     flipped := board.doMoveToHigherBits(0x00000000000000C0)
     flipped |= board.doMoveToHigherBits(0x0000010204081000)
     flipped |= board.doMoveToHigherBits(0x2020202020202000)
@@ -97,35 +73,35 @@ func (board *Board) doMove5() uint64 {
     return flipped
 }
 
-func (board *Board) doMove6() uint64 {
+func (board *Board) doMove6() bitset {
     flipped := board.doMoveToHigherBits(0x0001020408102000)
     flipped |= board.doMoveToHigherBits(0x4040404040404000)
     flipped |= board.doMoveToLowerBits(0x000000000000003F)
     return flipped
 }
 
-func (board *Board) doMove7() uint64 {
+func (board *Board) doMove7() bitset {
     flipped := board.doMoveToHigherBits(0x0102040810204000)
     flipped |= board.doMoveToHigherBits(0x8080808080808000)
     flipped |= board.doMoveToLowerBits(0x000000000000007F)
     return flipped
 }
 
-func (board *Board) doMove8() uint64 {
+func (board *Board) doMove8() bitset {
     flipped := board.doMoveToHigherBits(0x000000000000FE00)
     flipped |= board.doMoveToHigherBits(0x0101010101010000)
     flipped |= board.doMoveToHigherBits(0x4020100804020000)
     return flipped
 }
 
-func (board *Board) doMove9() uint64 {
+func (board *Board) doMove9() bitset {
     flipped := board.doMoveToHigherBits(0x000000000000FC00)
     flipped |= board.doMoveToHigherBits(0x0202020202020000)
     flipped |= board.doMoveToHigherBits(0x8040201008040000)
     return flipped
 }
 
-func (board *Board) doMove10() uint64 {
+func (board *Board) doMove10() bitset {
     flipped := board.doMoveToHigherBits(0x000000000000F800)
     flipped |= board.doMoveToHigherBits(0x0000000001020000)
     flipped |= board.doMoveToHigherBits(0x0404040404040000)
@@ -134,7 +110,7 @@ func (board *Board) doMove10() uint64 {
     return flipped
 }
 
-func (board *Board) doMove11() uint64 {
+func (board *Board) doMove11() bitset {
     flipped := board.doMoveToHigherBits(0x000000000000F000)
     flipped |= board.doMoveToHigherBits(0x0000000102040000)
     flipped |= board.doMoveToHigherBits(0x0808080808080000)
@@ -143,7 +119,7 @@ func (board *Board) doMove11() uint64 {
     return flipped
 }
 
-func (board *Board) doMove12() uint64 {
+func (board *Board) doMove12() bitset {
     flipped := board.doMoveToHigherBits(0x000000000000E000)
     flipped |= board.doMoveToHigherBits(0x0000010204080000)
     flipped |= board.doMoveToHigherBits(0x1010101010100000)
@@ -152,7 +128,7 @@ func (board *Board) doMove12() uint64 {
     return flipped
 }
 
-func (board *Board) doMove13() uint64 {
+func (board *Board) doMove13() bitset {
     flipped := board.doMoveToHigherBits(0x000000000000C000)
     flipped |= board.doMoveToHigherBits(0x0001020408100000)
     flipped |= board.doMoveToHigherBits(0x2020202020200000)
@@ -161,21 +137,21 @@ func (board *Board) doMove13() uint64 {
     return flipped
 }
 
-func (board *Board) doMove14() uint64 {
+func (board *Board) doMove14() bitset {
     flipped := board.doMoveToHigherBits(0x0102040810200000)
     flipped |= board.doMoveToHigherBits(0x4040404040400000)
     flipped |= board.doMoveToLowerBits(0x0000000000003F00)
     return flipped
 }
 
-func (board *Board) doMove15() uint64 {
+func (board *Board) doMove15() bitset {
     flipped := board.doMoveToHigherBits(0x0204081020400000)
     flipped |= board.doMoveToHigherBits(0x8080808080800000)
     flipped |= board.doMoveToLowerBits(0x0000000000007F00)
     return flipped
 }
 
-func (board *Board) doMove16() uint64 {
+func (board *Board) doMove16() bitset {
     flipped := board.doMoveToHigherBits(0x0000000000FE0000)
     flipped |= board.doMoveToHigherBits(0x0101010101000000)
     flipped |= board.doMoveToHigherBits(0x2010080402000000)
@@ -184,7 +160,7 @@ func (board *Board) doMove16() uint64 {
     return flipped
 }
 
-func (board *Board) doMove17() uint64 {
+func (board *Board) doMove17() bitset {
     flipped := board.doMoveToHigherBits(0x0000000000FC0000)
     flipped |= board.doMoveToHigherBits(0x0202020202000000)
     flipped |= board.doMoveToHigherBits(0x4020100804000000)
@@ -193,7 +169,7 @@ func (board *Board) doMove17() uint64 {
     return flipped
 }
 
-func (board *Board) doMove18() uint64 {
+func (board *Board) doMove18() bitset {
     flipped := board.doMoveToHigherBits(0x0000000000F80000)
     flipped |= board.doMoveToHigherBits(0x0000000102000000)
     flipped |= board.doMoveToHigherBits(0x0404040404000000)
@@ -205,7 +181,7 @@ func (board *Board) doMove18() uint64 {
     return flipped
 }
 
-func (board *Board) doMove19() uint64 {
+func (board *Board) doMove19() bitset {
     flipped := board.doMoveToHigherBits(0x0000000000F00000)
     flipped |= board.doMoveToHigherBits(0x0000010204000000)
     flipped |= board.doMoveToHigherBits(0x0808080808000000)
@@ -217,7 +193,7 @@ func (board *Board) doMove19() uint64 {
     return flipped
 }
 
-func (board *Board) doMove20() uint64 {
+func (board *Board) doMove20() bitset {
     flipped := board.doMoveToHigherBits(0x0000000000E00000)
     flipped |= board.doMoveToHigherBits(0x0001020408000000)
     flipped |= board.doMoveToHigherBits(0x1010101010000000)
@@ -229,7 +205,7 @@ func (board *Board) doMove20() uint64 {
     return flipped
 }
 
-func (board *Board) doMove21() uint64 {
+func (board *Board) doMove21() bitset {
     flipped := board.doMoveToHigherBits(0x0000000000C00000)
     flipped |= board.doMoveToHigherBits(0x0102040810000000)
     flipped |= board.doMoveToHigherBits(0x2020202020000000)
@@ -241,7 +217,7 @@ func (board *Board) doMove21() uint64 {
     return flipped
 }
 
-func (board *Board) doMove22() uint64 {
+func (board *Board) doMove22() bitset {
     flipped := board.doMoveToHigherBits(0x0204081020000000)
     flipped |= board.doMoveToHigherBits(0x4040404040000000)
     flipped |= board.doMoveToLowerBits(0x00000000003F0000)
@@ -250,7 +226,7 @@ func (board *Board) doMove22() uint64 {
     return flipped
 }
 
-func (board *Board) doMove23() uint64 {
+func (board *Board) doMove23() bitset {
     flipped := board.doMoveToHigherBits(0x0408102040000000)
     flipped |= board.doMoveToHigherBits(0x8080808080000000)
     flipped |= board.doMoveToLowerBits(0x00000000007F0000)
@@ -259,7 +235,7 @@ func (board *Board) doMove23() uint64 {
     return flipped
 }
 
-func (board *Board) doMove24() uint64 {
+func (board *Board) doMove24() bitset {
     flipped := board.doMoveToHigherBits(0x00000000FE000000)
     flipped |= board.doMoveToHigherBits(0x0101010100000000)
     flipped |= board.doMoveToHigherBits(0x1008040200000000)
@@ -268,7 +244,7 @@ func (board *Board) doMove24() uint64 {
     return flipped
 }
 
-func (board *Board) doMove25() uint64 {
+func (board *Board) doMove25() bitset {
     flipped := board.doMoveToHigherBits(0x00000000FC000000)
     flipped |= board.doMoveToHigherBits(0x0202020200000000)
     flipped |= board.doMoveToHigherBits(0x2010080400000000)
@@ -277,7 +253,7 @@ func (board *Board) doMove25() uint64 {
     return flipped
 }
 
-func (board *Board) doMove26() uint64 {
+func (board *Board) doMove26() bitset {
     flipped := board.doMoveToHigherBits(0x00000000F8000000)
     flipped |= board.doMoveToHigherBits(0x0000010200000000)
     flipped |= board.doMoveToHigherBits(0x0404040400000000)
@@ -289,7 +265,7 @@ func (board *Board) doMove26() uint64 {
     return flipped
 }
 
-func (board *Board) doMove27() uint64 {
+func (board *Board) doMove27() bitset {
     flipped := board.doMoveToHigherBits(0x00000000F0000000)
     flipped |= board.doMoveToHigherBits(0x0001020400000000)
     flipped |= board.doMoveToHigherBits(0x0808080800000000)
@@ -301,7 +277,7 @@ func (board *Board) doMove27() uint64 {
     return flipped
 }
 
-func (board *Board) doMove28() uint64 {
+func (board *Board) doMove28() bitset {
     flipped := board.doMoveToHigherBits(0x00000000E0000000)
     flipped |= board.doMoveToHigherBits(0x0102040800000000)
     flipped |= board.doMoveToHigherBits(0x1010101000000000)
@@ -313,7 +289,7 @@ func (board *Board) doMove28() uint64 {
     return flipped
 }
 
-func (board *Board) doMove29() uint64 {
+func (board *Board) doMove29() bitset {
     flipped := board.doMoveToHigherBits(0x00000000C0000000)
     flipped |= board.doMoveToHigherBits(0x0204081000000000)
     flipped |= board.doMoveToHigherBits(0x2020202000000000)
@@ -325,7 +301,7 @@ func (board *Board) doMove29() uint64 {
     return flipped
 }
 
-func (board *Board) doMove30() uint64 {
+func (board *Board) doMove30() bitset {
     flipped := board.doMoveToHigherBits(0x0408102000000000)
     flipped |= board.doMoveToHigherBits(0x4040404000000000)
     flipped |= board.doMoveToLowerBits(0x000000003F000000)
@@ -334,7 +310,7 @@ func (board *Board) doMove30() uint64 {
     return flipped
 }
 
-func (board *Board) doMove31() uint64 {
+func (board *Board) doMove31() bitset {
     flipped := board.doMoveToHigherBits(0x0810204000000000)
     flipped |= board.doMoveToHigherBits(0x8080808000000000)
     flipped |= board.doMoveToLowerBits(0x000000007F000000)
@@ -343,7 +319,7 @@ func (board *Board) doMove31() uint64 {
     return flipped
 }
 
-func (board *Board) doMove32() uint64 {
+func (board *Board) doMove32() bitset {
     flipped := board.doMoveToHigherBits(0x000000FE00000000)
     flipped |= board.doMoveToHigherBits(0x0101010000000000)
     flipped |= board.doMoveToHigherBits(0x0804020000000000)
@@ -352,7 +328,7 @@ func (board *Board) doMove32() uint64 {
     return flipped
 }
 
-func (board *Board) doMove33() uint64 {
+func (board *Board) doMove33() bitset {
     flipped := board.doMoveToHigherBits(0x000000FC00000000)
     flipped |= board.doMoveToHigherBits(0x0202020000000000)
     flipped |= board.doMoveToHigherBits(0x1008040000000000)
@@ -361,7 +337,7 @@ func (board *Board) doMove33() uint64 {
     return flipped
 }
 
-func (board *Board) doMove34() uint64 {
+func (board *Board) doMove34() bitset {
     flipped := board.doMoveToHigherBits(0x000000F800000000)
     flipped |= board.doMoveToHigherBits(0x0001020000000000)
     flipped |= board.doMoveToHigherBits(0x0404040000000000)
@@ -373,7 +349,7 @@ func (board *Board) doMove34() uint64 {
     return flipped
 }
 
-func (board *Board) doMove35() uint64 {
+func (board *Board) doMove35() bitset {
     flipped := board.doMoveToHigherBits(0x000000F000000000)
     flipped |= board.doMoveToHigherBits(0x0102040000000000)
     flipped |= board.doMoveToHigherBits(0x0808080000000000)
@@ -385,7 +361,7 @@ func (board *Board) doMove35() uint64 {
     return flipped
 }
 
-func (board *Board) doMove36() uint64 {
+func (board *Board) doMove36() bitset {
     flipped := board.doMoveToHigherBits(0x000000E000000000)
     flipped |= board.doMoveToHigherBits(0x0204080000000000)
     flipped |= board.doMoveToHigherBits(0x1010100000000000)
@@ -397,7 +373,7 @@ func (board *Board) doMove36() uint64 {
     return flipped
 }
 
-func (board *Board) doMove37() uint64 {
+func (board *Board) doMove37() bitset {
     flipped := board.doMoveToHigherBits(0x000000C000000000)
     flipped |= board.doMoveToHigherBits(0x0408100000000000)
     flipped |= board.doMoveToHigherBits(0x2020200000000000)
@@ -409,7 +385,7 @@ func (board *Board) doMove37() uint64 {
     return flipped
 }
 
-func (board *Board) doMove38() uint64 {
+func (board *Board) doMove38() bitset {
     flipped := board.doMoveToHigherBits(0x0810200000000000)
     flipped |= board.doMoveToHigherBits(0x4040400000000000)
     flipped |= board.doMoveToLowerBits(0x0000003F00000000)
@@ -418,7 +394,7 @@ func (board *Board) doMove38() uint64 {
     return flipped
 }
 
-func (board *Board) doMove39() uint64 {
+func (board *Board) doMove39() bitset {
     flipped := board.doMoveToHigherBits(0x1020400000000000)
     flipped |= board.doMoveToHigherBits(0x8080800000000000)
     flipped |= board.doMoveToLowerBits(0x0000007F00000000)
@@ -427,7 +403,7 @@ func (board *Board) doMove39() uint64 {
     return flipped
 }
 
-func (board *Board) doMove40() uint64 {
+func (board *Board) doMove40() bitset {
     flipped := board.doMoveToHigherBits(0x0000FE0000000000)
     flipped |= board.doMoveToHigherBits(0x0101000000000000)
     flipped |= board.doMoveToHigherBits(0x0402000000000000)
@@ -436,7 +412,7 @@ func (board *Board) doMove40() uint64 {
     return flipped
 }
 
-func (board *Board) doMove41() uint64 {
+func (board *Board) doMove41() bitset {
     flipped := board.doMoveToHigherBits(0x0000FC0000000000)
     flipped |= board.doMoveToHigherBits(0x0202000000000000)
     flipped |= board.doMoveToHigherBits(0x0804000000000000)
@@ -445,7 +421,7 @@ func (board *Board) doMove41() uint64 {
     return flipped
 }
 
-func (board *Board) doMove42() uint64 {
+func (board *Board) doMove42() bitset {
     flipped := board.doMoveToHigherBits(0x0000F80000000000)
     flipped |= board.doMoveToHigherBits(0x0102000000000000)
     flipped |= board.doMoveToHigherBits(0x0404000000000000)
@@ -457,7 +433,7 @@ func (board *Board) doMove42() uint64 {
     return flipped
 }
 
-func (board *Board) doMove43() uint64 {
+func (board *Board) doMove43() bitset {
     flipped := board.doMoveToHigherBits(0x0000F00000000000)
     flipped |= board.doMoveToHigherBits(0x0204000000000000)
     flipped |= board.doMoveToHigherBits(0x0808000000000000)
@@ -469,7 +445,7 @@ func (board *Board) doMove43() uint64 {
     return flipped
 }
 
-func (board *Board) doMove44() uint64 {
+func (board *Board) doMove44() bitset {
     flipped := board.doMoveToHigherBits(0x0000E00000000000)
     flipped |= board.doMoveToHigherBits(0x0408000000000000)
     flipped |= board.doMoveToHigherBits(0x1010000000000000)
@@ -481,7 +457,7 @@ func (board *Board) doMove44() uint64 {
     return flipped
 }
 
-func (board *Board) doMove45() uint64 {
+func (board *Board) doMove45() bitset {
     flipped := board.doMoveToHigherBits(0x0000C00000000000)
     flipped |= board.doMoveToHigherBits(0x0810000000000000)
     flipped |= board.doMoveToHigherBits(0x2020000000000000)
@@ -493,7 +469,7 @@ func (board *Board) doMove45() uint64 {
     return flipped
 }
 
-func (board *Board) doMove46() uint64 {
+func (board *Board) doMove46() bitset {
     flipped := board.doMoveToHigherBits(0x1020000000000000)
     flipped |= board.doMoveToHigherBits(0x4040000000000000)
     flipped |= board.doMoveToLowerBits(0x00003F0000000000)
@@ -502,7 +478,7 @@ func (board *Board) doMove46() uint64 {
     return flipped
 }
 
-func (board *Board) doMove47() uint64 {
+func (board *Board) doMove47() bitset {
     flipped := board.doMoveToHigherBits(0x2040000000000000)
     flipped |= board.doMoveToHigherBits(0x8080000000000000)
     flipped |= board.doMoveToLowerBits(0x00007F0000000000)
@@ -511,21 +487,21 @@ func (board *Board) doMove47() uint64 {
     return flipped
 }
 
-func (board *Board) doMove48() uint64 {
+func (board *Board) doMove48() bitset {
     flipped := board.doMoveToHigherBits(0x00FE000000000000)
     flipped |= board.doMoveToLowerBits(0x0000020408102040)
     flipped |= board.doMoveToLowerBits(0x0000010101010101)
     return flipped
 }
 
-func (board *Board) doMove49() uint64 {
+func (board *Board) doMove49() bitset {
     flipped := board.doMoveToHigherBits(0x00FC000000000000)
     flipped |= board.doMoveToLowerBits(0x0000040810204080)
     flipped |= board.doMoveToLowerBits(0x0000020202020202)
     return flipped
 }
 
-func (board *Board) doMove50() uint64 {
+func (board *Board) doMove50() bitset {
     flipped := board.doMoveToHigherBits(0x00F8000000000000)
     flipped |= board.doMoveToLowerBits(0x0003000000000000)
     flipped |= board.doMoveToLowerBits(0x0000081020408000)
@@ -534,7 +510,7 @@ func (board *Board) doMove50() uint64 {
     return flipped
 }
 
-func (board *Board) doMove51() uint64 {
+func (board *Board) doMove51() bitset {
     flipped := board.doMoveToHigherBits(0x00F0000000000000)
     flipped |= board.doMoveToLowerBits(0x0007000000000000)
     flipped |= board.doMoveToLowerBits(0x0000102040800000)
@@ -543,7 +519,7 @@ func (board *Board) doMove51() uint64 {
     return flipped
 }
 
-func (board *Board) doMove52() uint64 {
+func (board *Board) doMove52() bitset {
     flipped := board.doMoveToHigherBits(0x00E0000000000000)
     flipped |= board.doMoveToLowerBits(0x000F000000000000)
     flipped |= board.doMoveToLowerBits(0x0000204080000000)
@@ -552,7 +528,7 @@ func (board *Board) doMove52() uint64 {
     return flipped
 }
 
-func (board *Board) doMove53() uint64 {
+func (board *Board) doMove53() bitset {
     flipped := board.doMoveToHigherBits(0x00C0000000000000)
     flipped |= board.doMoveToLowerBits(0x001F000000000000)
     flipped |= board.doMoveToLowerBits(0x0000408000000000)
@@ -561,35 +537,35 @@ func (board *Board) doMove53() uint64 {
     return flipped
 }
 
-func (board *Board) doMove54() uint64 {
+func (board *Board) doMove54() bitset {
     flipped := board.doMoveToLowerBits(0x003F000000000000)
     flipped |= board.doMoveToLowerBits(0x0000404040404040)
     flipped |= board.doMoveToLowerBits(0x0000201008040201)
     return flipped
 }
 
-func (board *Board) doMove55() uint64 {
+func (board *Board) doMove55() bitset {
     flipped := board.doMoveToLowerBits(0x007F000000000000)
     flipped |= board.doMoveToLowerBits(0x0000808080808080)
     flipped |= board.doMoveToLowerBits(0x0000402010080402)
     return flipped
 }
 
-func (board *Board) doMove56() uint64 {
+func (board *Board) doMove56() bitset {
     flipped := board.doMoveToHigherBits(0xFE00000000000000)
     flipped |= board.doMoveToLowerBits(0x0002040810204080)
     flipped |= board.doMoveToLowerBits(0x0001010101010101)
     return flipped
 }
 
-func (board *Board) doMove57() uint64 {
+func (board *Board) doMove57() bitset {
     flipped := board.doMoveToHigherBits(0xFC00000000000000)
     flipped |= board.doMoveToLowerBits(0x0004081020408000)
     flipped |= board.doMoveToLowerBits(0x0002020202020202)
     return flipped
 }
 
-func (board *Board) doMove58() uint64 {
+func (board *Board) doMove58() bitset {
     flipped := board.doMoveToHigherBits(0xF800000000000000)
     flipped |= board.doMoveToLowerBits(0x0300000000000000)
     flipped |= board.doMoveToLowerBits(0x0008102040800000)
@@ -598,7 +574,7 @@ func (board *Board) doMove58() uint64 {
     return flipped
 }
 
-func (board *Board) doMove59() uint64 {
+func (board *Board) doMove59() bitset {
     flipped := board.doMoveToHigherBits(0xF000000000000000)
     flipped |= board.doMoveToLowerBits(0x0700000000000000)
     flipped |= board.doMoveToLowerBits(0x0010204080000000)
@@ -607,7 +583,7 @@ func (board *Board) doMove59() uint64 {
     return flipped
 }
 
-func (board *Board) doMove60() uint64 {
+func (board *Board) doMove60() bitset {
     flipped := board.doMoveToHigherBits(0xE000000000000000)
     flipped |= board.doMoveToLowerBits(0x0F00000000000000)
     flipped |= board.doMoveToLowerBits(0x0020408000000000)
@@ -616,7 +592,7 @@ func (board *Board) doMove60() uint64 {
     return flipped
 }
 
-func (board *Board) doMove61() uint64 {
+func (board *Board) doMove61() bitset {
     flipped := board.doMoveToHigherBits(0xC000000000000000)
     flipped |= board.doMoveToLowerBits(0x1F00000000000000)
     flipped |= board.doMoveToLowerBits(0x0040800000000000)
@@ -625,14 +601,14 @@ func (board *Board) doMove61() uint64 {
     return flipped
 }
 
-func (board *Board) doMove62() uint64 {
+func (board *Board) doMove62() bitset {
     flipped := board.doMoveToLowerBits(0x3F00000000000000)
     flipped |= board.doMoveToLowerBits(0x0040404040404040)
     flipped |= board.doMoveToLowerBits(0x0020100804020100)
     return flipped
 }
 
-func (board *Board) doMove63() uint64 {
+func (board *Board) doMove63() bitset {
     flipped := board.doMoveToLowerBits(0x7F00000000000000)
     flipped |= board.doMoveToLowerBits(0x0080808080808080)
     flipped |= board.doMoveToLowerBits(0x0040201008040201)

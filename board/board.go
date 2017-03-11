@@ -2,11 +2,10 @@ package board
 
 import (
     "fmt"
-    "github.com/willf/bitset"
 )
 
 type Board struct {
-    me,opp uint64
+    me,opp bitset
 }
 
 func NewBoard() *Board {
@@ -16,14 +15,10 @@ func NewBoard() *Board {
 }
 
 func (board *Board) fieldColor(index uint) int {
-    if index >= 64 {
-        panic("testField called with index argument " + string(index))
-    }
-    mask := uint64(1) << index
-    if board.me & mask != 0 {
+    if board.me.Test(index) {
         return 0
     }
-    if board.opp & mask != 0 {
+    if board.opp.Test(index) {
         return 1
     }
     return -1
@@ -58,7 +53,7 @@ func (board *Board) Print() {
 
 }
 
-func movesPartial(me,mask,n uint64) uint64 {
+func movesPartial(me,mask,n bitset) bitset {
     flip_l := mask & (me << n)
     flip_l |= mask & (flip_l << n)
     mask_l := mask & (mask << n)
@@ -72,7 +67,7 @@ func movesPartial(me,mask,n uint64) uint64 {
     return (flip_l << n) | (flip_r >> n)
 }
 
-func (board *Board) Moves() bitset.BitSet {
+func (board *Board) Moves() bitset {
     // this function is a modified version of code from Edax
     mask := board.opp & 0x7E7E7E7E7E7E7E7E
     res := movesPartial(board.me,mask,1)
@@ -80,14 +75,14 @@ func (board *Board) Moves() bitset.BitSet {
     res |= movesPartial(board.me,mask,9)
     res |= movesPartial(board.me,board.opp,8)
     
-    return *bitset.From([]uint64{res & ^(board.me | board.opp)})
+    return res & ^(board.me | board.opp)
 }
 
 
 
-func (board *Board) DoMove(index uint) uint64 {
+func (board *Board) DoMove(index uint) bitset {
 
-    doMoveFuncs := []func() uint64{
+    doMoveFuncs := []func() bitset{
          board.doMove0, board.doMove1, board.doMove2, board.doMove3,
          board.doMove4, board.doMove5, board.doMove6, board.doMove7,
          board.doMove8, board.doMove9,board.doMove10,board.doMove11,
@@ -107,7 +102,7 @@ func (board *Board) DoMove(index uint) uint64 {
 
     flipped := doMoveFuncs[index]()
 
-    tmp := board.me | flipped | (1 << index)
+    tmp := board.me | flipped | bitset(1 << index)
 
     board.me = board.opp &^ tmp
     board.opp = tmp
