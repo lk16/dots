@@ -25,23 +25,23 @@ func last_bit(set uint64) uint64 {
 }
 
 func (board *Board) doMoveToHigherBits(line uint64) uint64 {
-    line_mask := line & board.me.Bytes()[0]
+    line_mask := line & board.me
     bit := first_bit(line_mask)
     line &= bit - 1
-    if (bit != 0) && ((line & board.opp.Bytes()[0]) == line) {
+    if (bit != 0) && (line & board.opp == line) {
         return line
     }
     return 0
 }
 
 func (board *Board) doMoveToLowerBits(line uint64) uint64 {
-    line_mask := line & board.me.Bytes()[0]
+    line_mask := line & board.me
     bit := last_bit(line_mask) 
     if line_mask != 0 {
             bit -= 1
     }
     line &= ^((bit << 1) - 1)
-    if (bit != 0) && ((line & board.opp.Bytes()[0]) == line) {
+    if (bit != 0) && (line & board.opp == line) {
         return line 
     }
     return 0
