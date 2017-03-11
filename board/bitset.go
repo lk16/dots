@@ -19,7 +19,7 @@ func (bs bitset) Count() uint {
     return uint((bs * h01) >> 56)    //returns left 8 bits of x + (x<<8) + (x<<16) + (x<<24) + ...
 }
 
-func (bs bitset) Test(index uint) bool {
+func (bs bitset) TestBit(index uint) bool {
     mask := bitset(1) << index
     return bs & mask != 0
 }

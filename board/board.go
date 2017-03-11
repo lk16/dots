@@ -15,10 +15,10 @@ func NewBoard() *Board {
 }
 
 func (board *Board) fieldColor(index uint) int {
-    if board.me.Test(index) {
+    if board.me.TestBit(index) {
         return 0
     }
-    if board.opp.Test(index) {
+    if board.opp.TestBit(index) {
         return 1
     }
     return -1
@@ -39,7 +39,7 @@ func (board *Board) Print() {
             case 1:
                 fmt.Printf("● ")
             case -1:
-                if moves.Test(f) {
+                if moves.TestBit(f) {
                     fmt.Printf("- ")
                 } else {
                     fmt.Printf("  ")
