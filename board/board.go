@@ -14,6 +14,11 @@ func NewBoard() *Board {
         opp: (1 << uint(27)) | (1 << uint(36))}
 }
 
+func (board *Board) Clone() Board {
+    clone := *board
+    return clone
+}
+
 func (board *Board) fieldColor(index uint) int {
     if board.me.TestBit(index) {
         return 0
@@ -82,7 +87,6 @@ func (board *Board) Moves() bitset {
 }
 
 
-
 func (board *Board) DoMove(index uint) bitset {
 
     doMoveFuncs := []func() bitset{
@@ -111,4 +115,11 @@ func (board *Board) DoMove(index uint) bitset {
     board.opp = tmp
 
     return flipped
+}
+
+
+func (board *Board) DoRandomMoves(n uint) Board {
+    // TODO
+    panic("Not implemented")
+    return *board
 }
