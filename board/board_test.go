@@ -13,7 +13,7 @@ func genTestBoards() (ch chan Board) {
 }
 
 func (board *Board) doMove(index uint) bitset {
-    if (board.me | board.opp) & (bitset(1) << index) != 0 {
+    if (board.me | board.opp) & bitset(1 << index) != 0 {
         return 0
     }
     flipped := bitset(0)
@@ -35,7 +35,8 @@ func (board *Board) doMove(index uint) bitset {
                 } else {
                     if board.me.TestBit(cur) && (s >= 2) {
                         for p:=1; p<s; p++ {
-                            flipped |= bitset(1) << uint(int(index) + (8*dy*p) + (dx*p))
+                            f := uint(int(index) + (8*dy*p) + (dx*p))
+                            flipped |= bitset(1 << f)
                         }
                     }
                     break
@@ -43,7 +44,7 @@ func (board *Board) doMove(index uint) bitset {
             }
         }
     }
-    board.me |= flipped | (bitset(1) << index)
+    board.me |= flipped | bitset(1 << index)
     board.opp &= ^board.me
     board.opp,board.me = board.me,board.opp
     return flipped
@@ -54,7 +55,7 @@ func (board *Board) moves() bitset {
     for i:=uint(0); i<64; i++ {
         clone := board.Clone()
         if clone.DoMove(i) != bitset(0) {
-            moves |= bitset(1) << i
+            moves |= bitset(1 << i)
         }
     }
     return moves
@@ -62,10 +63,14 @@ func (board *Board) moves() bitset {
 
 func TestMoves(t *testing.T) {
     for board := range genTestBoards() {
+        clone := board
         expected := board.moves()
         got := board.Moves()
         if expected != got {
-            t.Errorf("") // TODO
+            t.Errorf("board.Moves() failed: expected %d, got %d\n",expected,got)
+        }
+        if clone != board {
+            t.Errorf("board.Moves() changed the board!\n")
         }
     }
 }

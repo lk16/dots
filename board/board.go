@@ -10,8 +10,8 @@ type Board struct {
 
 func NewBoard() *Board {
     return &Board{
-        me: (1 << uint(28)) | (1 << uint(35)),
-        opp: (1 << uint(27)) | (1 << uint(36))}
+        me: bitset(1 << 28) | bitset(1 << 35),
+        opp: bitset(1 << 27) | bitset(1 << 36)}
 }
 
 func (board *Board) Clone() Board {
@@ -22,7 +22,7 @@ func (board *Board) Clone() Board {
 func (board *Board) fieldColor(index uint) int {
     if board.me.TestBit(index) {
         return 0
-    }
+    } 
     if board.opp.TestBit(index) {
         return 1
     }
@@ -116,7 +116,6 @@ func (board *Board) DoMove(index uint) bitset {
 
     return flipped
 }
-
 
 func (board *Board) DoRandomMoves(n uint) Board {
     // TODO

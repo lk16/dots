@@ -31,10 +31,9 @@ func (bs bitset) count() (count uint) {
 }
 
 func TestBitsetCount(t *testing.T) {
-    ch := genTestBitsets()
-    for v := range ch {
-        expected := v.count()
-        got := v.Count()
+    for bs := range genTestBitsets() {
+        expected := bs.count()
+        got := bs.Count()
         if expected != got {
             t.Errorf("Expected %d but got %d\n",expected,got)
         }
@@ -51,10 +50,9 @@ func (bs bitset) firstBit() (bitset) {
 }
 
 func TestBitsetFirstBit(t *testing.T) {
-    ch := genTestBitsets()
-    for v := range ch {
-        expected := v.firstBit()
-        got := v.FirstBit()
+    for bs := range genTestBitsets() {
+        expected := bs.firstBit()
+        got := bs.FirstBit()
         if expected != got {
             t.Errorf("Expected %d but got %d\n",expected,got)
         }
@@ -62,7 +60,7 @@ func TestBitsetFirstBit(t *testing.T) {
 }
 
 func (bs bitset) lastBit() (bitset) {
-    for mask:= bitset(1) << 63; mask!=0; mask>>=1 {
+    for mask:= bitset(1 << 63); mask!=0; mask>>=1 {
         if bs & mask != 0 {
             return mask
         } 
@@ -71,10 +69,9 @@ func (bs bitset) lastBit() (bitset) {
 }
 
 func TestBitsetLastBit(t *testing.T) {
-    ch := genTestBitsets()
-    for v := range ch {
-        expected := v.lastBit()
-        got := v.LastBit()
+    for bs := range genTestBitsets() {
+        expected := bs.lastBit()
+        got := bs.LastBit()
         if expected != got {
             t.Errorf("Expected %d but got %d\n",expected,got)
         }
@@ -82,18 +79,36 @@ func TestBitsetLastBit(t *testing.T) {
 }
 
 func (bs bitset) testBit(index uint) bool {
-    return bs & (bitset(1) << index) != 0
+    return bs & bitset(1 << index) != 0
 }
 
 func TestBitsetTestBit(t *testing.T) {
-    ch := genTestBitsets()
-    for v := range ch {
+    for bs := range genTestBitsets() {
         for index:=uint(0); index<64; index++ {
-            expected := v.testBit(index)
-            got := v.TestBit(index)
+            expected := bs.testBit(index)
+            got := bs.TestBit(index)
             if expected != got {
                 t.Errorf("Expected %d but got %d\n",expected,got)
             }
+        }
+    }
+}
+
+func (bs bitset) firstBitIndex() uint {
+    for index:=uint(0); index<64; index++ {
+        if bs & bitset(1 << index) != 0 {
+            return index
+        } 
+    }
+    return 0
+}
+
+func TestBitsetFirstBitIndex(t *testing.T) {
+    for bs := range genTestBitsets() {
+        expected := bs.firstBitIndex()
+        got := bs.firstBitIndex()
+        if expected != got {
+            t.Errorf("Expected %d but got %d\n",expected,got)
         }
     }
 }

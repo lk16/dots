@@ -20,12 +20,28 @@ func (bs bitset) Count() uint {
 }
 
 func (bs bitset) TestBit(index uint) bool {
-    mask := bitset(1) << index
+    mask := bitset(1 << index)
     return bs & mask != 0
 }
 
 func (bs bitset) FirstBit() bitset {
     return bs & -bs
+}
+
+func (bs bitset) FirstBitIndex() uint {
+    
+    magictable := [67]uint{
+         0,  0,  1, 39,  2, 15, 40, 23,
+         3, 12, 16, 59, 41, 19, 24, 54,
+         4,  0, 13, 10, 17, 62, 60, 28,
+        42, 30, 20, 51, 25, 44, 55, 47,
+         5, 32,  0, 38, 14, 22, 11, 58,
+        18, 53, 63,  9, 61, 27, 29, 50,
+        43, 46, 31, 37, 21, 57, 52,  8,
+        26, 49, 45, 36, 56,  7, 48, 35,
+         6, 34, 33}
+
+    return magictable[bs.FirstBit() % 67];
 }
 
 
