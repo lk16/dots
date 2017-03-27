@@ -117,6 +117,25 @@ func (board *Board) DoMove(index uint) bitset {
     return flipped
 }
 
+func (board *Board) GetChildren() (children []Board) {
+    children = make([]Board,10)
+    moves := board.Moves()
+
+    for {
+        index := moves.FirstBitIndex();
+        if index == uint(0) {
+            break
+        }
+        moves &^= bitset(1<<index)
+
+        clone := board.Clone()
+        clone.DoMove(index)
+        children = append(children,clone)
+    }
+    return
+}
+
+
 func (board *Board) DoRandomMoves(n uint) Board {
     // TODO
     panic("Not implemented")

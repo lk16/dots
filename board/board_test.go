@@ -1,6 +1,8 @@
 package board
 
-import "testing"
+import (
+    "testing"
+)
 
 func genTestBoards() (ch chan Board) {
     ch = make(chan Board)
@@ -11,6 +13,18 @@ func genTestBoards() (ch chan Board) {
     }()
     return
 }
+
+func TestBoardClone(t *testing.T) {
+    board := Board{
+        me: 1,
+        opp: 2}
+    clone := board.Clone()
+    clone.me = 3
+    if board.me != 1 {
+        t.Errorf("Board.Clone() does not make a deep copy!\n")
+    }     
+}
+
 
 func (board *Board) doMove(index uint) bitset {
     if (board.me | board.opp) & bitset(1 << index) != 0 {
@@ -50,6 +64,31 @@ func (board *Board) doMove(index uint) bitset {
     return flipped
 }
 
+func TestBoardDoMove(t *testing.T) {
+    for board := range genTestBoards() {
+        moves := board.Moves()
+        for i:=uint(0); i<64; i++ {
+            if !moves.TestBit(i) {
+                // board.DoMove() should not be called for invalid moves
+                continue
+            }
+            clone := board.Clone()
+            
+            expected_return_val := clone.doMove(i)
+            got_return_val := board.DoMove(i)
+            if got_return_val != expected_return_val {
+                t.Errorf("Got %d, expected %d.\n",got_return_val,expected_return_val) // TODO
+            } 
+            
+            expected_board_val := clone
+            got_board_val := board
+            if got_board_val != expected_board_val {
+                t.Errorf("") // TODO
+            }
+        }
+    }
+}
+
 func (board *Board) moves() bitset {
     moves := bitset(0)
     for i:=uint(0); i<64; i++ {
@@ -61,7 +100,7 @@ func (board *Board) moves() bitset {
     return moves
 }
 
-func TestMoves(t *testing.T) {
+func TestBoardMoves(t *testing.T) {
     for board := range genTestBoards() {
         clone := board
         expected := board.moves()
@@ -75,24 +114,46 @@ func TestMoves(t *testing.T) {
     }
 }
 
-func TestDoMove(t *testing.T) {
+func (board *Board) getChildren() (children []Board) {
+    children = make([]Board,10)
+    for i:=uint(0); i<64; i++ {
+        clone := board.Clone()
+        if clone.doMove(i) != bitset(0) {
+            children = append(children,clone)
+        }
+    }
+    return
+}
+
+func TestBoardGetChildren(t *testing.T) {
     for board := range genTestBoards() {
-        moves := board.Moves()
-        for i:=uint(0); i<64; i++ {
-            // board.DoMove() should not be called for invalid moves
-            if moves.TestBit(i) {
-                clone := board.Clone()
-                expected_return_val := clone.doMove(i)
-                expected_board_val := clone
-                got_return_val := board.DoMove(i)
-                got_board_val := board
-                if got_return_val != expected_return_val {
-                    t.Errorf("Got %d, expected %d.\n",got_return_val,expected_return_val) // TODO
-                } 
-                if got_board_val != expected_board_val {
-                    t.Errorf("") // TODO
-                }
+
+        expected := board.getChildren()
+        expected_set := make(map[Board]struct{},10)
+        for _,e := range expected {
+            expected_set[e] = struct{}{}
+        }
+
+        got := board.GetChildren()
+        got_set := make(map[Board]struct{},10)
+        for _,g := range got {
+            got_set[g] = struct{}{}
+        }
+
+        if len(got_set) != len(expected_set) {
+            t.Errorf("Expected %d children, got %d.\n",len(expected_set),len(got_set))
+        }
+
+        equal_sets := true
+
+        for e,_ := range expected_set {
+            if _,ok := got_set[e]; !ok {
+                equal_sets = false
             }
         }
+
+        if !equal_sets {
+            t.Errorf("Children sets are unequal.\n")
+        } 
     }
 }

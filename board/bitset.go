@@ -55,7 +55,5 @@ func (bs bitset) LastBit() bitset {
 }
 
 func RandomBitset() bitset {
-    high := bitset(rand.Uint32())
-    low := bitset(rand.Uint32())
-    return (high << 32) | low
+    return bitset(rand.Uint64())
 }
