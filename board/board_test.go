@@ -5,6 +5,8 @@ import (
     "fmt"
     "strings"
     "testing"
+
+    "dots/bitset"
 )
 
 func genTestBoards() (ch chan Board) {
@@ -29,11 +31,11 @@ func TestBoardClone(t *testing.T) {
 }
 
 
-func (board *Board) doMove(index uint) bitset {
-    if (board.me | board.opp) & bitset(1 << index) != 0 {
+func (board *Board) doMove(index uint) bitset.Bitset {
+    if (board.me | board.opp) & bitset.Bitset(1 << index) != 0 {
         return 0
     }
-    flipped := bitset(0)
+    flipped := bitset.Bitset(0)
     for dx:=-1; dx<=1; dx++ {
         for dy:=-1; dy<=1; dy++ {
             if dx == 0 && dy == 0 {
@@ -53,7 +55,7 @@ func (board *Board) doMove(index uint) bitset {
                     if board.me.TestBit(cur) && (s >= 2) {
                         for p:=1; p<s; p++ {
                             f := uint(int(index) + (8*dy*p) + (dx*p))
-                            flipped |= bitset(1 << f)
+                            flipped |= bitset.Bitset(1 << f)
                         }
                     }
                     break
@@ -61,7 +63,7 @@ func (board *Board) doMove(index uint) bitset {
             }
         }
     }
-    board.me |= flipped | bitset(1 << index)
+    board.me |= flipped | bitset.Bitset(1 << index)
     board.opp &= ^board.me
     board.opp,board.me = board.me,board.opp
     return flipped
@@ -92,12 +94,12 @@ func TestBoardDoMove(t *testing.T) {
     }
 }
 
-func (board *Board) moves() bitset {
-    moves := bitset(0)
+func (board *Board) moves() bitset.Bitset {
+    moves := bitset.Bitset(0)
     for i:=uint(0); i<64; i++ {
         clone := board.Clone()
-        if clone.DoMove(i) != bitset(0) {
-            moves |= bitset(1 << i)
+        if clone.DoMove(i) != bitset.Bitset(0) {
+            moves |= bitset.Bitset(1 << i)
         }
     }
     return moves
@@ -121,7 +123,7 @@ func (board *Board) getChildren() (children []Board) {
     children = make([]Board,10)
     for i:=uint(0); i<64; i++ {
         clone := board.Clone()
-        if clone.doMove(i) != bitset(0) {
+        if clone.doMove(i) != bitset.Bitset(0) {
             children = append(children,clone)
         }
     }

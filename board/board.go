@@ -3,16 +3,17 @@ package board
 import (
     "fmt"
     "bytes"
+    "dots/bitset" 
 )
 
 type Board struct {
-    me,opp bitset
+    me,opp bitset.Bitset
 }
 
 func NewBoard() *Board {
     return &Board{
-        me: bitset(1 << 28) | bitset(1 << 35),
-        opp: bitset(1 << 27) | bitset(1 << 36)}
+        me: bitset.Bitset(1 << 28) | bitset.Bitset(1 << 35),
+        opp: bitset.Bitset(1 << 27) | bitset.Bitset(1 << 36)}
 }
 
 func (board *Board) Clone() Board {
@@ -56,7 +57,7 @@ func (board *Board) AsciiArt() string {
     return buffer.String()
 }
 
-func movesPartial(me,mask,n bitset) bitset {
+func movesPartial(me,mask,n bitset.Bitset) bitset.Bitset {
     flip_l := mask & (me << n)
     flip_l |= mask & (flip_l << n)
     mask_l := mask & (mask << n)
@@ -70,7 +71,7 @@ func movesPartial(me,mask,n bitset) bitset {
     return (flip_l << n) | (flip_r >> n)
 }
 
-func (board *Board) Moves() bitset {
+func (board *Board) Moves() bitset.Bitset {
     // this function is a modified version of code from Edax
     mask := board.opp & 0x7E7E7E7E7E7E7E7E
 
@@ -85,9 +86,9 @@ func (board *Board) Moves() bitset {
 }
 
 
-func (board *Board) DoMove(index uint) bitset {
+func (board *Board) DoMove(index uint) bitset.Bitset {
 
-    doMoveFuncs := []func() bitset{
+    doMoveFuncs := []func() bitset.Bitset{
          board.doMove0, board.doMove1, board.doMove2, board.doMove3,
          board.doMove4, board.doMove5, board.doMove6, board.doMove7,
          board.doMove8, board.doMove9,board.doMove10,board.doMove11,
@@ -107,7 +108,7 @@ func (board *Board) DoMove(index uint) bitset {
 
     flipped := doMoveFuncs[index]()
 
-    tmp := board.me | flipped | bitset(1 << index)
+    tmp := board.me | flipped | bitset.Bitset(1 << index)
 
     board.me = board.opp &^ tmp
     board.opp = tmp
@@ -124,7 +125,7 @@ func (board *Board) GetChildren() (children []Board) {
         if index == uint(0) {
             break
         }
-        moves &^= bitset(1<<index)
+        moves &^= bitset.Bitset(1<<index)
 
         clone := board.Clone()
         clone.DoMove(index)

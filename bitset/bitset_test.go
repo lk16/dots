@@ -1,17 +1,17 @@
-package board
+package bitset
 
 import "testing"
 
-func genTestBitsets() (ch chan bitset) {
-    ch = make(chan bitset)
+func genTestBitsets() (ch chan Bitset) {
+    ch = make(chan Bitset)
     go func() {
-        ch <- bitset(0)
-        ch <- ^bitset(0)
+        ch <- Bitset(0)
+        ch <- ^Bitset(0)
         for i:=uint(0); i<64; i++ {
-            ch <- bitset(1) << i
+            ch <- Bitset(1) << i
         }
         for i:=uint(0); i<64; i++ {
-            ch <- ^(bitset(1) << i)
+            ch <- ^(Bitset(1) << i)
         }
         for i:=0; i<100000; i++ {
             ch <- RandomBitset()
@@ -21,7 +21,7 @@ func genTestBitsets() (ch chan bitset) {
     return
 }
 
-func (bs bitset) count() (count uint) {
+func (bs Bitset) count() (count uint) {
     for i := uint(0); i<64; i++ {
         if bs & (1 << i) != 0 {
             count++
@@ -40,8 +40,8 @@ func TestBitsetCount(t *testing.T) {
     }
 }
 
-func (bs bitset) firstBit() (bitset) {
-    for mask:= bitset(1); mask!=0; mask<<=1 {
+func (bs Bitset) firstBit() (Bitset) {
+    for mask:= Bitset(1); mask!=0; mask<<=1 {
         if bs & mask != 0 {
             return mask
         } 
@@ -59,8 +59,8 @@ func TestBitsetFirstBit(t *testing.T) {
     }
 }
 
-func (bs bitset) lastBit() (bitset) {
-    for mask:= bitset(1 << 63); mask!=0; mask>>=1 {
+func (bs Bitset) lastBit() Bitset {
+    for mask:= Bitset(1 << 63); mask!=0; mask>>=1 {
         if bs & mask != 0 {
             return mask
         } 
@@ -78,8 +78,8 @@ func TestBitsetLastBit(t *testing.T) {
     }
 }
 
-func (bs bitset) testBit(index uint) bool {
-    return bs & bitset(1 << index) != 0
+func (bs Bitset) testBit(index uint) bool {
+    return bs & Bitset(1 << index) != 0
 }
 
 func TestBitsetTestBit(t *testing.T) {
@@ -94,9 +94,9 @@ func TestBitsetTestBit(t *testing.T) {
     }
 }
 
-func (bs bitset) firstBitIndex() uint {
+func (bs Bitset) firstBitIndex() uint {
     for index:=uint(0); index<64; index++ {
-        if bs & bitset(1 << index) != 0 {
+        if bs & Bitset(1 << index) != 0 {
             return index
         } 
     }

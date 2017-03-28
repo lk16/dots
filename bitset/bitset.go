@@ -1,12 +1,12 @@
-package board
+package bitset
 
 import (
     "math/rand"
 )
 
-type bitset uint64
+type Bitset uint64
 
-func (bs bitset) Count() uint {
+func (bs Bitset) Count() uint {
     const (
         m1  = 0x5555555555555555 //binary: 0101...
         m2  = 0x3333333333333333 //binary: 00110011..
@@ -19,16 +19,16 @@ func (bs bitset) Count() uint {
     return uint((bs * h01) >> 56)    //returns left 8 bits of x + (x<<8) + (x<<16) + (x<<24) + ...
 }
 
-func (bs bitset) TestBit(index uint) bool {
-    mask := bitset(1 << index)
+func (bs Bitset) TestBit(index uint) bool {
+    mask := Bitset(1 << index)
     return bs & mask != 0
 }
 
-func (bs bitset) FirstBit() bitset {
+func (bs Bitset) FirstBit() Bitset {
     return bs & -bs
 }
 
-func (bs bitset) FirstBitIndex() uint {
+func (bs Bitset) FirstBitIndex() uint {
     
     magictable := [67]uint{
          0,  0,  1, 39,  2, 15, 40, 23,
@@ -45,8 +45,8 @@ func (bs bitset) FirstBitIndex() uint {
 }
 
 
-func (bs bitset) LastBit() bitset {
-    for mask := bitset(1 << 63); mask!=0; mask>>=1 {
+func (bs Bitset) LastBit() Bitset {
+    for mask := Bitset(1 << 63); mask!=0; mask>>=1 {
         if bs & mask != 0 {
             return mask
         }
@@ -54,6 +54,6 @@ func (bs bitset) LastBit() bitset {
     return 0
 }
 
-func RandomBitset() bitset {
-    return bitset(rand.Uint64())
+func RandomBitset() Bitset {
+    return Bitset(rand.Uint64())
 }
