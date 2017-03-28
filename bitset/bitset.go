@@ -6,6 +6,7 @@ import (
 
 type Bitset uint64
 
+// Returns the number of set bits in a Bitset
 func (bs Bitset) Count() uint {
     const (
         m1  = 0x5555555555555555
@@ -19,15 +20,20 @@ func (bs Bitset) Count() uint {
     return uint((bs * h01) >> 56)
 }
 
+// Tests if the bit in a Bitset at index is set 
 func (bs Bitset) TestBit(index uint) bool {
     mask := Bitset(1 << index)
     return bs & mask != 0
 }
 
+// Returns new bitset with only the first (least significant) bit set.
+// Returns the 0 Bitset if the input Bitset is 0 
 func (bs Bitset) FirstBit() Bitset {
     return bs & -bs
 }
 
+// Returns index of first set bit in a Bitset 
+// Returns the 0 Bitset if the input Bitset is 0
 func (bs Bitset) FirstBitIndex() uint {
     
     magictable := [67]uint{
@@ -44,6 +50,8 @@ func (bs Bitset) FirstBitIndex() uint {
     return magictable[bs.FirstBit() % 67];
 }
 
+// Returns last (most significant) set bit in a Bitset
+// Returns 0 Bitset if the input Bitset is 0
 func (bs Bitset) LastBit() Bitset {
     for mask := Bitset(1 << 63); mask!=0; mask>>=1 {
         if bs & mask != 0 {
@@ -53,6 +61,7 @@ func (bs Bitset) LastBit() Bitset {
     return 0
 }
 
+// Returns a pseudo-random Bitset
 func RandomBitset() Bitset {
     return Bitset(rand.Uint64())
 }

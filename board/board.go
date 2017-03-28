@@ -10,17 +10,20 @@ type Board struct {
     me,opp bitset.Bitset
 }
 
+// Returns a Board in start state
 func NewBoard() *Board {
     return &Board{
         me: bitset.Bitset(1 << 28) | bitset.Bitset(1 << 35),
         opp: bitset.Bitset(1 << 27) | bitset.Bitset(1 << 36)}
 }
 
+// Returns a deep copy of a Board
 func (board *Board) Clone() Board {
     clone := *board
     return clone
 }
 
+// Returns a String of ASCII-art of a Board
 func (board *Board) AsciiArt() string {
 
     buffer := new(bytes.Buffer)
@@ -57,6 +60,7 @@ func (board *Board) AsciiArt() string {
     return buffer.String()
 }
 
+// Returns a subset of the moves for a Board
 func movesPartial(me,mask,n bitset.Bitset) bitset.Bitset {
     flip_l := mask & (me << n)
     flip_l |= mask & (flip_l << n)
@@ -71,6 +75,7 @@ func movesPartial(me,mask,n bitset.Bitset) bitset.Bitset {
     return (flip_l << n) | (flip_r >> n)
 }
 
+// Returns a Bitset with all valid moves for a Board
 func (board *Board) Moves() bitset.Bitset {
     // this function is a modified version of code from Edax
     mask := board.opp & 0x7E7E7E7E7E7E7E7E
@@ -85,7 +90,8 @@ func (board *Board) Moves() bitset.Bitset {
     return res & empties
 }
 
-
+// Does the move at field index on a Board
+// Returns the flipped discs
 func (board *Board) DoMove(index uint) bitset.Bitset {
 
     doMoveFuncs := []func() bitset.Bitset{
@@ -116,6 +122,7 @@ func (board *Board) DoMove(index uint) bitset.Bitset {
     return flipped
 }
 
+// Returns a slice with all children of a Board
 func (board *Board) GetChildren() (children []Board) {
     children = make([]Board,10)
     moves := board.Moves()
