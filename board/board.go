@@ -2,6 +2,7 @@ package board
 
 import (
     "fmt"
+    "bytes"
 )
 
 type Board struct {
@@ -19,43 +20,40 @@ func (board *Board) Clone() Board {
     return clone
 }
 
-func (board *Board) fieldColor(index uint) int {
-    if board.me.TestBit(index) {
-        return 0
-    } 
-    if board.opp.TestBit(index) {
-        return 1
-    }
-    return -1
-}
+func (board *Board) AsciiArt() string {
 
+    buffer := new(bytes.Buffer)
 
-func (board *Board) Print() {
     moves := board.Moves()
 
-    fmt.Printf("+-a-b-c-d-e-f-g-h-+\n")
-    for f:=uint(0); f<64; f++ {
-        if f%8 == 0 {
-            fmt.Printf("%d ",(f/8)+1)
-        }
-        switch board.fieldColor(f) {
-            case 0:
-                fmt.Printf("○ ")
-            case 1:
-                fmt.Printf("● ")
-            case -1:
-                if moves.TestBit(f) {
-                    fmt.Printf("- ")
-                } else {
-                    fmt.Printf("  ")
-                }
-        }
-        if f%8 == 7 {
-            fmt.Printf("|\n")
-        }
-    }
-    fmt.Printf("+-----------------+\n")
+    buffer.WriteString("+-a-b-c-d-e-f-g-h-+\n")
+    
+    for y:=uint(0); y<8; y++ {
 
+        buffer.WriteString(fmt.Sprintf("%d ",y+1))
+
+        for x:=uint(0); x<8; x++ {
+        
+            f := y*8 + x
+
+            if board.me.TestBit(f) {
+                buffer.WriteString("○ ")
+            } else if board.opp.TestBit(f) {
+                buffer.WriteString("● ")
+            } else if moves.TestBit(f) {
+                buffer.WriteString("- ")
+            } else {
+                buffer.WriteString("  ")
+            }
+
+        }
+     
+        buffer.WriteString("|\n")
+    }
+    buffer.WriteString("+-----------------+\n")
+
+
+    return buffer.String()
 }
 
 func movesPartial(me,mask,n bitset) bitset {

@@ -2,15 +2,16 @@ package main
 
 import (
     "dots/board"
+    "fmt"
 )
 
 func main() {
     board := board.NewBoard()
-    board.Print()
+    fmt.Printf("%s\n",board.AsciiArt())
     board.DoMove(44)
-    board.Print()
+    fmt.Printf("%s\n",board.AsciiArt())
     board.DoMove(29)
-    board.Print()
+    fmt.Printf("%s\n",board.AsciiArt())
     board.DoMove(22)
-    board.Print()
+    fmt.Printf("%s\n",board.AsciiArt())
 }

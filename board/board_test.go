@@ -1,6 +1,9 @@
 package board
 
 import (
+    "bytes"
+    "fmt"
+    "strings"
     "testing"
 )
 
@@ -155,5 +158,54 @@ func TestBoardGetChildren(t *testing.T) {
         if !equal_sets {
             t.Errorf("Children sets are unequal.\n")
         } 
+    }
+}
+
+func TestBoardAsciiArt(t *testing.T) {
+    for board := range genTestBoards() {
+
+        moves := board.Moves()
+
+        ascii_art := board.AsciiArt()
+
+        lines := strings.Split(ascii_art,"\n")
+
+        expected := "+-a-b-c-d-e-f-g-h-+"
+        if lines[0] != expected {
+            t.Errorf("At lines[0]: expected '%s', got '%s'\n",expected,lines[0])
+        }
+
+        for y:=uint(0); y<8; y++ {
+
+            expected_buf := new(bytes.Buffer)
+            expected_buf.WriteString(fmt.Sprintf("%d ",y+1))
+
+            for x:=uint(0); x<8; x++ {
+
+                if board.me.TestBit(8*y + x) {
+                    expected_buf.WriteString("○ ")
+                } else if board.opp.TestBit(8*y + x) {
+                    expected_buf.WriteString("● ")
+                } else if moves.TestBit(8*y + x) {
+                    expected_buf.WriteString("- ")
+                } else {
+                    expected_buf.WriteString("  ")
+                }
+            }
+
+            expected_buf.WriteString("|")
+
+            got := expected_buf.String()
+            if lines[y+1] != got {
+                t.Errorf("At lines[%d]: expected '%s', got '%s'\n",y+1,lines[y+1],got)
+            }
+
+        }
+
+        expected = "+-----------------+"
+        if lines[9] != expected {
+            t.Errorf("At lines[9]: expected '%s', got '%s'\n",expected,lines[9])
+        }
+
     }
 }
