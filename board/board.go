@@ -133,9 +133,3 @@ func (board *Board) GetChildren() (children []Board) {
     }
     return
 }
-
-func (board *Board) DoRandomMoves(n uint) Board {
-    // TODO
-    panic("Not implemented")
-    return *board
-}

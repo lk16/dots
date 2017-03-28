@@ -30,7 +30,6 @@ func TestBoardClone(t *testing.T) {
     }     
 }
 
-
 func (board *Board) doMove(index uint) bitset.Bitset {
     if (board.me | board.opp) & bitset.Bitset(1 << index) != 0 {
         return 0

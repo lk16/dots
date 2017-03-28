@@ -106,7 +106,7 @@ func (bs Bitset) firstBitIndex() uint {
 func TestBitsetFirstBitIndex(t *testing.T) {
     for bs := range genTestBitsets() {
         expected := bs.firstBitIndex()
-        got := bs.firstBitIndex()
+        got := bs.FirstBitIndex()
         if expected != got {
             t.Errorf("Expected %d but got %d\n",expected,got)
         }
