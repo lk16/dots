@@ -1,8 +1,8 @@
 package main
 
 import (
-    "dots/board"
     "fmt"
+    "dots/board"
 )
 
 func main() {
