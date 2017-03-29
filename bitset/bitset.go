@@ -8,6 +8,7 @@ type Bitset uint64
 
 // Returns the number of set bits in a Bitset
 func (bs Bitset) Count() uint {
+    // TODO try this for potential better performance: https://github.com/barnybug/popcount
     const (
         m1  = 0x5555555555555555
         m2  = 0x3333333333333333

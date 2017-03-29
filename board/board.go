@@ -1,8 +1,10 @@
 package board
 
 import (
-    "fmt"
     "bytes"
+    "fmt"
+    "math/rand"
+
     "dots/bitset" 
 )
 
@@ -122,21 +124,47 @@ func (board *Board) DoMove(index uint) bitset.Bitset {
     return flipped
 }
 
+// Returns a channel that outputs the children of a Board
+func (board *Board) GenChildren() (ch chan Board) {
+    ch = make(chan Board)
+    go func() {
+        moves := board.Moves()
+        for {
+            index := moves.FirstBitIndex();
+            if index == uint(0) {
+                break
+            }
+            moves &^= bitset.Bitset(1<<index)
+
+            clone := board.Clone()
+            clone.DoMove(index)
+            ch <- clone
+        }
+        close(ch)
+    }()
+    return ch
+}
+
 // Returns a slice with all children of a Board
 func (board *Board) GetChildren() (children []Board) {
     children = make([]Board,10)
-    moves := board.Moves()
-
-    for {
-        index := moves.FirstBitIndex();
-        if index == uint(0) {
-            break
-        }
-        moves &^= bitset.Bitset(1<<index)
-
-        clone := board.Clone()
-        clone.DoMove(index)
-        children = append(children,clone)
+    for child := range board.GenChildren() {
+        children = append(children,child)
     }
     return
+}
+
+func (board *Board) DoRandomMoves(move_count uint) {
+    for m:=uint(0); m<move_count; m++ {
+        children := board.GetChildren()
+        if len(children) == 0 {
+            clone := board.Clone()
+
+            children = clone.GetChildren()
+            if len(children) == 0 {
+                return
+            }
+        }
+        board = &children[rand.Int() % len(children)]
+    }
 }
