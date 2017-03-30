@@ -165,6 +165,10 @@ func (board *Board) DoRandomMoves(move_count uint) {
                 return
             }
         }
-        board = &children[rand.Int() % len(children)]
+        *board = children[rand.Int() % len(children)]
     }
+}
+
+func (board *Board) SwitchTurn() {
+    board.me,board.opp = board.opp,board.me
 }

@@ -13,6 +13,7 @@ func genTestBoards() (ch chan Board) {
     ch = make(chan Board)
     go func() {
         ch <- *NewBoard()
+        //ch <- Board{me: 0, opp: 0}
         // TODO
         close(ch)
     }()
@@ -208,5 +209,48 @@ func TestBoardAsciiArt(t *testing.T) {
             t.Errorf("At lines[9]: expected '%s', got '%s'\n",expected,lines[9])
         }
 
+    }
+}
+
+func TestBoardDoRandomMoves(t *testing.T) {
+    for board := range genTestBoards() {
+        
+        board_pieces := board.me | board.opp
+
+        descendant := board.Clone()
+        descendant.DoRandomMoves(0)
+
+        if descendant != board {
+            t.Errorf("Board changed when doing 0 random moves.\n")
+            t.Errorf("board: \n%s\n\n Descendant:\n%s\n\n",board.AsciiArt(),descendant.AsciiArt())
+        }    
+
+        for m:=uint(0); m<=60; m++ {
+            descendant = board.Clone()
+            descendant.DoRandomMoves(m)
+
+            descendant_pieces := descendant.me | descendant.opp
+
+            if (board.Moves() != 0) && (board == descendant) {
+                t.Errorf("Board with children did not change when doing %d random moves.\n",m)
+                t.Errorf("board: \n%s\n\n Descendant:\n%s\n\n",board.AsciiArt(),descendant.AsciiArt())
+            }
+
+            if descendant_pieces & board_pieces != board_pieces {
+                t.Errorf("Pieces were removed from board with Board.DoRandomMoves()\n")
+                t.Errorf("board: \n%s\n\n Descendant:\n%s\n\n",board.AsciiArt(),descendant.AsciiArt())
+            }
+
+        }
+    }
+}
+
+func TestBoardSwitchTurn(t *testing.T) {
+    for board := range genTestBoards() {
+        clone := board.Clone()
+        clone.SwitchTurn()
+        if (board.me != clone.opp) || (board.opp != clone.me) {
+            t.Errorf("Failure in Board.SwitchTurn()")
+        }
     }
 }
