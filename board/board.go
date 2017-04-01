@@ -154,21 +154,29 @@ func (board *Board) GetChildren() (children []Board) {
     return
 }
 
-func (board *Board) DoRandomMoves(move_count uint) {
-    for m:=uint(0); m<move_count; m++ {
-        children := board.GetChildren()
-        if len(children) == 0 {
-            clone := board.Clone()
+func (board Board) doRandomMoves(move_count,skips uint) Board {
 
-            children = clone.GetChildren()
-            if len(children) == 0 {
-                return
-            }
-        }
-        *board = children[rand.Int() % len(children)]
+    if (skips == 2) || (move_count == 0) {
+        return board
     }
+
+    children := board.GetChildren()
+
+    if len(children) == 0 {
+        board.SwitchTurn()
+        return board.doRandomMoves(move_count,skips + 1)
+    }
+
+    child := children[rand.Int() % len(children)]
+    return child.doRandomMoves(move_count-1,0)
+}
+
+func (board Board) DoRandomMoves(move_count uint) Board {
+    return board.doRandomMoves(move_count,0)
 }
 
 func (board *Board) SwitchTurn() {
-    board.me,board.opp = board.opp,board.me
+    tmp := board.me
+    board.me = board.opp
+    board.opp = tmp
 }

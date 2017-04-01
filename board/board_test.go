@@ -139,11 +139,22 @@ func TestBoardGetChildren(t *testing.T) {
             expected_set[e] = struct{}{}
         }
 
+        board_pieces := board.me | board.opp
+
+
         got := board.GetChildren()
         got_set := make(map[Board]struct{},10)
         for _,g := range got {
             got_set[g] = struct{}{}
+
+            child_pieces := board.me | board.opp
+
+            if child_pieces & board_pieces != board_pieces {
+                t.Errorf("Pieces where removed from board with board.GetChildren()\n")
+                t.Errorf("board:\n%s\n\nchild: \n%s\n\n",board.AsciiArt(),g.AsciiArt())
+            }
         }
+
 
         if len(got_set) != len(expected_set) {
             t.Errorf("Expected %d children, got %d.\n",len(expected_set),len(got_set))
@@ -217,24 +228,35 @@ func TestBoardDoRandomMoves(t *testing.T) {
         
         board_pieces := board.me | board.opp
 
-        descendant := board.Clone()
-        descendant.DoRandomMoves(0)
-
-        if descendant != board {
-            t.Errorf("Board changed when doing 0 random moves.\n")
-            t.Errorf("board: \n%s\n\n Descendant:\n%s\n\n",board.AsciiArt(),descendant.AsciiArt())
-        }    
-
         for m:=uint(0); m<=60; m++ {
-            descendant = board.Clone()
-            descendant.DoRandomMoves(m)
+
+            clone := board.Clone()
+            descendant := board.DoRandomMoves(m)
+
+
+            if board != clone {
+                t.Errorf("board changed with Board.DoRandomMoves()\n")
+                t.Errorf("board: \n%s\n\n clone:\n%s\n\n",board.AsciiArt(),clone.AsciiArt())
+            }
+
+            has_moves := false
+            if clone.Moves().Count() != 0 {
+                has_moves = true
+            }
+            clone.SwitchTurn()
+            if clone.Moves().Count() != 0 {
+                has_moves = true
+            }
+            
+            difference := descendant != board
+            expected_difference := has_moves && (m != 0)
+
+            if difference != expected_difference {
+                t.Errorf("board/descendant difference expected: %s, got: %s\n",expected_difference,difference)
+                t.Errorf("board: \n%s\n\n descendant: \n%s\n\n",board.AsciiArt(),descendant.AsciiArt())
+            }
 
             descendant_pieces := descendant.me | descendant.opp
-
-            if (board.Moves() != 0) && (board == descendant) {
-                t.Errorf("Board with children did not change when doing %d random moves.\n",m)
-                t.Errorf("board: \n%s\n\n Descendant:\n%s\n\n",board.AsciiArt(),descendant.AsciiArt())
-            }
 
             if descendant_pieces & board_pieces != board_pieces {
                 t.Errorf("Pieces were removed from board with Board.DoRandomMoves()\n")
