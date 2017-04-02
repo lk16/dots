@@ -147,7 +147,6 @@ func (board *Board) GenChildren() (ch chan Board) {
 
 // Returns a slice with all children of a Board
 func (board *Board) GetChildren() (children []Board) {
-    children = make([]Board,10)
     for child := range board.GenChildren() {
         children = append(children,child)
     }
