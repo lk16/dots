@@ -120,7 +120,6 @@ func TestBoardMoves(t *testing.T) {
 }
 
 func (board *Board) getChildren() (children []Board) {
-    children = make([]Board,10)
     for i:=uint(0); i<64; i++ {
         clone := board.Clone()
         if clone.doMove(i) != bitset.Bitset(0) {
