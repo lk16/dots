@@ -3,7 +3,6 @@ package board
 import (
     "bytes"
     "fmt"
-    "math/rand"
     "strings"
     "testing"
 
@@ -14,11 +13,22 @@ func genTestBoards() (ch chan Board) {
     ch = make(chan Board)
     go func() {
         ch <- *NewBoard()
-        for i := 0; i < 100; i++ {
-            board := *NewBoard()
-            board.DoRandomMoves(uint(rand.Uint32() % 61))
+
+        for i := 0; i < 1000; i++ {
+            board := Board{
+                me: bitset.RandomBitset(),
+                opp: bitset.RandomBitset()}
+            board.opp &^= board.me
             ch <- board
         }
+
+
+
+        /*for i := 0; i < 1000; i++ {
+           for discs := uint(4); discs <= 64; d++ {}
+                ch <- *RandomBoard(discs)
+            }
+        }*/
 
         close(ch)
     }()
@@ -240,47 +250,29 @@ func TestBoardAsciiArt(t *testing.T) {
     }
 }
 
-func TestBoardDoRandomMoves(t *testing.T) {
+func TestBoardDoRandomMove(t *testing.T) {
     for board := range genTestBoards() {
-
-        board_pieces := board.me | board.opp
-
-        descendant := board
-
-        // check if there are any descendants
-        has_descendants := false
-        if descendant.Moves().Count() != 0 {
-            has_descendants = true
+        clone := board
+        if clone.Moves().Count() == 0 {
+            // no children means Board.DoRandomMove() will panic
+            continue
         }
-        descendant.SwitchTurn()
-        if descendant.Moves().Count() != 0 {
-            has_descendants = true
-        }
-        descendant.SwitchTurn()
 
-        for m := uint(0); m <= 60; m++ {
+        clone.DoRandomMove()
 
-            descendant = board
-            descendant.DoRandomMoves(m)
-
-            difference := descendant != board
-            expected_difference := has_descendants && (m != 0)
-
-            if difference != expected_difference {
-                t.Errorf("board/descendant difference expected: %t, got: %t\n", expected_difference, difference)
-                t.Errorf("board: \n%s\n\n descendant: \n%s\n\n", board.AsciiArt(), descendant.AsciiArt())
-                t.FailNow()
+        found := false
+        for child := range board.GenChildren() {
+            if clone == child {
+                found = true
+                break
             }
-
-            descendant_pieces := descendant.me | descendant.opp
-
-            if descendant_pieces&board_pieces != board_pieces {
-                t.Errorf("Pieces were removed from board with Board.DoRandomMoves()\n")
-                t.Errorf("board: \n%s\n\n Descendant:\n%s\n\n", board.AsciiArt(), descendant.AsciiArt())
-                t.FailNow()
-            }
-
         }
+
+        if !found {
+            t.Errorf("Expected child of:\n%s\n\nGot:\n%s\n\n",board.AsciiArt(),clone.AsciiArt())
+        }
+
+
     }
 }
 

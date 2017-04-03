@@ -13,10 +13,41 @@ type Board struct {
 }
 
 // Returns a Board in start state
-func NewBoard() *Board {
-    return &Board{
+func NewBoard() (board *Board) {
+    board = &Board{
         me:  bitset.Bitset(1<<28) | bitset.Bitset(1<<35),
         opp: bitset.Bitset(1<<27) | bitset.Bitset(1<<36)}
+    return
+}
+
+// Returns a random Board reachable from normal play with a certain number of discs
+func RandomBoard(discs uint) (board *Board) {
+
+    if (discs < 4) || (discs > 64) {
+        panic("Cannot create random board: invalid number of discs required")
+    } 
+
+    board = NewBoard()
+    skips := 0
+
+    for (board.me | board.opp).Count() != discs {
+
+        if skips == 2 {
+            // stuck, try again
+            return RandomBoard(discs)
+        }
+
+        if board.Moves().Count() == 0 {
+            skips++
+            board.SwitchTurn()
+            continue
+        }
+
+        skips = 0
+        board.DoRandomMove()
+    }
+
+    return 
 }
 
 // Returns a deep copy of a Board
@@ -124,11 +155,8 @@ func (board Board) GenChildren() (ch chan Board) {
     ch = make(chan Board)
     go func() {
         moves := board.Moves()
-        for {
+        for moves != 0 {
             index := moves.FirstBitIndex()
-            if index == uint(0) {
-                break
-            }
             moves &^= bitset.Bitset(1 << index)
 
             clone := board.Clone()
@@ -148,24 +176,14 @@ func (board Board) GetChildren() (children []Board) {
     return
 }
 
-// Does n random moves on a Board
-func (board *Board) DoRandomMoves(n uint) {
-
-    skips := 0
-
-    for (n > 0) && (skips < 2) {
-
-        children := board.GetChildren()
-        if len(children) == 0 {
-            board.SwitchTurn()
-            skips++
-            continue
-        }
-
-        *board = children[rand.Int()%len(children)]
-        n--
-        skips = 0
+// Does a random move on a Board
+func (board *Board) DoRandomMove() {
+    if board.Moves().Count() == 0 {
+        fmt.Printf("%d %d\n",board.me,board.opp)
+        panic("Cannot do a random move when there are no moves.")
     }
+    children := board.GetChildren()
+    *board = children[rand.Int()%len(children)]
 }
 
 // Switches turn of a Board
