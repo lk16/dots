@@ -22,7 +22,7 @@ func (board *Board) doMoveToLowerBits(line bitset.Bitset) (flipped bitset.Bitset
     line_mask := line & board.me
     bit := line_mask.LastBit()
     if line_mask == 0 {
-        return
+        bit = 0
     }
     line &^= bitset.Bitset((bit << 1) - 1)
     if (bit != 0) && (line&board.opp == line) {

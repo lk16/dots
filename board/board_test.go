@@ -14,6 +14,14 @@ func genTestBoards() (ch chan Board) {
     go func() {
         ch <- *NewBoard()
 
+        // random reachable boards with 4-64 discs
+        for i := 0; i < 10; i++ {
+           for discs := uint(4); discs <= 64; discs++ {
+                ch <- *RandomBoard(discs)
+            }
+        }
+
+        // random boards not necessarily reachable
         for i := 0; i < 1000; i++ {
             board := Board{
                 me: bitset.RandomBitset(),
@@ -22,13 +30,45 @@ func genTestBoards() (ch chan Board) {
             ch <- board
         }
 
+        // generate all boards with all drawing lines from each square
+        
+        // for each field
+        for y:=0; y<8; y++ {
+            for x:=0; x<8; x++ {
+                board := Board{}
+                board.me = bitset.Bitset(1 << uint(y*8 + x))
+                
+                // for each direction
+                for dy:=-1; dy<=1; dy++ {
+                    for dx:= -1; dx<=1; dx++ {
+                        if (dy==0) && (dx==0) {
+                            continue
+                        }
+                        board.opp = 0
 
+                        // for each distance
+                        for d:=1; d<=6; d++ {
+                            
+                            // check if me can still flip within board boundaries
+                            py := y + (d+1)*dy
+                            px := x + (d+1)*dx
+                            
 
-        /*for i := 0; i < 1000; i++ {
-           for discs := uint(4); discs <= 64; d++ {}
-                ch <- *RandomBoard(discs)
+                            if (py < 0) || (py > 7) || (px < 0) || (px > 7) {
+                                break
+                            }
+
+                            qy := y + d*dy
+                            qx := x + d*dx
+
+                            board.opp |= bitset.Bitset(1 << uint(qy*8 + qx))
+
+                            ch <- board
+                        }
+                    }
+                }
             }
-        }*/
+        }
 
         close(ch)
     }()
