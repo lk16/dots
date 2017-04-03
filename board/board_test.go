@@ -82,17 +82,21 @@ func TestBoardDoMove(t *testing.T) {
                 // board.DoMove() should not be called for invalid moves
                 continue
             }
-            clone := board.Clone()
 
+            clone := board.Clone()
             expected_return_val := clone.doMove(i)
-            got_return_val := board.DoMove(i)
+            expected_board_val := clone
+
+            clone = board.Clone()
+            got_return_val := clone.DoMove(i)
+            got_board_val := clone
+
             if got_return_val != expected_return_val {
+                t.Errorf("Doing move %c%d on board\n%s\n",'a' + i%8,(i/8)+1,board.AsciiArt())
                 t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n", expected_return_val.AsciiArt(), got_return_val.AsciiArt())
                 t.FailNow()
             }
 
-            expected_board_val := clone
-            got_board_val := board
             if got_board_val != expected_board_val {
                 t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n", expected_board_val.AsciiArt(), got_board_val.AsciiArt())
                 t.FailNow()
@@ -241,28 +245,26 @@ func TestBoardDoRandomMoves(t *testing.T) {
 
         board_pieces := board.me | board.opp
 
+        descendant := board
+
+        // check if there are any descendants
+        has_descendants := false
+        if descendant.Moves().Count() != 0 {
+            has_descendants = true
+        }
+        descendant.SwitchTurn()
+        if descendant.Moves().Count() != 0 {
+            has_descendants = true
+        }
+        descendant.SwitchTurn()
+
         for m := uint(0); m <= 60; m++ {
 
-            clone := board.Clone()
-            descendant := board
+            descendant = board
             descendant.DoRandomMoves(m)
 
-            if board != clone {
-                t.Errorf("board changed with Board.DoRandomMoves()\n")
-                t.Errorf("board: \n%s\n\n clone:\n%s\n\n", board.AsciiArt(), clone.AsciiArt())
-            }
-
-            has_moves := false
-            if clone.Moves().Count() != 0 {
-                has_moves = true
-            }
-            clone.SwitchTurn()
-            if clone.Moves().Count() != 0 {
-                has_moves = true
-            }
-
             difference := descendant != board
-            expected_difference := has_moves && (m != 0)
+            expected_difference := has_descendants && (m != 0)
 
             if difference != expected_difference {
                 t.Errorf("board/descendant difference expected: %t, got: %t\n", expected_difference, difference)
