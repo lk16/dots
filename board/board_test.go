@@ -83,6 +83,22 @@ func TestRandomBoard(t *testing.T) {
 			t.Errorf("Expected %d, got %d\n", expected, got)
 		}
 	}
+
+	assertPanic := func() {
+		if r := recover(); r == nil {
+			t.Errorf("panic() was not called")
+		}
+	}
+
+	func() {
+		defer assertPanic()
+		RandomBoard(3)
+	}()
+
+	func() {
+		defer assertPanic()
+		RandomBoard(65)
+	}()
 }
 
 func TestBoardClone(t *testing.T) {
@@ -319,6 +335,18 @@ func TestBoardDoRandomMove(t *testing.T) {
 		}
 
 	}
+
+	assertPanic := func() {
+		if r := recover(); r == nil {
+			t.Errorf("panic() was not called")
+		}
+	}
+
+	func() {
+		defer assertPanic()
+		board := Board{me: 0, opp: 0}
+		board.DoRandomMove()
+	}()
 }
 
 func TestBoardSwitchTurn(t *testing.T) {
