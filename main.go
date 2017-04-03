@@ -9,5 +9,5 @@ func main() {
 	random_bot := players.NewBotRandom()
 
 	cli_game := cli_game.NewCliGame(random_bot, random_bot)
-	cli_game.RunGame()
+	cli_game.Run()
 }

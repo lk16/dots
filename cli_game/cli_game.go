@@ -14,6 +14,7 @@ type CliGame struct {
 	skips   int
 }
 
+// Returns a new CliGame with two players
 func NewCliGame(black, white players.Player) *CliGame {
 	return &CliGame{
 		players: [2]players.Player{
@@ -23,13 +24,15 @@ func NewCliGame(black, white players.Player) *CliGame {
 		turn:  0}
 }
 
+// Skips a turn (for when a player has no moves)
 func (cli *CliGame) SkipTurn() {
 	cli.board.SwitchTurn()
 	cli.turn = 1 - cli.turn
 	cli.skips++
 }
 
-func (cli *CliGame) RunGame() {
+// Runs the game
+func (cli *CliGame) Run() {
 
 	cli.skips = 0
 
