@@ -104,8 +104,11 @@ func TestBoardDoMove(t *testing.T) {
 func (board *Board) moves() bitset.Bitset {
     moves := bitset.Bitset(0)
     for i := uint(0); i < 64; i++ {
+        if (board.me | board.opp).TestBit(i) {
+            continue
+        }
         clone := board.Clone()
-        if clone.DoMove(i) != bitset.Bitset(0) {
+        if clone.doMove(i) != 0 {
             moves |= bitset.Bitset(1 << i)
         }
     }
@@ -118,7 +121,8 @@ func TestBoardMoves(t *testing.T) {
         expected := board.moves()
         got := board.Moves()
         if expected != got {
-            t.Errorf("board.Moves() failed: expected %d, got %d\n", expected, got)
+            t.Errorf("For board\n%s",board.AsciiArt())
+            t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n", expected.AsciiArt(), got.AsciiArt())
             t.FailNow()
         }
         if clone != board {
