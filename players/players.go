@@ -1,9 +1,9 @@
 package players
 
 import (
-    "dots/board"
+	"dots/board"
 )
 
 type Player interface {
-    DoMove(board.Board) board.Board
+	DoMove(board.Board) board.Board
 }
