@@ -3,6 +3,7 @@ package board
 import (
 	"bytes"
 	"fmt"
+	"math/rand"
 	"strings"
 	"testing"
 
@@ -13,8 +14,12 @@ func genTestBoards() (ch chan Board) {
 	ch = make(chan Board)
 	go func() {
 		ch <- *NewBoard()
-		//ch <- Board{me: 0, opp: 0}
-		// TODO
+		for i := 0; i < 100; i++ {
+			board := *NewBoard()
+			board.DoRandomMoves(uint(rand.Uint32() % 61))
+			ch <- board
+		}
+
 		close(ch)
 	}()
 	return
@@ -249,7 +254,7 @@ func TestBoardDoRandomMoves(t *testing.T) {
 			expected_difference := has_moves && (m != 0)
 
 			if difference != expected_difference {
-				t.Errorf("board/descendant difference expected: %s, got: %s\n", expected_difference, difference)
+				t.Errorf("board/descendant difference expected: %t, got: %t\n", expected_difference, difference)
 				t.Errorf("board: \n%s\n\n descendant: \n%s\n\n", board.AsciiArt(), descendant.AsciiArt())
 			}
 

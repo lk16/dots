@@ -1,6 +1,8 @@
 package bitset
 
 import (
+	"bytes"
+
 	"math/rand"
 )
 
@@ -69,5 +71,36 @@ func (bs Bitset) LastBit() (last_bit Bitset) {
 // Returns a pseudo-random Bitset
 func RandomBitset() (random Bitset) {
 	random = Bitset(rand.Uint64())
+	return
+}
+
+// Returns an Ascii-Art string representing a Bitset
+func (bs Bitset) AsciiArt() (output string) {
+
+	buffer := new(bytes.Buffer)
+
+	buffer.WriteString("+-----------------+\n")
+
+	for y := uint(0); y < 8; y++ {
+
+		buffer.WriteString("| ")
+
+		for x := uint(0); x < 8; x++ {
+
+			f := y*8 + x
+
+			if bs.TestBit(f) {
+				buffer.WriteString("@ ")
+			} else {
+				buffer.WriteString("  ")
+			}
+
+		}
+
+		buffer.WriteString("|\n")
+	}
+	buffer.WriteString("+-----------------+\n")
+
+	output = buffer.String()
 	return
 }
