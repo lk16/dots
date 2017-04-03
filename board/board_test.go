@@ -101,14 +101,10 @@ func TestBoardDoMove(t *testing.T) {
             got_return_val := clone.DoMove(i)
             got_board_val := clone
 
-            if got_return_val != expected_return_val {
+            if (got_return_val != expected_return_val) || (got_board_val != expected_board_val) {
                 t.Errorf("Doing move %c%d on board\n%s\n",'a' + i%8,(i/8)+1,board.AsciiArt())
-                t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n", expected_return_val.AsciiArt(), got_return_val.AsciiArt())
-                t.FailNow()
-            }
-
-            if got_board_val != expected_board_val {
-                t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n", expected_board_val.AsciiArt(), got_board_val.AsciiArt())
+                t.Errorf("Expected return val:\n%s\n\nGot:\n%s\n\n", expected_return_val.AsciiArt(), got_return_val.AsciiArt())
+                t.Errorf("Expected board:\n%s\n\nGot:\n%s\n\n", expected_board_val.AsciiArt(), got_board_val.AsciiArt())
                 t.FailNow()
             }
         }
