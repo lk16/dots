@@ -75,6 +75,17 @@ func genTestBoards() (ch chan Board) {
     return
 }
 
+func TestRandomBoard(t *testing.T) {
+    for i:=uint(4); i<=64; i++ {
+        board := RandomBoard(i)
+        expected := i
+        got := (board.me | board.opp).Count()
+        if expected != got {
+            t.Errorf("Expected %d, got %d\n",expected,got)
+        }
+    }
+}
+
 func TestBoardClone(t *testing.T) {
     board := Board{
         me:  1,
