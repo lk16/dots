@@ -7,9 +7,12 @@ import "dots/bitset"
 // Returns the flipped discs.
 func (board *Board) doMoveToHigherBits(line bitset.Bitset) (flipped bitset.Bitset) {
     line_mask := line & board.me
+    if line_mask == 0 {
+        return
+    }
     bit := line_mask.FirstBit()
     line &= bitset.Bitset(bit - 1)
-    if (bit != 0) && (line&board.opp == line) {
+    if line&board.opp == line {
         flipped = line
     }    
     return
@@ -20,12 +23,12 @@ func (board *Board) doMoveToHigherBits(line bitset.Bitset) (flipped bitset.Bitse
 // Returns the flipped discs.
 func (board *Board) doMoveToLowerBits(line bitset.Bitset) (flipped bitset.Bitset) {
     line_mask := line & board.me
-    bit := line_mask.LastBit()
     if line_mask == 0 {
-        bit = 0
+        return
     }
+    bit := line_mask.LastBit()
     line &^= bitset.Bitset((bit << 1) - 1)
-    if (bit != 0) && (line&board.opp == line) {
+    if line&board.opp == line {
         flipped = line
     }
     return
