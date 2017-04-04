@@ -147,3 +147,47 @@ func TestBitsetAsciiArt(t *testing.T) {
 
 	}
 }
+
+func TestBitsetSetBit(t *testing.T) {
+	for bs := range genTestBitsets() {
+		for i := uint(0); i < 64; i++ {
+			clone := bs
+			clone.SetBit(i)
+			expected := bs | Bitset(1<<i)
+			if clone != expected {
+				t.Errorf("Expected %d, got %d", expected, clone)
+			}
+		}
+	}
+
+	bs := Bitset(0)
+	bs.SetBit(1).SetBit(2)
+	expected := Bitset(1<<1) | Bitset(1<<2)
+
+	if bs != expected {
+		t.Errorf("Expected %d, got %d", expected, bs)
+	}
+
+}
+
+func TestBitsetResetBit(t *testing.T) {
+	for bs := range genTestBitsets() {
+		for i := uint(0); i < 64; i++ {
+			clone := bs
+			clone.ResetBit(i)
+			expected := bs &^ Bitset(1<<i)
+			if clone != expected {
+				t.Errorf("Expected %d, got %d", expected, clone)
+			}
+		}
+	}
+
+	bs := (^Bitset(0))
+	bs.ResetBit(1).ResetBit(2)
+	expected := (^Bitset(0)) &^ (Bitset(1<<1) | Bitset(1<<2))
+
+	if bs != expected {
+		t.Errorf("Expected %d, got %d", expected, bs)
+	}
+
+}

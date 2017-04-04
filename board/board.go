@@ -14,9 +14,9 @@ type Board struct {
 
 // Returns a Board in start state
 func NewBoard() (board *Board) {
-	board = &Board{
-		me:  bitset.Bitset(1<<28) | bitset.Bitset(1<<35),
-		opp: bitset.Bitset(1<<27) | bitset.Bitset(1<<36)}
+	board = &Board{}
+	board.me.SetBit(28).SetBit(35)
+	board.opp.SetBit(27).SetBit(36)
 	return
 }
 
@@ -141,7 +141,8 @@ func (board *Board) DoMove(index uint) (flipped bitset.Bitset) {
 
 	flipped = doMoveFuncs[index]()
 
-	tmp := board.me | flipped | bitset.Bitset(1<<index)
+	tmp := board.me | flipped
+	tmp.SetBit(index)
 
 	board.me = board.opp &^ tmp
 	board.opp = tmp
@@ -156,7 +157,7 @@ func (board Board) GenChildren() (ch chan Board) {
 		moves := board.Moves()
 		for moves != 0 {
 			index := moves.FirstBitIndex()
-			moves &^= bitset.Bitset(1 << index)
+			moves.ResetBit(index)
 
 			clone := board.Clone()
 			clone.DoMove(index)

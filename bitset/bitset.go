@@ -104,3 +104,19 @@ func (bs Bitset) AsciiArt() (output string) {
 	output = buffer.String()
 	return
 }
+
+// Sets a bit of a bitset
+// Returns the modified bitset, to allow chaining
+func (bs *Bitset) SetBit(index uint) (out *Bitset) {
+	*bs |= Bitset(1 << index)
+	out = bs
+	return
+}
+
+// Resets a bit of a bitset
+// Returns the modified bitset, to allow chaining
+func (bs *Bitset) ResetBit(index uint) (out *Bitset) {
+	*bs &^= Bitset(1 << index)
+	out = bs
+	return
+}
