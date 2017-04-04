@@ -58,11 +58,28 @@ func (board Board) Clone() (clone Board) {
 
 // Returns a String of ASCII-art of a Board
 func (board Board) AsciiArt() (output string) {
+	return board.asciiArt(false)
+}
+
+// Returns a string of ASCII-art of a board, but as if the opponent was to move
+func (board Board) AsciiArtOpponent() (output string) {
+	return board.asciiArt(true)
+}
+
+// Returns a String of ASCII-art of a Board
+// Or for no one: (-1)
+func (board Board) asciiArt(swap_disc_colors bool) (output string) {
 
 	buffer := new(bytes.Buffer)
 	buffer.WriteString("+-a-b-c-d-e-f-g-h-+\n")
 
-	moves := board.Moves()
+	var moves bitset.Bitset
+
+	moves = board.Moves()
+
+	if swap_disc_colors {
+		board.SwitchTurn()
+	}
 
 	for y := uint(0); y < 8; y++ {
 		buffer.WriteString(fmt.Sprintf("%d ", y+1))
