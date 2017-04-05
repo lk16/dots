@@ -197,3 +197,20 @@ func (board Board) CountDiscs() (count uint) {
 	count = (board.me | board.opp).Count()
 	return
 }
+
+func (board Board) CountEmpties() (count uint) {
+	count = 64 - board.CountDiscs()
+	return
+}
+
+func (board Board) ExactScore() (score int) {
+	me_count := int(board.me.Count())
+	opp_count := int(board.opp.Count())
+
+	if me_count > opp_count {
+		score = 64 - (2 * opp_count)
+	} else if me_count < opp_count {
+		score = -64 + (2 * me_count)
+	}
+	return
+}
