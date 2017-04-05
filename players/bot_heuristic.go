@@ -55,12 +55,16 @@ func (bot *BotHeuristic) DoMove(board board.Board) (afterwards board.Board) {
 	alpha := minimax.Min_heuristic
 	for i, child := range children {
 		heur := bot.minimax.Evaluate(child, depth, heuristic, alpha)
-		fmt.Printf("Move %d/%d: %d\n", i+1, len(children), heur)
+		fmt.Printf("move %d/%d: ", i+1, len(children))
 		if heur > alpha {
+			fmt.Printf("%d\n", heur)
 			alpha = heur
 			afterwards = child
+		} else {
+			fmt.Printf("not better\n")
 		}
 	}
+	fmt.Printf("\n")
 
 	return
 }
