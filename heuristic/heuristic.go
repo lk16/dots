@@ -1,11 +1,11 @@
-package players
+package heuristic
 
 import (
 	"dots/bitset"
 	"dots/board"
 )
 
-func SquaredHeuristic(board board.Board) (heur int) {
+func Squared(board board.Board) (heur int) {
 	corner_mask := bitset.Bitset(0)
 	corner_mask.SetBit(0).SetBit(7).SetBit(56).SetBit(63)
 
