@@ -1,6 +1,8 @@
 package players
 
 import (
+	"fmt"
+
 	"dots/board"
 	"dots/minimax"
 )
@@ -39,6 +41,7 @@ func (bot *BotHeuristic) DoMove(board board.Board) (afterwards board.Board) {
 	afterwards = children[0]
 
 	if len(children) == 1 {
+		fmt.Printf("Only one move. Skipping evaluation.\n")
 		return
 	}
 
@@ -50,8 +53,9 @@ func (bot *BotHeuristic) DoMove(board board.Board) (afterwards board.Board) {
 	}
 
 	alpha := minimax.Min_heuristic
-	for _, child := range children {
+	for i, child := range children {
 		heur := bot.minimax.Evaluate(child, depth, heuristic, alpha)
+		fmt.Printf("Move %d/%d: %d\n", i+1, len(children), heur)
 		if heur > alpha {
 			alpha = heur
 			afterwards = child
