@@ -10,7 +10,7 @@ import (
 func main() {
 	random_bot := players.NewBotRandom()
 
-	smart_bot := players.NewBotHeuristic(heuristic.Squared, &minimax.AlphaBeta{}, 7, 10)
+	smart_bot := players.NewBotHeuristic(heuristic.Squared, &minimax.Mtdf{}, 7, 10)
 
 	cli_game := cli_game.NewCliGame(random_bot, smart_bot)
 	cli_game.Run()
