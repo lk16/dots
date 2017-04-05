@@ -5,20 +5,14 @@ import (
 	"dots/minimax"
 )
 
-type Heuristic func(board board.Board) (heur int)
-
-type MinimaxInterface interface {
-	Evaluate(board board.Board, depth uint, heuristic Heuristic, alpha int) int
-}
-
 type BotHeuristic struct {
-	heuristic    Heuristic
-	minimax      MinimaxInterface
+	heuristic    minimax.Heuristic
+	minimax      minimax.MinimaxInterface
 	search_depth uint
 	exact_depth  uint
 }
 
-func NewBotHeuristic(heuristic Heuristic, minimax MinimaxInterface,
+func NewBotHeuristic(heuristic minimax.Heuristic, minimax minimax.MinimaxInterface,
 	search_depth, exact_depth uint) (bot *BotHeuristic) {
 	bot = &BotHeuristic{
 		heuristic:    heuristic,

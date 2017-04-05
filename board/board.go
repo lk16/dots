@@ -214,3 +214,13 @@ func (board Board) ExactScore() (score int) {
 	}
 	return
 }
+
+func (board Board) Me() (me bitset.Bitset) {
+	me = board.me
+	return
+}
+
+func (board Board) Opp() (opp bitset.Bitset) {
+	opp = board.opp
+	return
+}
