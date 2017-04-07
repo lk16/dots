@@ -14,15 +14,15 @@ const (
 
 type Heuristic func(board board.Board) (heur int)
 
-type MinimaxInterface interface {
-	Evaluate(board board.Board, depth_left uint, heuristic Heuristic, alpha int) (heur int)
+type Interface interface {
+	Search(board board.Board, depth_left uint, heuristic Heuristic, alpha int) (heur int)
 }
 
 type Minimax struct {
 	heuristic Heuristic
 }
 
-func (minimax *Minimax) Evaluate(board board.Board, depth_left uint, heuristic Heuristic, alpha int) (heur int) {
+func (minimax *Minimax) Search(board board.Board, depth_left uint, heuristic Heuristic, alpha int) (heur int) {
 	minimax.heuristic = heuristic
 	heur = minimax.doMinimax(board, depth_left, true)
 	return
@@ -41,17 +41,19 @@ func (minimax *Minimax) doMinimax(board board.Board, depth_left uint, is_max boo
 	if moves := board.Moves(); moves != 0 {
 		if is_max {
 			heur = Min_heuristic
+			for child := range board.GenChildren() {
+				child_heur := minimax.doMinimax(child, depth_left-1, false)
+				if child_heur > heur {
+					heur = child_heur
+				}
+			}
 		} else {
 			heur = Max_heuristic
-		}
-
-		for child := range board.GenChildren() {
-			child_heur := minimax.doMinimax(child, depth_left-1, !is_max)
-			if is_max && (child_heur > heur) {
-				heur = child_heur
-			}
-			if (!is_max) && (child_heur < heur) {
-				heur = child_heur
+			for child := range board.GenChildren() {
+				child_heur := minimax.doMinimax(child, depth_left-1, true)
+				if child_heur < heur {
+					heur = child_heur
+				}
 			}
 		}
 		return

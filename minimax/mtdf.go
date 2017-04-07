@@ -8,7 +8,7 @@ type Mtdf struct {
 	heuristic Heuristic
 }
 
-func (mtdf *Mtdf) Evaluate(board board.Board, depth_left uint, heuristic Heuristic, alpha int) (heur int) {
+func (mtdf *Mtdf) Search(board board.Board, depth_left uint, heuristic Heuristic, alpha int) (heur int) {
 	mtdf.heuristic = heuristic
 
 	if board.CountEmpties() == depth_left {

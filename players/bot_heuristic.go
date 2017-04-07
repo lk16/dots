@@ -9,12 +9,12 @@ import (
 
 type BotHeuristic struct {
 	heuristic    minimax.Heuristic
-	minimax      minimax.MinimaxInterface
+	minimax      minimax.Interface
 	search_depth uint
 	exact_depth  uint
 }
 
-func NewBotHeuristic(heuristic minimax.Heuristic, minimax minimax.MinimaxInterface,
+func NewBotHeuristic(heuristic minimax.Heuristic, minimax minimax.Interface,
 	search_depth, exact_depth uint) (bot *BotHeuristic) {
 	bot = &BotHeuristic{
 		heuristic:    heuristic,
@@ -54,7 +54,7 @@ func (bot *BotHeuristic) DoMove(board board.Board) (afterwards board.Board) {
 
 	alpha := minimax.Min_heuristic
 	for i, child := range children {
-		heur := bot.minimax.Evaluate(child, depth, heuristic, alpha)
+		heur := bot.minimax.Search(child, depth, heuristic, alpha)
 		fmt.Printf("move %d/%d: ", i+1, len(children))
 		if heur > alpha {
 			fmt.Printf("%d\n", heur)
