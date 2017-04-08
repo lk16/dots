@@ -24,11 +24,6 @@ func NewBotHeuristic(heuristic minimax.Heuristic, minimax minimax.Interface,
 	return
 }
 
-func ExactScoreHeuristic(board board.Board) (heur int) {
-	heur = board.ExactScore()
-	return
-}
-
 func (bot *BotHeuristic) DoMove(board board.Board) (afterwards board.Board) {
 
 	children := board.GetChildren()
@@ -47,15 +42,26 @@ func (bot *BotHeuristic) DoMove(board board.Board) (afterwards board.Board) {
 
 	heuristic := bot.heuristic
 	depth := bot.search_depth
-	if board.CountEmpties() <= bot.exact_depth {
-		heuristic = ExactScoreHeuristic
-		depth = board.CountEmpties()
+
+	do_exact_search := board.CountEmpties() <= bot.exact_depth
+
+	var alpha int
+	if do_exact_search {
+		alpha = minimax.Min_exact_heuristic
+	} else {
+		alpha = minimax.Min_heuristic
 	}
 
-	alpha := minimax.Min_heuristic
 	for i, child := range children {
-		heur := bot.minimax.Search(child, depth, heuristic, alpha)
+		var heur int
+		if do_exact_search {
+			heur = bot.minimax.ExactSearch(child, alpha)
+		} else {
+			heur = bot.minimax.Search(child, depth, heuristic, alpha)
+		}
+
 		fmt.Printf("move %d/%d: ", i+1, len(children))
+
 		if heur > alpha {
 			fmt.Printf("%d\n", heur)
 			alpha = heur

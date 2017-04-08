@@ -56,3 +56,35 @@ func (alphabeta *AlphaBeta) doAlphaBeta(board board.Board, depth_left uint, alph
 	heur = alphabeta.polish(Exact_score_factor*board.ExactScore(), alpha, beta)
 	return
 }
+
+func (alphabeta *AlphaBeta) ExactSearch(board board.Board, alpha int) (heur int) {
+	heur = alphabeta.doAlphaBetaExact(board, alpha, Max_exact_heuristic)
+	return
+}
+
+func (alphabeta *AlphaBeta) doAlphaBetaExact(board board.Board, alpha, beta int) (heur int) {
+
+	if moves := board.Moves(); moves != 0 {
+		heur = alpha
+		for child := range board.GenChildren() {
+			child_heur := -alphabeta.doAlphaBetaExact(child, -beta, -heur)
+			if child_heur > heur {
+				heur = child_heur
+			}
+			if heur >= beta {
+				heur = beta
+				break
+			}
+		}
+		return
+	}
+
+	board.SwitchTurn()
+	if moves := board.Moves(); moves != 0 {
+		heur = -alphabeta.doAlphaBetaExact(board, -beta, -alpha)
+		return
+	}
+
+	heur = alphabeta.polish(board.ExactScore(), alpha, beta)
+	return
+}
