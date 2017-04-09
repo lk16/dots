@@ -193,16 +193,19 @@ func (board *Board) SwitchTurn() {
 	board.opp = tmp
 }
 
+// Returns the amount of discs on a board
 func (board Board) CountDiscs() (count uint) {
 	count = (board.me | board.opp).Count()
 	return
 }
 
+// Returns the amount of empty fields on a board
 func (board Board) CountEmpties() (count uint) {
 	count = 64 - board.CountDiscs()
 	return
 }
 
+// Returns the final score of a board as if it is end of game
 func (board Board) ExactScore() (score int) {
 	me_count := int(board.me.Count())
 	opp_count := int(board.opp.Count())
@@ -215,11 +218,13 @@ func (board Board) ExactScore() (score int) {
 	return
 }
 
+// Returns a bitset with the discs of the player to move
 func (board Board) Me() (me bitset.Bitset) {
 	me = board.me
 	return
 }
 
+// Returns a bitset with the discs of the opponent of the player to move
 func (board Board) Opp() (opp bitset.Bitset) {
 	opp = board.opp
 	return

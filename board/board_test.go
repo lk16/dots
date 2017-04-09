@@ -36,7 +36,7 @@ func genTestBoards() (ch chan Board) {
 		for y := 0; y < 8; y++ {
 			for x := 0; x < 8; x++ {
 				board := Board{}
-				board.me = bitset.Bitset(1 << uint(y*8+x))
+				board.me.SetBit(uint(y*8 + x))
 
 				// for each direction
 				for dy := -1; dy <= 1; dy++ {
@@ -60,7 +60,7 @@ func genTestBoards() (ch chan Board) {
 							qy := y + d*dy
 							qx := x + d*dx
 
-							board.opp |= bitset.Bitset(1 << uint(qy*8+qx))
+							board.opp.SetBit(uint(qy*8 + qx))
 
 							ch <- board
 						}
@@ -74,6 +74,12 @@ func genTestBoards() (ch chan Board) {
 	return
 }
 
+func assertPanic(t *testing.T) {
+	if r := recover(); r == nil {
+		t.Errorf("panic() was not called")
+	}
+}
+
 func TestRandomBoard(t *testing.T) {
 	for i := uint(4); i <= 64; i++ {
 		board := RandomBoard(i)
@@ -84,19 +90,13 @@ func TestRandomBoard(t *testing.T) {
 		}
 	}
 
-	assertPanic := func() {
-		if r := recover(); r == nil {
-			t.Errorf("panic() was not called")
-		}
-	}
-
 	func() {
-		defer assertPanic()
+		defer assertPanic(t)
 		RandomBoard(3)
 	}()
 
 	func() {
-		defer assertPanic()
+		defer assertPanic(t)
 		RandomBoard(65)
 	}()
 }
@@ -336,14 +336,8 @@ func TestBoardDoRandomMove(t *testing.T) {
 
 	}
 
-	assertPanic := func() {
-		if r := recover(); r == nil {
-			t.Errorf("panic() was not called")
-		}
-	}
-
 	func() {
-		defer assertPanic()
+		defer assertPanic(t)
 		board := Board{me: 0, opp: 0}
 		board.DoRandomMove()
 	}()
@@ -361,11 +355,68 @@ func TestBoardSwitchTurn(t *testing.T) {
 
 func TestBoardCountDiscs(t *testing.T) {
 	for board := range genTestBoards() {
-		excpected := board.me.Count() + board.opp.Count()
+		expected := board.me.Count() + board.opp.Count()
 		got := board.CountDiscs()
 
-		if excpected != got {
-			t.Errorf("Expected %d discs, got %d\n", excpected, got)
+		if expected != got {
+			t.Errorf("Expected %d discs, got %d\n", expected, got)
+		}
+	}
+}
+
+func TestBoardCountEmpties(t *testing.T) {
+	for board := range genTestBoards() {
+		expected := 64 - (board.me.Count() + board.opp.Count())
+		got := board.CountEmpties()
+
+		if expected != got {
+			t.Errorf("Expected %d discs, got %d\n", expected, got)
+		}
+	}
+}
+
+func TestBoardExactScore(t *testing.T) {
+	for board := range genTestBoards() {
+		var expected int
+
+		me_count := int(board.me.Count())
+		opp_count := int(board.opp.Count())
+		empty_count := int(board.CountEmpties())
+
+		if me_count > opp_count {
+			expected = me_count + empty_count - opp_count
+		} else if me_count < opp_count {
+			expected = me_count - empty_count - opp_count
+		} else {
+			expected = 0
+		}
+
+		got := board.ExactScore()
+
+		if expected != got {
+			t.Errorf("Expected %d, got %d\n", expected, got)
+		}
+	}
+}
+
+func TestBoardMe(t *testing.T) {
+	for board := range genTestBoards() {
+		expected := board.me
+		got := board.Me()
+
+		if expected != got {
+			t.Errorf("Expected %d, got %d\n", expected, got)
+		}
+	}
+}
+
+func TestBoardOpp(t *testing.T) {
+	for board := range genTestBoards() {
+		expected := board.opp
+		got := board.Opp()
+
+		if expected != got {
+			t.Errorf("Expected %d, got %d\n", expected, got)
 		}
 	}
 }
