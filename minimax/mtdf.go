@@ -73,7 +73,7 @@ func (mtdf *Mtdf) doMtdf(board board.Board, depth_left uint, alpha int) (heur in
 
 	if moves := board.Moves(); moves != 0 {
 		heur = alpha
-		for child := range board.GenChildren() {
+		for _, child := range board.GetChildren() {
 			child_heur := -mtdf.doMtdf(child, depth_left-1, -(alpha + 1))
 			if child_heur > alpha {
 				heur = alpha + 1
@@ -98,7 +98,7 @@ func (mtdf *Mtdf) doMtdfExact(board board.Board, alpha int) (heur int) {
 
 	if moves := board.Moves(); moves != 0 {
 		heur = alpha
-		for child := range board.GenChildren() {
+		for _, child := range board.GetChildren() {
 			child_heur := -mtdf.doMtdfExact(child, -(alpha + 1))
 			if child_heur > alpha {
 				heur = alpha + 1

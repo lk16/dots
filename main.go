@@ -15,7 +15,7 @@ func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	human := &players.Human{}
-	smart_bot := players.NewBotHeuristic(heuristic.Squared, &minimax.Mtdf{}, 5, 10)
+	smart_bot := players.NewBotHeuristic(heuristic.Squared, &minimax.Mtdf{}, 10, 12)
 
 	cli_game := cli_game.NewCliGame(human, smart_bot)
 	cli_game.Run()
