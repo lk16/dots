@@ -17,4 +17,5 @@ type Heuristic func(board board.Board) (heur int)
 type Interface interface {
 	Search(board board.Board, depth_left uint, heuristic Heuristic, alpha int) (heur int)
 	ExactSearch(board board.Board, alpha int) (heur int)
+	Name() (name string)
 }

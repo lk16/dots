@@ -106,3 +106,8 @@ func (mtdf *Mtdf) polish(heur, alpha int) (outheur int) {
 	}
 	return
 }
+
+func (mtdf Mtdf) Name() (name string) {
+	name = "mtdf"
+	return
+}

@@ -26,18 +26,22 @@ func TestInterfaceSearch(t *testing.T) {
 		&AlphaBeta{},
 		&Mtdf{}}
 
-	search_depth := uint(5)
-	exact_depth := uint(5)
 	alpha := Min_exact_heuristic
 	heuristic := heuristic.Squared
 
 	for board := range genTestBoards() {
-		if board.CountEmpties() > exact_depth {
-			expected := base_case.Search(board, search_depth, heuristic, alpha)
+		for depth := uint(1); depth <= 4; depth++ {
+
+			// skip exact serches because it will make the unit test slow
+			if board.CountEmpties() <= depth {
+				continue
+			}
+
+			expected := base_case.Search(board, depth, heuristic, alpha)
 			for _, test_case := range test_cases {
-				got := test_case.Search(board, search_depth, heuristic, alpha)
+				got := test_case.Search(board, depth, heuristic, alpha)
 				if got != expected {
-					t.Errorf("Expected %d, got %d for board\n%s\n\n", expected, got, board.AsciiArt())
+					t.Errorf("At depth %d: expected %d, got %d from %s for board\n%s\n\n", depth, expected, got, test_case.Name(), board.AsciiArt())
 				}
 			}
 		}
@@ -53,20 +57,22 @@ func TestInterfaceExactSearch(t *testing.T) {
 		&AlphaBeta{},
 		&Mtdf{}}
 
-	exact_depth := uint(5)
+	exact_depth := uint(4)
 	alpha := Min_exact_heuristic
 
 	for board := range genTestBoards() {
-		if board.CountEmpties() <= exact_depth {
 
-			expected := base_case.ExactSearch(board, alpha)
-			for _, test_case := range test_cases {
-				got := test_case.ExactSearch(board, alpha)
-				if got != expected {
-					t.Errorf("Expected %d, got %d for board\n%s\n\n", expected, got, board.AsciiArt())
-				}
+		// skip exact searches for large depths becuase it will make unit tests slow
+		if board.CountEmpties() > exact_depth {
+			continue
+		}
+
+		expected := base_case.ExactSearch(board, alpha)
+		for _, test_case := range test_cases {
+			got := test_case.ExactSearch(board, alpha)
+			if got != expected {
+				t.Errorf("Expected %d, got %d from %s for board\n%s\n\n", expected, got, test_case.Name(), board.AsciiArt())
 			}
-
 		}
 	}
 

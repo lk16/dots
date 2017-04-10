@@ -10,7 +10,7 @@ type Minimax struct {
 
 func (minimax *Minimax) Search(board board.Board, depth_left uint, heuristic Heuristic, alpha int) (heur int) {
 	minimax.heuristic = heuristic
-	heur = minimax.doMinimax(board, depth_left, true)
+	heur = -minimax.doMinimax(board, depth_left, true)
 	return
 }
 
@@ -48,7 +48,7 @@ func (minimax *Minimax) doMinimax(board board.Board, depth_left uint, is_max boo
 
 	board.SwitchTurn()
 	if moves := board.Moves(); moves != 0 {
-		heur = -minimax.doMinimax(board, depth_left, !is_max)
+		heur = minimax.doMinimax(board, depth_left, !is_max)
 		return
 	}
 
@@ -99,5 +99,10 @@ func (minimax *Minimax) doMinimaxExact(board board.Board, is_max bool) (heur int
 	} else {
 		heur = -board.ExactScore()
 	}
+	return
+}
+
+func (minimax Minimax) Name() (name string) {
+	name = "minimax"
 	return
 }

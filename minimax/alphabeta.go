@@ -88,3 +88,8 @@ func (alphabeta *AlphaBeta) doAlphaBetaExact(board board.Board, alpha, beta int)
 	heur = alphabeta.polish(board.ExactScore(), alpha, beta)
 	return
 }
+
+func (alphabeta AlphaBeta) Name() (name string) {
+	name = "alphabeta"
+	return
+}
