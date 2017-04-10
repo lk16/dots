@@ -37,7 +37,7 @@ func TestMinimax(t *testing.T) {
 			if board.CountEmpties() > exact_depth {
 				result = minimax.Search(board, search_depth, heuristic.Squared, alpha)
 			} else {
-				result = minimax.ExactSearch(board, alpha)
+				//result = minimax.ExactSearch(board, alpha)
 			}
 			results = append(results, result)
 		}

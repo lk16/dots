@@ -15,6 +15,7 @@ func (minimax *Minimax) Search(board board.Board, depth_left uint, heuristic Heu
 }
 
 func (minimax *Minimax) doMinimax(board board.Board, depth_left uint, is_max bool) (heur int) {
+
 	if depth_left == 0 {
 		if is_max {
 			heur = minimax.heuristic(board)

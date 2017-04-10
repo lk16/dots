@@ -58,7 +58,7 @@ func (alphabeta *AlphaBeta) doAlphaBeta(board board.Board, depth_left uint, alph
 }
 
 func (alphabeta *AlphaBeta) ExactSearch(board board.Board, alpha int) (heur int) {
-	heur = alphabeta.doAlphaBetaExact(board, alpha, Max_exact_heuristic)
+	heur = -alphabeta.doAlphaBetaExact(board, alpha, Max_exact_heuristic)
 	return
 }
 

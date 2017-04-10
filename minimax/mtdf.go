@@ -44,9 +44,9 @@ func (mtdf *Mtdf) loop(board board.Board, depth_left uint,
 	for upper_bound-lower_bound >= step {
 		var bound int
 		if exact {
-			bound = -mtdf.doMtdfExact(board, -(f + 1))
+			bound = mtdf.doMtdfExact(board, f)
 		} else {
-			bound = -mtdf.doMtdf(board, depth_left, -(f + 1))
+			bound = mtdf.doMtdf(board, depth_left, f)
 		}
 		if bound == f {
 			f -= step
@@ -68,6 +68,7 @@ func (mtdf *Mtdf) doMtdf(board board.Board, depth_left uint, alpha int) (heur in
 	}
 
 	if moves := board.Moves(); moves != 0 {
+		heur = alpha
 		for child := range board.GenChildren() {
 			child_heur := -mtdf.doMtdf(child, depth_left-1, -(alpha + 1))
 			if child_heur > alpha {
