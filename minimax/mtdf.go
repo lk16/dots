@@ -10,7 +10,24 @@ type Mtdf struct {
 
 func (mtdf *Mtdf) Search(board board.Board, depth_left uint, heuristic Heuristic, alpha int) (heur int) {
 	mtdf.heuristic = heuristic
-	heur = mtdf.loop(board, depth_left, alpha, Max_heuristic, 0, 1, false)
+
+	/*
+	   Temporary hack:
+	   If the true heuristic is outside the -100,100 interval
+	   we return either 100 or -100, because exact scores currently take too long to compute
+	*/
+
+	upper_limit := 100
+	lower_limit := -upper_limit
+
+	capped_alpha := lower_limit
+	if alpha > capped_alpha {
+		capped_alpha = alpha
+	}
+
+	capped_beta := upper_limit
+
+	heur = mtdf.loop(board, depth_left, capped_alpha, capped_beta, 0, 1, false)
 	return
 }
 
@@ -66,9 +83,10 @@ func (mtdf *Mtdf) doMtdf(board board.Board, depth_left uint, alpha int) (heur in
 		return
 	}
 
-	board.SwitchTurn()
-	if moves := board.Moves(); moves != 0 {
-		heur = -mtdf.doMtdf(board, depth_left, -(alpha + 1))
+	clone := board
+	clone.SwitchTurn()
+	if moves := clone.Moves(); moves != 0 {
+		heur = -mtdf.doMtdf(clone, depth_left, -(alpha + 1))
 		return
 	}
 
@@ -79,6 +97,7 @@ func (mtdf *Mtdf) doMtdf(board board.Board, depth_left uint, alpha int) (heur in
 func (mtdf *Mtdf) doMtdfExact(board board.Board, alpha int) (heur int) {
 
 	if moves := board.Moves(); moves != 0 {
+		heur = alpha
 		for child := range board.GenChildren() {
 			child_heur := -mtdf.doMtdfExact(child, -(alpha + 1))
 			if child_heur > alpha {
@@ -89,9 +108,10 @@ func (mtdf *Mtdf) doMtdfExact(board board.Board, alpha int) (heur int) {
 		return
 	}
 
-	board.SwitchTurn()
-	if moves := board.Moves(); moves != 0 {
-		heur = -mtdf.doMtdfExact(board, -(alpha + 1))
+	clone := board
+	clone.SwitchTurn()
+	if moves := clone.Moves(); moves != 0 {
+		heur = -mtdf.doMtdfExact(clone, -(alpha + 1))
 		return
 	}
 
@@ -100,10 +120,11 @@ func (mtdf *Mtdf) doMtdfExact(board board.Board, alpha int) (heur int) {
 }
 
 func (mtdf *Mtdf) polish(heur, alpha int) (outheur int) {
-	outheur = heur
 	if heur > alpha {
-		outheur++
+		outheur = alpha + 1
+		return
 	}
+	outheur = alpha
 	return
 }
 

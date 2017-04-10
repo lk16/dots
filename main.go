@@ -1,6 +1,9 @@
 package main
 
 import (
+	"math/rand"
+	"time"
+
 	"dots/cli_game"
 	"dots/heuristic"
 	"dots/minimax"
@@ -8,6 +11,9 @@ import (
 )
 
 func main() {
+
+	rand.Seed(time.Now().UTC().UnixNano())
+
 	random_bot := players.NewBotRandom()
 
 	smart_bot := players.NewBotHeuristic(heuristic.Squared, &minimax.Mtdf{}, 5, 10)

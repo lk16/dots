@@ -61,7 +61,7 @@ func (minimax *Minimax) doMinimax(board board.Board, depth_left uint, is_max boo
 }
 
 func (minimax *Minimax) ExactSearch(board board.Board, alpha int) (heur int) {
-	heur = minimax.doMinimaxExact(board, true)
+	heur = -minimax.doMinimaxExact(board, true)
 	return
 }
 

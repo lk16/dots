@@ -63,7 +63,7 @@ func TestInterfaceExactSearch(t *testing.T) {
 	for board := range genTestBoards() {
 
 		// skip exact searches for large depths becuase it will make unit tests slow
-		if board.CountEmpties() > exact_depth {
+		if board.CountEmpties() <= exact_depth {
 			continue
 		}
 
