@@ -57,7 +57,9 @@ func (cli *CliGame) Run() {
 // Returns a string with ascii-art representing the current board state
 func (cli CliGame) AsciiArt() (output string) {
 	if cli.turn == 1 {
-		cli.board.SwitchTurn()
+		output = cli.board.AsciiArtOpponent()
+	} else {
+		output = cli.board.AsciiArt()
 	}
-	return cli.board.AsciiArt()
+	return
 }
