@@ -38,18 +38,16 @@ func (cli *CliGame) Run() {
 
 	for cli.skips < 2 {
 
-		if cli.skips == 0 {
-			fmt.Printf("%s\n", cli.AsciiArt())
-		}
-
 		if cli.board.Moves().Count() == 0 {
 			cli.SkipTurn()
 			continue
 		}
 
+		fmt.Printf("%s\n", cli.AsciiArt())
+
 		cli.board = cli.players[cli.turn].DoMove(cli.board)
 		cli.turn = 1 - cli.turn
-
+		cli.skips = 0
 	}
 
 	fmt.Printf("%s\n", cli.AsciiArt())

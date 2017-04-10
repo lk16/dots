@@ -48,7 +48,7 @@ func (minimax *Minimax) doMinimax(board board.Board, depth_left uint, is_max boo
 
 	board.SwitchTurn()
 	if moves := board.Moves(); moves != 0 {
-		heur = minimax.doMinimax(board, depth_left, !is_max)
+		heur = -minimax.doMinimax(board, depth_left, !is_max)
 		return
 	}
 

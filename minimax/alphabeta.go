@@ -10,7 +10,7 @@ type AlphaBeta struct {
 
 func (alphabeta *AlphaBeta) Search(board board.Board, depth_left uint, heuristic Heuristic, alpha int) (heur int) {
 	alphabeta.heuristic = heuristic
-	heur = alphabeta.doAlphaBeta(board, depth_left, alpha, Max_heuristic)
+	heur = -alphabeta.doAlphaBeta(board, depth_left, alpha, Max_heuristic)
 	return
 }
 

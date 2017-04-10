@@ -10,25 +10,12 @@ type Mtdf struct {
 
 func (mtdf *Mtdf) Search(board board.Board, depth_left uint, heuristic Heuristic, alpha int) (heur int) {
 	mtdf.heuristic = heuristic
+	heur = mtdf.loop(board, depth_left, alpha, Max_heuristic, 0, 1, false)
+	return
+}
 
-	upper_cap := 100
-	lower_cap := -upper_cap
-
-	capped_lower_bound := alpha
-	if alpha < lower_cap {
-		lower_cap = alpha
-	}
-
-	capped_upper_bound := upper_cap
-
-	capped_result := mtdf.loop(board, depth_left, capped_lower_bound, capped_upper_bound, 0, 1, false)
-
-	if (capped_result > capped_lower_bound) && (capped_result < capped_upper_bound) {
-		heur = capped_result
-		return
-	}
-
-	heur = Exact_score_factor * mtdf.ExactSearch(board, alpha)
+func (mtdf *Mtdf) ExactSearch(board board.Board, alpha int) (heur int) {
+	heur = mtdf.loop(board, 64, alpha, Max_exact_heuristic, 0, 2, true)
 	return
 }
 
@@ -44,9 +31,9 @@ func (mtdf *Mtdf) loop(board board.Board, depth_left uint,
 	for upper_bound-lower_bound >= step {
 		var bound int
 		if exact {
-			bound = mtdf.doMtdfExact(board, f)
+			bound = -mtdf.doMtdfExact(board, -(f + 1))
 		} else {
-			bound = mtdf.doMtdf(board, depth_left, f)
+			bound = -mtdf.doMtdf(board, depth_left, -(f + 1))
 		}
 		if bound == f {
 			f -= step
@@ -117,10 +104,5 @@ func (mtdf *Mtdf) polish(heur, alpha int) (outheur int) {
 	if heur > alpha {
 		outheur++
 	}
-	return
-}
-
-func (mtdf *Mtdf) ExactSearch(board board.Board, alpha int) (heur int) {
-	heur = mtdf.loop(board, 64, alpha, Max_heuristic, 0, 2, true)
 	return
 }
