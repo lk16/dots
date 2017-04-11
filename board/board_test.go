@@ -33,6 +33,7 @@ func bitsetAsciiArtString(bs bitset.Bitset) (output string) {
 func genTestBoards() (ch chan Board) {
 	ch = make(chan Board)
 	go func() {
+		ch <- Board{me: 0, opp: 0}
 		ch <- *NewBoard()
 
 		// random reachable boards with 4-64 discs
@@ -285,6 +286,11 @@ func TestBoardDoMoveN(t *testing.T) {
 			clone = board
 			got := doMoveFuncs[i]()
 
+			if clone != board {
+				t.Errorf("Board was changed. Before:\n%s\n\nAfter:\n%s\n\n",
+					board.asciiArtString(false), clone.asciiArtString(false))
+			}
+
 			if expected != got {
 				t.Errorf("Doing move %c%d on board\n%s\n", 'a'+i%8, (i/8)+1,
 					board.asciiArtString(false))
@@ -321,7 +327,8 @@ func TestBoardMoves(t *testing.T) {
 			t.FailNow()
 		}
 		if clone != board {
-			t.Errorf("board.Moves() changed the board!\n")
+			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
+				board.asciiArtString(false), clone.asciiArtString(false))
 			t.FailNow()
 		}
 	}
@@ -350,7 +357,14 @@ func TestBoardGetChildren(t *testing.T) {
 
 		board_pieces := board.me | board.opp
 
-		got := board.GetChildren()
+		clone := board
+		got := clone.GetChildren()
+
+		if clone != board {
+			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
+				board.asciiArtString(false), clone.asciiArtString(false))
+		}
+
 		for _, child := range got {
 
 			child_pieces := child.me | child.opp
@@ -420,11 +434,17 @@ func TestBoardAsciiArt(t *testing.T) {
 
 			expected_buff.WriteString("+-----------------+\n")
 
-			got_buff := new(bytes.Buffer)
-			board.AsciiArt(got_buff, swap_disc_colors)
-
-			got := got_buff.String()
 			expected := expected_buff.String()
+
+			got_buff := new(bytes.Buffer)
+			clone = board
+			clone.AsciiArt(got_buff, swap_disc_colors)
+			got := got_buff.String()
+
+			if clone != board {
+				t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
+					board.asciiArtString(false), clone.asciiArtString(false))
+			}
 
 			if got != expected {
 				t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n", expected, got)
@@ -464,15 +484,7 @@ func TestBoardDoRandomMove(t *testing.T) {
 			t.Errorf("Found board:\n%s\n\nWith invalid child:\n%s\n\n",
 				board.asciiArtString(false), clone.asciiArtString(false))
 		}
-
 	}
-
-	// test with empty board
-	func() {
-		defer assertPanic(t)
-		board := Board{me: 0, opp: 0}
-		board.DoRandomMove()
-	}()
 }
 
 func TestBoardSwitchTurn(t *testing.T) {
@@ -495,7 +507,14 @@ func TestBoardSwitchTurn(t *testing.T) {
 func TestBoardCountDiscs(t *testing.T) {
 	for board := range genTestBoards() {
 		expected := board.me.Count() + board.opp.Count()
-		got := board.CountDiscs()
+
+		clone := board
+		got := clone.CountDiscs()
+
+		if clone != board {
+			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
+				board.asciiArtString(false), clone.asciiArtString(false))
+		}
 
 		if expected != got {
 			t.Errorf("Expected %d discs, got %d\n", expected, got)
@@ -506,7 +525,14 @@ func TestBoardCountDiscs(t *testing.T) {
 func TestBoardCountEmpties(t *testing.T) {
 	for board := range genTestBoards() {
 		expected := 64 - (board.me.Count() + board.opp.Count())
-		got := board.CountEmpties()
+
+		clone := board
+		got := clone.CountEmpties()
+
+		if clone != board {
+			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
+				board.asciiArtString(false), clone.asciiArtString(false))
+		}
 
 		if expected != got {
 			t.Errorf("Expected %d discs, got %d\n", expected, got)
@@ -530,7 +556,12 @@ func TestBoardExactScore(t *testing.T) {
 			expected = 0
 		}
 
-		got := board.ExactScore()
+		clone := board
+		got := clone.ExactScore()
+		if clone != board {
+			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
+				board.asciiArtString(false), clone.asciiArtString(false))
+		}
 
 		if expected != got {
 			t.Errorf("Expected %d, got %d\n", expected, got)
@@ -541,7 +572,14 @@ func TestBoardExactScore(t *testing.T) {
 func TestBoardMe(t *testing.T) {
 	for board := range genTestBoards() {
 		expected := board.me
-		got := board.Me()
+
+		clone := board
+		got := clone.Me()
+
+		if clone != board {
+			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
+				board.asciiArtString(false), clone.asciiArtString(false))
+		}
 
 		if expected != got {
 			t.Errorf("Expected %s, got %s\n",
@@ -553,7 +591,14 @@ func TestBoardMe(t *testing.T) {
 func TestBoardOpp(t *testing.T) {
 	for board := range genTestBoards() {
 		expected := board.opp
-		got := board.Opp()
+
+		clone := board
+		got := clone.Opp()
+
+		if clone != board {
+			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
+				board.asciiArtString(false), clone.asciiArtString(false))
+		}
 
 		if expected != got {
 			t.Errorf("Expected %d, got %d\n",

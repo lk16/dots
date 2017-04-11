@@ -34,8 +34,10 @@ func RandomBoard(discs uint) (board *Board) {
 	for board.CountDiscs() != discs {
 
 		if skips == 2 {
-			// stuck, try again
-			return RandomBoard(discs)
+			// Stuck. Try again.
+			board = NewBoard()
+			skips = 0
+			continue
 		}
 
 		if board.Moves().Count() == 0 {
