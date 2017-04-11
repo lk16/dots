@@ -173,27 +173,19 @@ func (board *Board) DoMove(index uint) (flipped bitset.Bitset) {
 	return flipped
 }
 
-// Returns a channel that outputs the children of a Board
-func (board Board) GenChildren() (ch chan Board) {
-	ch = make(chan Board)
-	go func() {
-		moves := board.Moves()
-		for moves != 0 {
-			index := moves.FirstBitIndex()
-			moves.ResetBit(index)
-
-			clone := board
-			clone.DoMove(index)
-			ch <- clone
-		}
-		close(ch)
-	}()
-	return
-}
-
 // Returns a slice with all children of a Board
 func (board Board) GetChildren() (children []Board) {
-	for child := range board.GenChildren() {
+
+	moves := board.Moves()
+	children = make([]Board, 0)
+
+	for moves != 0 {
+		index := moves.FirstBitIndex()
+		moves.ResetBit(index)
+
+		child := board
+		child.DoMove(index)
+
 		children = append(children, child)
 	}
 	return

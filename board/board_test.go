@@ -10,8 +10,6 @@ import (
 
 /**
 TODO:
-- make sure every function is tested
-- remove Board.GenChildren()
 - test all outputs for validity with Board.IsValid(), including genTestBoards()
 - test functions for constness
 **/
@@ -441,7 +439,7 @@ func TestBoardDoRandomMove(t *testing.T) {
 		clone.DoRandomMove()
 
 		found := false
-		for child := range board.GenChildren() {
+		for _, child := range board.GetChildren() {
 			if clone == child {
 				found = true
 				break
