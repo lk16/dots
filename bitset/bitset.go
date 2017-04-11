@@ -2,11 +2,17 @@ package bitset
 
 import (
 	"bytes"
-
+	"io"
 	"math/rand"
 )
 
 type Bitset uint64
+
+// Returns a pseudo-random Bitset
+func RandomBitset() (random Bitset) {
+	random = Bitset(rand.Uint64())
+	return
+}
 
 // Returns the number of set bits in a Bitset
 func (bs Bitset) Count() (count uint) {
@@ -26,7 +32,8 @@ func (bs Bitset) Count() (count uint) {
 
 // Tests if the bit in a Bitset at index is set
 func (bs Bitset) TestBit(index uint) bool {
-	mask := Bitset(1 << index)
+	mask := Bitset(0)
+	mask.SetBit(index)
 	return bs&mask != 0
 }
 
@@ -59,6 +66,8 @@ func (bs Bitset) FirstBitIndex() (first_index uint) {
 // Returns last (most significant) set bit in a Bitset
 // Returns 0 Bitset if the input Bitset is 0
 func (bs Bitset) LastBit() (last_bit Bitset) {
+
+	// TODO find proper implementation of this
 	for mask := Bitset(1 << 63); mask != 0; mask >>= 1 {
 		if bs&mask != 0 {
 			last_bit = mask
@@ -68,17 +77,10 @@ func (bs Bitset) LastBit() (last_bit Bitset) {
 	return
 }
 
-// Returns a pseudo-random Bitset
-func RandomBitset() (random Bitset) {
-	random = Bitset(rand.Uint64())
-	return
-}
-
 // Returns an Ascii-Art string representing a Bitset
-func (bs Bitset) AsciiArt() (output string) {
+func (bs Bitset) AsciiArt(writer io.Writer) {
 
 	buffer := new(bytes.Buffer)
-
 	buffer.WriteString("+-----------------+\n")
 
 	for y := uint(0); y < 8; y++ {
@@ -101,8 +103,7 @@ func (bs Bitset) AsciiArt() (output string) {
 	}
 	buffer.WriteString("+-----------------+\n")
 
-	output = buffer.String()
-	return
+	writer.Write(buffer.Bytes())
 }
 
 // Sets a bit of a bitset

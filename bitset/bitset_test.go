@@ -36,7 +36,13 @@ func (bs Bitset) count() (count uint) {
 func TestBitsetCount(t *testing.T) {
 	for bs := range genTestBitsets() {
 		expected := bs.count()
-		got := bs.Count()
+		clone := bs
+		got := clone.Count()
+
+		if bs != clone {
+			t.Errorf("Bitset was modified: %d -> %d", bs, clone)
+		}
+
 		if expected != got {
 			t.Errorf("Expected %d but got %d\n", expected, got)
 		}
@@ -55,7 +61,14 @@ func (bs Bitset) firstBit() Bitset {
 func TestBitsetFirstBit(t *testing.T) {
 	for bs := range genTestBitsets() {
 		expected := bs.firstBit()
+
+		clone := bs
 		got := bs.FirstBit()
+
+		if bs != clone {
+			t.Errorf("Bitset was modified: %d -> %d", bs, clone)
+		}
+
 		if expected != got {
 			t.Errorf("Expected %d but got %d\n", expected, got)
 		}
@@ -74,7 +87,14 @@ func (bs Bitset) lastBit() Bitset {
 func TestBitsetLastBit(t *testing.T) {
 	for bs := range genTestBitsets() {
 		expected := bs.lastBit()
+
+		clone := bs
 		got := bs.LastBit()
+
+		if bs != clone {
+			t.Errorf("Bitset was modified: %d -> %d", bs, clone)
+		}
+
 		if expected != got {
 			t.Errorf("Expected %d but got %d\n", expected, got)
 		}
@@ -87,9 +107,15 @@ func (bs Bitset) testBit(index uint) bool {
 
 func TestBitsetTestBit(t *testing.T) {
 	for bs := range genTestBitsets() {
+		clone := bs
 		for index := uint(0); index < 64; index++ {
 			expected := bs.testBit(index)
 			got := bs.TestBit(index)
+
+			if bs != clone {
+				t.Errorf("Bitset was modified: %d -> %d", bs, clone)
+			}
+
 			if expected != got {
 				t.Errorf("Expected %d but got %d\n", expected, got)
 			}
@@ -109,7 +135,14 @@ func (bs Bitset) firstBitIndex() uint {
 func TestBitsetFirstBitIndex(t *testing.T) {
 	for bs := range genTestBitsets() {
 		expected := bs.firstBitIndex()
+
+		clone := bs
 		got := bs.FirstBitIndex()
+
+		if bs != clone {
+			t.Errorf("Bitset was modified: %d -> %d", bs, clone)
+		}
+
 		if expected != got {
 			t.Errorf("Expected %d but got %d\n", expected, got)
 		}
@@ -119,12 +152,9 @@ func TestBitsetFirstBitIndex(t *testing.T) {
 func TestBitsetAsciiArt(t *testing.T) {
 	for bs := range genTestBitsets() {
 
-		got := bs.AsciiArt()
-
 		expected_buff := new(bytes.Buffer)
 
 		expected_buff.WriteString("+-----------------+\n")
-
 		for y := uint(0); y < 8; y++ {
 			expected_buff.WriteString("| ")
 
@@ -141,8 +171,18 @@ func TestBitsetAsciiArt(t *testing.T) {
 
 		expected := expected_buff.String()
 
+		clone := bs
+
+		got_buff := new(bytes.Buffer)
+		bs.AsciiArt(got_buff)
+		got := got_buff.String()
+
+		if bs != clone {
+			t.Errorf("Bitset was modified: %d -> %d", bs, clone)
+		}
+
 		if expected != got {
-			t.Errorf("Expected:\n%s\n\nGo5:\n%s\n\n", expected, got)
+			t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n", expected, got)
 		}
 
 	}
