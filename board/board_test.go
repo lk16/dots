@@ -10,7 +10,9 @@ import (
 
 /**
 TODO:
-- test all outputs for validity with Board.IsValid()
+- make sure every function is tested
+- remove Board.GenChildren()
+- test all outputs for validity with Board.IsValid(), including genTestBoards()
 - test functions for constness
 **/
 
@@ -142,24 +144,24 @@ func TestBoardIsValid(t *testing.T) {
 }
 
 func TestRandomBoard(t *testing.T) {
-	for i := uint(4); i <= 64; i++ {
-		board := RandomBoard(i)
-		expected := i
+	for discs := uint(0); discs <= 65; discs++ {
+
+		if discs < 4 || discs > 64 {
+			func() {
+				defer assertPanic(t)
+				RandomBoard(discs)
+			}()
+			continue
+		}
+
+		board := RandomBoard(discs)
+		expected := discs
 		got := (board.me | board.opp).Count()
 		if expected != got {
 			t.Errorf("Expected disc count %d, got %d\n", expected, got)
 		}
 	}
 
-	func() {
-		defer assertPanic(t)
-		RandomBoard(3)
-	}()
-
-	func() {
-		defer assertPanic(t)
-		RandomBoard(65)
-	}()
 }
 
 // Board.Clone() was removed, but this test is kept to test for assignment copy works
@@ -236,6 +238,54 @@ func TestBoardDoMove(t *testing.T) {
 					bitsetAsciiArtString(expected_return_val), bitsetAsciiArtString(got_return_val))
 				t.Errorf("Expected board:\n%s\n\nGot:\n%s\n\n",
 					expected_board_val.asciiArtString(false), got_board_val.asciiArtString(false))
+				t.FailNow()
+			}
+		}
+	}
+}
+
+func TestBoardDoMoveN(t *testing.T) {
+
+	for board := range genTestBoards() {
+
+		clone := board
+
+		doMoveFuncs := []func() bitset.Bitset{
+			clone.doMove0, clone.doMove1, clone.doMove2, clone.doMove3,
+			clone.doMove4, clone.doMove5, clone.doMove6, clone.doMove7,
+			clone.doMove8, clone.doMove9, clone.doMove10, clone.doMove11,
+			clone.doMove12, clone.doMove13, clone.doMove14, clone.doMove15,
+			clone.doMove16, clone.doMove17, clone.doMove18, clone.doMove19,
+			clone.doMove20, clone.doMove21, clone.doMove22, clone.doMove23,
+			clone.doMove24, clone.doMove25, clone.doMove26, clone.doMove27,
+			clone.doMove28, clone.doMove29, clone.doMove30, clone.doMove31,
+			clone.doMove32, clone.doMove33, clone.doMove34, clone.doMove35,
+			clone.doMove36, clone.doMove37, clone.doMove38, clone.doMove39,
+			clone.doMove40, clone.doMove41, clone.doMove42, clone.doMove43,
+			clone.doMove44, clone.doMove45, clone.doMove46, clone.doMove47,
+			clone.doMove48, clone.doMove49, clone.doMove50, clone.doMove51,
+			clone.doMove52, clone.doMove53, clone.doMove54, clone.doMove55,
+			clone.doMove56, clone.doMove57, clone.doMove58, clone.doMove59,
+			clone.doMove60, clone.doMove61, clone.doMove62, clone.doMove63}
+
+		moves := board.Moves()
+		for i := uint(0); i < 64; i++ {
+			if !moves.TestBit(i) {
+				// board.DoMove() should not be called for invalid moves
+				continue
+			}
+
+			clone = board
+			expected := clone.doMove(i)
+
+			clone = board
+			got := doMoveFuncs[i]()
+
+			if expected != got {
+				t.Errorf("Doing move %c%d on board\n%s\n", 'a'+i%8, (i/8)+1,
+					board.asciiArtString(false))
+				t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
+					bitsetAsciiArtString(expected), bitsetAsciiArtString(got))
 				t.FailNow()
 			}
 		}
@@ -405,6 +455,7 @@ func TestBoardDoRandomMove(t *testing.T) {
 
 	}
 
+	// test with empty board
 	func() {
 		defer assertPanic(t)
 		board := Board{me: 0, opp: 0}
@@ -414,10 +465,17 @@ func TestBoardDoRandomMove(t *testing.T) {
 
 func TestBoardSwitchTurn(t *testing.T) {
 	for board := range genTestBoards() {
-		clone := board
-		clone.SwitchTurn()
-		if (board.me != clone.opp) || (board.opp != clone.me) {
-			t.Errorf("Failure in Board.SwitchTurn()")
+
+		expected := Board{}
+		expected.me, expected.opp = board.opp, board.me
+
+		got := board
+		got.SwitchTurn()
+
+		if expected != got {
+			t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
+				expected.asciiArtString(false), got.asciiArtString(false))
+			t.FailNow()
 		}
 	}
 }
@@ -474,7 +532,8 @@ func TestBoardMe(t *testing.T) {
 		got := board.Me()
 
 		if expected != got {
-			t.Errorf("Expected %d, got %d\n", expected, got)
+			t.Errorf("Expected %s, got %s\n",
+				bitsetAsciiArtString(expected), bitsetAsciiArtString(got))
 		}
 	}
 }
@@ -485,7 +544,26 @@ func TestBoardOpp(t *testing.T) {
 		got := board.Opp()
 
 		if expected != got {
-			t.Errorf("Expected %d, got %d\n", expected, got)
+			t.Errorf("Expected %d, got %d\n",
+				bitsetAsciiArtString(expected), bitsetAsciiArtString(got))
 		}
+	}
+}
+
+func TestBoardNewBoard(t *testing.T) {
+
+	// center of the start board:
+	// W B
+	// B W
+
+	expected := Board{}
+	expected.me.SetBit(4*8 + 3).SetBit(3*8 + 4)
+	expected.opp.SetBit(3*8 + 3).SetBit(4*8 + 4)
+
+	got := *NewBoard()
+
+	if expected != got {
+		t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
+			expected.asciiArtString(false), got.asciiArtString(false))
 	}
 }

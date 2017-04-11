@@ -109,24 +109,25 @@ func (board Board) AsciiArt(writer io.Writer, swap_disc_colors bool) {
 	writer.Write(buffer.Bytes())
 }
 
-// Returns a subset of the moves for a Board
-func movesPartial(me, mask, n bitset.Bitset) (moves bitset.Bitset) {
-	flip_l := mask & (me << n)
-	flip_l |= mask & (flip_l << n)
-	mask_l := mask & (mask << n)
-	flip_l |= mask_l & (flip_l << (2 * n))
-	flip_l |= mask_l & (flip_l << (2 * n))
-	flip_r := mask & (me >> n)
-	flip_r |= mask & (flip_r >> n)
-	mask_r := mask & (mask >> n)
-	flip_r |= mask_r & (flip_r >> (2 * n))
-	flip_r |= mask_r & (flip_r >> (2 * n))
-	moves = (flip_l << n) | (flip_r >> n)
-	return
-}
-
 // Returns a Bitset with all valid moves for a Board
 func (board Board) Moves() (moves bitset.Bitset) {
+
+	// Returns a subset of the moves for a Board
+	movesPartial := func(me, mask, n bitset.Bitset) (moves bitset.Bitset) {
+		flip_l := mask & (me << n)
+		flip_l |= mask & (flip_l << n)
+		mask_l := mask & (mask << n)
+		flip_l |= mask_l & (flip_l << (2 * n))
+		flip_l |= mask_l & (flip_l << (2 * n))
+		flip_r := mask & (me >> n)
+		flip_r |= mask & (flip_r >> n)
+		mask_r := mask & (mask >> n)
+		flip_r |= mask_r & (flip_r >> (2 * n))
+		flip_r |= mask_r & (flip_r >> (2 * n))
+		moves = (flip_l << n) | (flip_r >> n)
+		return
+	}
+
 	// this function is a modified version of code from Edax
 	mask := board.opp & 0x7E7E7E7E7E7E7E7E
 
@@ -200,12 +201,12 @@ func (board Board) GetChildren() (children []Board) {
 
 // Does a random move on a Board
 func (board *Board) DoRandomMove() {
-	if board.Moves().Count() == 0 {
-		fmt.Printf("%d %d\n", board.me, board.opp)
+	move_count := board.Moves().Count()
+	if move_count == 0 {
 		panic("Cannot do a random move when there are no moves.")
 	}
-	children := board.GetChildren()
-	*board = children[rand.Int()%len(children)]
+	child_index := uint(rand.Uint32()) % move_count
+	*board = board.GetChildren()[child_index]
 }
 
 // Switches turn of a Board
@@ -223,7 +224,8 @@ func (board Board) CountDiscs() (count uint) {
 
 // Returns the amount of empty fields on a board
 func (board Board) CountEmpties() (count uint) {
-	count = 64 - board.CountDiscs()
+	empties := ^(board.me | board.opp)
+	count = empties.Count()
 	return
 }
 
