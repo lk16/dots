@@ -10,7 +10,6 @@ import (
 
 /**
 TODO:
-- test all outputs for validity with Board.IsValid(), including genTestBoards()
 - test functions for constness
 **/
 
@@ -152,12 +151,19 @@ func TestRandomBoard(t *testing.T) {
 			continue
 		}
 
-		board := RandomBoard(discs)
 		expected := discs
+
+		board := RandomBoard(discs)
 		got := (board.me | board.opp).Count()
+
 		if expected != got {
 			t.Errorf("Expected disc count %d, got %d\n", expected, got)
 		}
+
+		if !board.IsValid() {
+			t.Errorf("Invalid board:\n%s\n\n", board.asciiArtString(false))
+		}
+
 	}
 
 }
@@ -304,9 +310,11 @@ func (board Board) moves() (moves bitset.Bitset) {
 
 func TestBoardMoves(t *testing.T) {
 	for board := range genTestBoards() {
+
 		clone := board
 		expected := board.moves()
-		got := board.Moves()
+
+		got := clone.Moves()
 		if expected != got {
 			t.Errorf("For board\n%s", board.asciiArtString(false))
 			t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n", bitsetAsciiArtString(expected), bitsetAsciiArtString(got))
@@ -322,7 +330,7 @@ func TestBoardMoves(t *testing.T) {
 func (board *Board) getChildren() (children []Board) {
 	for i := uint(0); i < 64; i++ {
 		clone := *board
-		if clone.doMove(i) != bitset.Bitset(0) {
+		if clone.doMove(i) != 0 {
 			children = append(children, clone)
 		}
 	}
@@ -331,6 +339,8 @@ func (board *Board) getChildren() (children []Board) {
 
 func TestBoardGetChildren(t *testing.T) {
 	for board := range genTestBoards() {
+
+		board_valid := board.IsValid()
 
 		expected := board.getChildren()
 		expected_set := make(map[Board]struct{}, 10)
@@ -341,37 +351,36 @@ func TestBoardGetChildren(t *testing.T) {
 		board_pieces := board.me | board.opp
 
 		got := board.GetChildren()
-		got_set := make(map[Board]struct{}, 10)
-		for _, g := range got {
-			got_set[g] = struct{}{}
+		for _, child := range got {
 
-			child_pieces := board.me | board.opp
+			child_pieces := child.me | child.opp
 
-			if child_pieces&board_pieces != board_pieces {
-				t.Errorf("Pieces where removed from board with board.GetChildren()\n")
+			if (child_pieces & board_pieces) != board_pieces {
+				t.Errorf("Pieces were removed from board with board.GetChildren()\n")
 				t.Errorf("board:\n%s\n\nchild: \n%s\n\n",
-					board.asciiArtString(false), g.asciiArtString(false))
+					board.asciiArtString(false), child.asciiArtString(false))
+				t.FailNow()
+			}
+
+			if board_valid && !child.IsValid() {
+				t.Errorf("Valid board:\n%s\n\nInvalid child:\n%s\n\n",
+					board.asciiArtString(false), child.asciiArtString(false))
+			}
+
+		}
+
+		if len(got) != len(expected) {
+			t.Errorf("Expected %d children, got %d.\n", len(expected), len(got))
+			t.FailNow()
+		}
+
+		for _, g := range got {
+			if _, ok := expected_set[g]; !ok {
+				t.Errorf("Children sets are unequal.\n")
 				t.FailNow()
 			}
 		}
 
-		if len(got_set) != len(expected_set) {
-			t.Errorf("Expected %d children, got %d.\n", len(expected_set), len(got_set))
-			t.FailNow()
-		}
-
-		equal_sets := true
-
-		for e, _ := range expected_set {
-			if _, ok := got_set[e]; !ok {
-				equal_sets = false
-			}
-		}
-
-		if !equal_sets {
-			t.Errorf("Children sets are unequal.\n")
-			t.FailNow()
-		}
 	}
 }
 
@@ -448,6 +457,11 @@ func TestBoardDoRandomMove(t *testing.T) {
 
 		if !found {
 			t.Errorf("Expected child of:\n%s\n\nGot:\n%s\n\n",
+				board.asciiArtString(false), clone.asciiArtString(false))
+		}
+
+		if board.IsValid() && !clone.IsValid() {
+			t.Errorf("Found board:\n%s\n\nWith invalid child:\n%s\n\n",
 				board.asciiArtString(false), clone.asciiArtString(false))
 		}
 
@@ -563,5 +577,9 @@ func TestBoardNewBoard(t *testing.T) {
 	if expected != got {
 		t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
 			expected.asciiArtString(false), got.asciiArtString(false))
+	}
+
+	if !got.IsValid() {
+		t.Errorf("Start board is invalid:\n%s\n\n", got.asciiArtString(false))
 	}
 }
