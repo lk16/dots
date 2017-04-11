@@ -79,9 +79,10 @@ func (alphabeta *AlphaBeta) doAlphaBetaExact(board board.Board, alpha, beta int)
 		return
 	}
 
-	board.SwitchTurn()
-	if moves := board.Moves(); moves != 0 {
-		heur = -alphabeta.doAlphaBetaExact(board, -beta, -alpha)
+	clone := board
+	clone.SwitchTurn()
+	if moves := clone.Moves(); moves != 0 {
+		heur = -alphabeta.doAlphaBetaExact(clone, -beta, -alpha)
 		return
 	}
 

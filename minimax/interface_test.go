@@ -10,8 +10,10 @@ import (
 func genTestBoards() (ch chan board.Board) {
 	ch = make(chan board.Board)
 	go func() {
-		for i := uint(4); i <= 64; i++ {
-			ch <- *board.RandomBoard(i)
+		for discs := uint(4); discs <= 64; discs++ {
+			for i := uint(0); i < 10; i++ {
+				ch <- *board.RandomBoard(discs)
+			}
 		}
 		close(ch)
 	}()
@@ -63,7 +65,7 @@ func TestInterfaceExactSearch(t *testing.T) {
 	for board := range genTestBoards() {
 
 		// skip exact searches for large depths becuase it will make unit tests slow
-		if board.CountEmpties() <= exact_depth {
+		if board.CountEmpties() > exact_depth {
 			continue
 		}
 

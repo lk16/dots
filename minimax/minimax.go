@@ -88,9 +88,10 @@ func (minimax *Minimax) doMinimaxExact(board board.Board, is_max bool) (heur int
 		return
 	}
 
-	board.SwitchTurn()
-	if moves := board.Moves(); moves != 0 {
-		heur = minimax.doMinimaxExact(board, !is_max)
+	clone := board
+	clone.SwitchTurn()
+	if moves := clone.Moves(); moves != 0 {
+		heur = minimax.doMinimaxExact(clone, !is_max)
 		return
 	}
 
