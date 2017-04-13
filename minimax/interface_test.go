@@ -1,17 +1,43 @@
 package minimax
 
 import (
+	"bytes"
 	"testing"
 
 	"dots/board"
 	"dots/heuristic"
 )
 
-func genTestBoards() (ch chan board.Board) {
+type interfaceTestConfig struct {
+	algorithm Interface
+	max_depth uint
+}
+
+func genInterfaceTestConfig() (ch chan interfaceTestConfig) {
+	ch = make(chan interfaceTestConfig)
+	go func() {
+		ch <- interfaceTestConfig{algorithm: &Minimax{}, max_depth: 4}
+		ch <- interfaceTestConfig{algorithm: &AlphaBeta{}, max_depth: 60}
+		ch <- interfaceTestConfig{algorithm: &Mtdf{}, max_depth: 60}
+		close(ch)
+	}()
+	return
+}
+
+// Helper for this testing file
+// Returns a string written by board.AsciiArt()
+func boardAsciiArtString(board board.Board, swap_disc_colors bool) (output string) {
+	buffer := new(bytes.Buffer)
+	board.AsciiArt(buffer, swap_disc_colors)
+	output = buffer.String()
+	return
+}
+
+func genTestBoards(n uint) (ch chan board.Board) {
 	ch = make(chan board.Board)
 	go func() {
 		for discs := uint(4); discs <= 64; discs++ {
-			for i := uint(0); i < 10; i++ {
+			for i := uint(0); i < n/64; i++ {
 				ch <- *board.RandomBoard(discs)
 			}
 		}
@@ -22,28 +48,38 @@ func genTestBoards() (ch chan board.Board) {
 
 func TestInterfaceSearch(t *testing.T) {
 
-	base_case := &Minimax{}
-
-	test_cases := []Interface{
-		&AlphaBeta{},
-		&Mtdf{}}
-
-	alpha := Min_exact_heuristic
+	alpha := Min_heuristic
 	heuristic := heuristic.Squared
+	max_test_depth := uint(4)
 
-	for board := range genTestBoards() {
-		for depth := uint(1); depth <= 4; depth++ {
+	for board := range genTestBoards(2 * 64) {
+		for depth := uint(1); depth <= max_test_depth; depth++ {
 
-			// skip exact serches because it will make the unit test slow
+			// skip exact serches
 			if board.CountEmpties() <= depth {
 				continue
 			}
 
-			expected := base_case.Search(board, depth, heuristic, alpha)
-			for _, test_case := range test_cases {
-				got := test_case.Search(board, depth, heuristic, alpha)
+			var base_case_algorithm Interface
+			var expected int
+
+			for test_case := range genInterfaceTestConfig() {
+				if depth > test_case.max_depth {
+					continue
+				}
+				if base_case_algorithm == nil {
+					base_case_algorithm = test_case.algorithm
+					expected = base_case_algorithm.Search(board, depth, heuristic, alpha)
+					continue
+				}
+
+				got := test_case.algorithm.Search(board, depth, heuristic, alpha)
+
 				if got != expected {
-					t.Errorf("At depth %d: expected %d, got %d from %s for board\n%s\n\n", depth, expected, got, test_case.Name(), board.AsciiArt())
+					t.Errorf("When searching at depth %d:\n expected: %d (from %s)\n",
+						depth, expected, base_case_algorithm.Name())
+					t.Errorf("got %d (from %s)\n for board\n%s\n\n",
+						got, test_case.algorithm.Name(), boardAsciiArtString(board, false))
 				}
 			}
 		}
@@ -53,29 +89,47 @@ func TestInterfaceSearch(t *testing.T) {
 
 func TestInterfaceExactSearch(t *testing.T) {
 
-	base_case := &Minimax{}
-
-	test_cases := []Interface{
-		&AlphaBeta{},
-		&Mtdf{}}
-
-	exact_depth := uint(4)
 	alpha := Min_exact_heuristic
+	max_test_depth := uint(8)
 
-	for board := range genTestBoards() {
+	for board := range genTestBoards(1 * 64) {
 
-		// skip exact searches for large depths becuase it will make unit tests slow
-		if board.CountEmpties() > exact_depth {
+		if board.CountEmpties() > max_test_depth {
 			continue
 		}
 
-		expected := base_case.ExactSearch(board, alpha)
-		for _, test_case := range test_cases {
-			got := test_case.ExactSearch(board, alpha)
+		var base_case_algorithm Interface
+		var expected int
+
+		for test_case := range genInterfaceTestConfig() {
+			if board.CountEmpties() > test_case.max_depth {
+				continue
+			}
+
+			if base_case_algorithm == nil {
+				base_case_algorithm = test_case.algorithm
+				expected = base_case_algorithm.ExactSearch(board, alpha)
+				continue
+			}
+
+			got := test_case.algorithm.ExactSearch(board, alpha)
 			if got != expected {
-				t.Errorf("Expected %d, got %d from %s for board\n%s\n\n", expected, got, test_case.Name(), board.AsciiArt())
+				t.Errorf("When searching exact expected: %d (from %s)\n",
+					expected, base_case_algorithm.Name())
+				t.Errorf("got %d (from %s)\n for board\n%s\n\n",
+					got, test_case.algorithm.Name(), boardAsciiArtString(board, false))
+				t.FailNow()
 			}
 		}
 	}
 
+}
+
+func TestInterfaceName(t *testing.T) {
+
+	for test_case := range genInterfaceTestConfig() {
+		if test_case.algorithm.Name() == "" {
+			t.Errorf("Expected non-empty string\n")
+		}
+	}
 }

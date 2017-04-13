@@ -34,7 +34,7 @@ func (alphabeta *AlphaBeta) doAlphaBeta(board board.Board, depth_left uint, alph
 
 	if moves := board.Moves(); moves != 0 {
 		heur = alpha
-		for child := range board.GenChildren() {
+		for _, child := range board.GetChildren() {
 			child_heur := -alphabeta.doAlphaBeta(child, depth_left-1, -beta, -heur)
 			if child_heur > heur {
 				heur = child_heur
@@ -66,7 +66,7 @@ func (alphabeta *AlphaBeta) doAlphaBetaExact(board board.Board, alpha, beta int)
 
 	if moves := board.Moves(); moves != 0 {
 		heur = alpha
-		for child := range board.GenChildren() {
+		for _, child := range board.GetChildren() {
 			child_heur := -alphabeta.doAlphaBetaExact(child, -beta, -heur)
 			if child_heur > heur {
 				heur = child_heur

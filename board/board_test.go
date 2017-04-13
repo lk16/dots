@@ -8,11 +8,6 @@ import (
 	"dots/bitset"
 )
 
-/**
-TODO:
-- test functions for constness
-**/
-
 // Helper for this testing file
 // Returns a string written by board.AsciiArt()
 func (board Board) asciiArtString(swap_disc_colors bool) (output string) {

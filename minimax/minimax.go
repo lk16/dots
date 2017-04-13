@@ -8,13 +8,16 @@ type Minimax struct {
 	heuristic Heuristic
 }
 
-func (minimax *Minimax) Search(board board.Board, depth_left uint, heuristic Heuristic, alpha int) (heur int) {
+func (minimax *Minimax) Search(board board.Board, depth_left uint,
+	heuristic Heuristic, alpha int) (heur int) {
+
 	minimax.heuristic = heuristic
 	heur = -minimax.doMinimax(board, depth_left, true)
 	return
 }
 
-func (minimax *Minimax) doMinimax(board board.Board, depth_left uint, is_max bool) (heur int) {
+func (minimax *Minimax) doMinimax(board board.Board, depth_left uint,
+	is_max bool) (heur int) {
 
 	if depth_left == 0 {
 		if is_max {
@@ -28,7 +31,7 @@ func (minimax *Minimax) doMinimax(board board.Board, depth_left uint, is_max boo
 	if moves := board.Moves(); moves != 0 {
 		if is_max {
 			heur = Min_heuristic
-			for child := range board.GenChildren() {
+			for _, child := range board.GetChildren() {
 				child_heur := minimax.doMinimax(child, depth_left-1, false)
 				if child_heur > heur {
 					heur = child_heur
@@ -36,7 +39,7 @@ func (minimax *Minimax) doMinimax(board board.Board, depth_left uint, is_max boo
 			}
 		} else {
 			heur = Max_heuristic
-			for child := range board.GenChildren() {
+			for _, child := range board.GetChildren() {
 				child_heur := minimax.doMinimax(child, depth_left-1, true)
 				if child_heur < heur {
 					heur = child_heur
@@ -70,7 +73,7 @@ func (minimax *Minimax) doMinimaxExact(board board.Board, is_max bool) (heur int
 	if moves := board.Moves(); moves != 0 {
 		if is_max {
 			heur = Min_exact_heuristic
-			for child := range board.GenChildren() {
+			for _, child := range board.GetChildren() {
 				child_heur := minimax.doMinimaxExact(child, false)
 				if child_heur > heur {
 					heur = child_heur
@@ -78,7 +81,7 @@ func (minimax *Minimax) doMinimaxExact(board board.Board, is_max bool) (heur int
 			}
 		} else {
 			heur = Max_exact_heuristic
-			for child := range board.GenChildren() {
+			for _, child := range board.GetChildren() {
 				child_heur := minimax.doMinimaxExact(child, true)
 				if child_heur < heur {
 					heur = child_heur
