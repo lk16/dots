@@ -1,8 +1,9 @@
 package cli_game
 
 import (
+	"bytes"
 	"fmt"
-	"os"
+	"io"
 
 	"dots/board"
 	"dots/players"
@@ -12,14 +13,14 @@ type CliGame struct {
 	players [2]players.Player
 	board   board.Board
 	turn    int
-	output  *os.File
+	writer  io.Writer
 }
 
 // Returns a new CliGame with two players
-func NewCliGame(black, white players.Player, output *os.File) (cli *CliGame) {
+func NewCliGame(black, white players.Player, writer io.Writer) (cli *CliGame) {
 	cli = &CliGame{}
 	cli.players = [2]players.Player{black, white}
-	cli.output = output
+	cli.writer = writer
 	return
 }
 
@@ -49,11 +50,34 @@ func (cli *CliGame) onNewGame() {
 
 func (cli *CliGame) onGameEnd() {
 	cli.asciiArt()
-	fmt.Printf("%s\n", cli.ResultString())
+
+	if cli.turn == 1 {
+		cli.board.SwitchTurn()
+	}
+
+	white_count := cli.board.Opp().Count()
+	black_count := cli.board.Me().Count()
+
+	buff := new(bytes.Buffer)
+
+	if white_count > black_count {
+		buff.WriteString(fmt.Sprintf("White wins: %d-%d\n", white_count, black_count))
+	} else if white_count < black_count {
+		buff.WriteString(fmt.Sprintf("Black wins: %d-%d\n", black_count, white_count))
+	} else {
+		buff.WriteString(fmt.Sprintf("It's a draw: %d-%d\n", white_count, white_count))
+	}
+
+	cli.writer.Write(buff.Bytes())
 }
 
 func (cli *CliGame) gameRunning() (running bool) {
 	return !cli.board.IsLeaf()
+}
+
+func (cli CliGame) asciiArt() {
+	swap_disc_colors := cli.turn == 1
+	cli.board.AsciiArt(cli.writer, swap_disc_colors)
 }
 
 // Runs the game
@@ -68,28 +92,4 @@ func (cli *CliGame) Run() {
 		}
 	}
 	cli.onGameEnd()
-}
-
-func (cli CliGame) asciiArt() {
-	swap_disc_colors := cli.turn == 1
-	cli.board.AsciiArt(cli.output, swap_disc_colors)
-}
-
-func (cli CliGame) ResultString() (str string) {
-
-	if cli.turn == 1 {
-		cli.board.SwitchTurn()
-	}
-
-	white_count := cli.board.Opp().Count()
-	black_count := cli.board.Me().Count()
-
-	if white_count > black_count {
-		str = fmt.Sprintf("White wins: %d-%d\n", white_count, black_count)
-	} else if white_count < black_count {
-		str = fmt.Sprintf("Black wins: %d-%d\n", black_count, white_count)
-	} else {
-		str = fmt.Sprintf("It's a draw: %d-%d\n", white_count, white_count)
-	}
-	return
 }
