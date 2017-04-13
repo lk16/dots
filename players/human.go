@@ -2,7 +2,7 @@ package players
 
 import (
 	"bufio"
-	"fmt"
+	"bytes"
 	"io"
 	"os"
 
@@ -26,11 +26,15 @@ func (human *Human) DoMove(board board.Board) (afterwards board.Board) {
 	afterwards = board
 	moves := board.Moves()
 
-	fmt.Printf("\n")
-
 	scanner := bufio.NewScanner(human.reader)
 
-	for scanner.Scan() {
+	for {
+		prompt := bytes.NewBufferString("> ").Bytes()
+		human.writer.Write(prompt)
+
+		if !scanner.Scan() {
+			panic("Error processing input.")
+		}
 		line := scanner.Text()
 
 		if len(line) != 2 {
@@ -53,7 +57,5 @@ func (human *Human) DoMove(board board.Board) (afterwards board.Board) {
 		afterwards.DoMove(index)
 		return
 	}
-
-	panic("Error processing input.")
 
 }

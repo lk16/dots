@@ -33,6 +33,8 @@ func (cli *CliGame) skipTurn() {
 // Lets the player to move do a move
 func (cli *CliGame) doMove() {
 	cli.asciiArt()
+	cli.writer.Write(bytes.NewBufferString("\n").Bytes())
+
 	cli.board = cli.players[cli.turn].DoMove(cli.board)
 	cli.turn = 1 - cli.turn
 }
