@@ -623,3 +623,34 @@ func TestBoardNewBoard(t *testing.T) {
 		t.Errorf("Start board is invalid:\n%s\n\n", got.asciiArtString(false))
 	}
 }
+
+func TestBoardIsLeaf(t *testing.T) {
+
+	for board := range genTestBoards() {
+
+		expected := true
+		if board.Moves().Count() != 0 {
+			expected = false
+		} else {
+			board.SwitchTurn()
+			if board.Moves().Count() != 0 {
+				expected = false
+			}
+		}
+
+		clone := board
+		got := clone.IsLeaf()
+
+		if clone != board {
+			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
+				board.asciiArtString(false), clone.asciiArtString(false))
+		}
+
+		if expected != got {
+			t.Errorf("Expected %t, got %t for board:\n%s\n\n",
+				expected, got, clone.asciiArtString(false))
+		}
+
+	}
+
+}

@@ -248,6 +248,23 @@ func (board Board) Opp() (opp bitset.Bitset) {
 	return
 }
 
+// Returns whether this board is a leaf in the game tree
+func (board Board) IsLeaf() (is_leaf bool) {
+	is_leaf = false
+
+	if board.Moves().Count() != 0 {
+		return
+	}
+
+	board.SwitchTurn()
+	if board.Moves().Count() != 0 {
+		return
+	}
+
+	is_leaf = true
+	return
+}
+
 // Flips discs on a Board, given a flipping line.
 // This only affects the directions right, left down, down and right down
 // Returns the flipped discs.
