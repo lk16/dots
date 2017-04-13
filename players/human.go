@@ -3,31 +3,48 @@ package players
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 
 	"dots/board"
 )
 
-type Human struct{}
+type Human struct {
+	reader io.Reader
+	writer io.Writer
+}
+
+func NewHuman(reader io.Reader) (human *Human) {
+	human = &Human{}
+	human.reader = reader
+	human.writer = os.Stdout
+	return
+}
 
 func (human *Human) DoMove(board board.Board) (afterwards board.Board) {
-	afterwards = board
-	reader := bufio.NewReader(os.Stdin)
-	moves := board.Moves()
-	for {
-		fmt.Printf("> ")
-		text, _ := reader.ReadString('\n')
 
-		if len(text) != 3 {
+	afterwards = board
+	moves := board.Moves()
+
+	fmt.Printf("\n")
+
+	scanner := bufio.NewScanner(human.reader)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		if len(line) != 2 {
 			continue
 		}
-		if text[0] < 'a' || text[0] > 'h' {
+
+		col := uint(line[0] - 'a')
+		row := uint(line[1] - '1')
+
+		if col > 7 || row > 7 {
 			continue
 		}
-		if text[1] < '1' || text[1] > '8' {
-			continue
-		}
-		index := uint(8*(text[1]-'1') + (text[0] - 'a'))
+
+		index := 8*row + col
 
 		if !moves.TestBit(index) {
 			continue
@@ -36,5 +53,7 @@ func (human *Human) DoMove(board board.Board) (afterwards board.Board) {
 		afterwards.DoMove(index)
 		return
 	}
+
+	panic("Error processing input.")
 
 }
