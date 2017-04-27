@@ -19,6 +19,11 @@ type CliGame struct {
 // Returns a new CliGame with two players
 func NewCliGame(black, white players.Player, writer io.Writer) (cli *CliGame) {
 	cli = &CliGame{}
+
+	if white == nil || black == nil {
+		panic("A player cannot be nil!")
+	}
+
 	cli.players = [2]players.Player{black, white}
 	cli.writer = writer
 	return
@@ -39,6 +44,7 @@ func (cli *CliGame) doMove() {
 	cli.turn = 1 - cli.turn
 }
 
+// Returns whether the player to move can do a move
 func (cli *CliGame) canMove() (can_move bool) {
 	moves_count := cli.board.Moves().Count()
 	can_move = (moves_count != 0)
@@ -53,24 +59,26 @@ func (cli *CliGame) onNewGame() {
 func (cli *CliGame) onGameEnd() {
 	cli.asciiArt()
 
+	board := cli.board
 	if cli.turn == 1 {
-		cli.board.SwitchTurn()
+		board.SwitchTurn()
 	}
 
-	white_count := cli.board.Opp().Count()
-	black_count := cli.board.Me().Count()
+	white_count := board.Opp().Count()
+	black_count := board.Me().Count()
 
-	buff := new(bytes.Buffer)
+	var str string
 
 	if white_count > black_count {
-		buff.WriteString(fmt.Sprintf("White wins: %d-%d\n", white_count, black_count))
+		str = fmt.Sprintf("White wins: %d-%d\n", white_count, black_count)
 	} else if white_count < black_count {
-		buff.WriteString(fmt.Sprintf("Black wins: %d-%d\n", black_count, white_count))
+		str = fmt.Sprintf("Black wins: %d-%d\n", black_count, white_count)
 	} else {
-		buff.WriteString(fmt.Sprintf("It's a draw: %d-%d\n", white_count, white_count))
+		str = fmt.Sprintf("It's a draw: %d-%d\n", white_count, white_count)
 	}
 
-	cli.writer.Write(buff.Bytes())
+	bytes := bytes.NewBufferString(str).Bytes()
+	cli.writer.Write(bytes)
 }
 
 func (cli *CliGame) gameRunning() (running bool) {
@@ -87,11 +95,11 @@ func (cli *CliGame) Run() {
 
 	cli.onNewGame()
 	for cli.gameRunning() {
-		if cli.canMove() {
-			cli.doMove()
-		} else {
+		if !cli.canMove() {
 			cli.skipTurn()
+			continue
 		}
+		cli.doMove()
 	}
 	cli.onGameEnd()
 }
