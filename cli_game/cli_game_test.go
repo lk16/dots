@@ -259,7 +259,7 @@ func TestCliGameOnGameEnd(t *testing.T) {
 
 }
 
-func TestBoardGameRunning(t *testing.T) {
+func TestCliGameRunning(t *testing.T) {
 
 	black := &players.BotRandom{}
 	white := &players.BotRandom{}
@@ -279,7 +279,12 @@ func TestBoardGameRunning(t *testing.T) {
 		}
 
 		cli_game.board = board
+		clone := *cli_game
 		got := cli_game.gameRunning()
+
+		if clone != *cli_game {
+			t.Errorf("CliGame was modified.\n")
+		}
 
 		if expected != got {
 			board_buff := new(bytes.Buffer)
@@ -297,11 +302,11 @@ func TestBoardGameRunning(t *testing.T) {
 	// unfinished game
 	test(*board.NewBoard())
 
-	// finished gameard
+	// finished game
 	test(*board.RandomBoard(64))
 }
 
-func TestBoardAsciiArt(t *testing.T) {
+func TestCliGameAsciiArt(t *testing.T) {
 
 	black := &players.BotRandom{}
 	white := &players.BotRandom{}

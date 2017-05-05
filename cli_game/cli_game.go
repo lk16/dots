@@ -51,11 +51,13 @@ func (cli *CliGame) canMove() (can_move bool) {
 	return
 }
 
+// Resets for a new game
 func (cli *CliGame) onNewGame() {
 	cli.board = *board.NewBoard()
 	cli.turn = 0
 }
 
+// Wraps up a game
 func (cli *CliGame) onGameEnd() {
 	cli.asciiArt()
 
@@ -81,10 +83,12 @@ func (cli *CliGame) onGameEnd() {
 	cli.writer.Write(bytes)
 }
 
+// Checks if a game is running
 func (cli *CliGame) gameRunning() (running bool) {
 	return !cli.board.IsLeaf()
 }
 
+// Prints ascii art for current turn to cli_game writer
 func (cli CliGame) asciiArt() {
 	swap_disc_colors := cli.turn == 1
 	cli.board.AsciiArt(cli.writer, swap_disc_colors)
