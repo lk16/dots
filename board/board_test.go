@@ -164,6 +164,19 @@ func TestRandomBoard(t *testing.T) {
 
 }
 
+func TestBoardCustom(t *testing.T) {
+
+	me := bitset.Bitset(1)
+	opp := bitset.Bitset(2)
+
+	board := CustomBoard(me, opp)
+
+	if board.me != me || board.opp != opp {
+		t.Errorf("Custom board failed\n")
+	}
+
+}
+
 // Board.Clone() was removed, but this test is kept to test for assignment copy works
 func TestBoardClone(t *testing.T) {
 	board := Board{
@@ -626,7 +639,7 @@ func TestBoardNewBoard(t *testing.T) {
 
 func TestBoardIsLeaf(t *testing.T) {
 
-	for board := range genTestBoards() {
+	test := func(board Board) {
 
 		expected := true
 		if board.Moves().Count() != 0 {
@@ -653,4 +666,12 @@ func TestBoardIsLeaf(t *testing.T) {
 
 	}
 
+	// moves possible
+	test(*CustomBoard(1, 2))
+
+	// moves for opponent possible
+	test(*CustomBoard(2, 1))
+
+	// game end
+	test(*CustomBoard(0, 0))
 }

@@ -21,6 +21,13 @@ func NewBoard() (board *Board) {
 	return
 }
 
+// Returns a custom Board
+func CustomBoard(me, opp bitset.Bitset) (board *Board) {
+	return &Board{
+		me:  me,
+		opp: opp}
+}
+
 // Returns a random Board reachable from normal play with a certain number of discs
 func RandomBoard(discs uint) (board *Board) {
 

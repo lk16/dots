@@ -99,11 +99,13 @@ func (cli *CliGame) Run() {
 
 	cli.onNewGame()
 	for cli.gameRunning() {
-		if !cli.canMove() {
+
+		if cli.canMove() {
+			cli.doMove()
+		} else {
 			cli.skipTurn()
-			continue
 		}
-		cli.doMove()
+
 	}
 	cli.onGameEnd()
 }
