@@ -28,9 +28,9 @@ func NewBotHeuristic(heuristic minimax.Heuristic, minimax minimax.Interface,
 	return
 }
 
-func (bot *BotHeuristic) DoMove(board board.Board) (afterwards board.Board) {
+func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 
-	children := board.GetChildren()
+	children := b.GetChildren()
 
 	if len(children) == 0 {
 		panic("Cannot do move, because there are no moves.")
@@ -45,37 +45,40 @@ func (bot *BotHeuristic) DoMove(board board.Board) (afterwards board.Board) {
 		return
 	}
 
-	heuristic := bot.heuristic
-	depth := bot.search_depth
-
-	do_exact_search := board.CountEmpties() <= bot.exact_depth
-
-	var alpha int
-	if do_exact_search {
-		alpha = minimax.Min_exact_heuristic
-	} else {
-		alpha = minimax.Min_heuristic
-	}
-
-	for i, child := range children {
-		var heur int
-		if do_exact_search {
-			heur = bot.minimax.ExactSearch(child, alpha)
-		} else {
-			heur = bot.minimax.Search(child, depth, heuristic, alpha)
-		}
-
-		str := fmt.Sprintf("move %d/%d: ", i+1, len(children))
+	log_child_eval := func(child_id, child_count, heur, alpha int) {
+		str := fmt.Sprintf("move %d/%d: ", child_id+1, child_count)
 		buff := bytes.NewBufferString(str)
-
 		if heur > alpha {
 			buff.WriteString(fmt.Sprintf("%d\n", heur))
-			alpha = heur
-			afterwards = child
 		} else {
 			buff.WriteString("not better\n")
 		}
 		bot.writer.Write(buff.Bytes())
+	}
+
+	var child_eval func(board.Board, uint, minimax.Heuristic, int) int
+	var alpha int
+
+	if b.CountEmpties() <= bot.exact_depth {
+		alpha = minimax.Min_exact_heuristic
+		// wrapper function to achieve same prototype for ExactSearch() as Search()
+		// it just drops arguments depth and heuristic
+		child_eval = func(child board.Board, depth uint,
+			heuristic minimax.Heuristic, alpha int) int {
+			return bot.minimax.ExactSearch(child, alpha)
+		}
+	} else {
+		alpha = minimax.Min_heuristic
+		child_eval = bot.minimax.Search
+	}
+
+	for i, child := range children {
+		heur := child_eval(child, bot.search_depth, bot.heuristic, alpha)
+		log_child_eval(i+1, len(children), heur, alpha)
+		if heur > alpha {
+			alpha = heur
+			afterwards = child
+		}
 	}
 
 	bot.writer.Write(bytes.NewBufferString("\n").Bytes())
