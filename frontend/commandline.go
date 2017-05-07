@@ -1,6 +1,7 @@
 package frontend
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io"
@@ -54,7 +55,38 @@ func (cli *CommandLine) OnGameEnd(state GameState) {
 }
 
 func (cli *CommandLine) OnHumanMove(state GameState) (afterwards board.Board) {
-	afterwards = state.board
-	afterwards.DoRandomMove()
-	return
+	moves := state.board.Moves()
+
+	scanner := bufio.NewScanner(os.Stdin)
+
+	for {
+		prompt := bytes.NewBufferString("> ").Bytes()
+		cli.writer.Write(prompt)
+
+		if !scanner.Scan() {
+			panic("Error processing input.")
+		}
+		line := scanner.Text()
+
+		if len(line) != 2 {
+			continue
+		}
+
+		col := uint(line[0] - 'a')
+		row := uint(line[1] - '1')
+
+		if col > 7 || row > 7 {
+			continue
+		}
+
+		index := 8*row + col
+
+		if !moves.TestBit(index) {
+			continue
+		}
+
+		afterwards = state.board
+		afterwards.DoMove(index)
+		return
+	}
 }
