@@ -74,7 +74,7 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 
 	for i, child := range children {
 		heur := child_eval(child, bot.search_depth, bot.heuristic, alpha)
-		log_child_eval(i+1, len(children), heur, alpha)
+		log_child_eval(i, len(children), heur, alpha)
 		if heur > alpha {
 			alpha = heur
 			afterwards = child

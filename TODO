@@ -1,3 +1,0 @@
-- hashtable
-- parallellised search
-- split cli_game in controller with different front_ends: (cli,gtk,...) 

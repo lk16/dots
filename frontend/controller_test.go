@@ -1,4 +1,4 @@
-package cli_game
+package frontend
 
 import (
 	"bytes"
