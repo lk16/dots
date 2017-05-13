@@ -7,9 +7,55 @@ import (
 	"dots/players"
 )
 
+const (
+	BLACK      = 0
+	WHITE      = 1
+	MOVE_BLACK = 2
+	MOVE_WHITE = 3
+	EMPTY      = 4
+)
+
 type GameState struct {
 	board board.Board
 	turn  int
+}
+
+// Returns field value
+func (state *GameState) GetField(x, y uint) (field int) {
+
+	f := y*8 + x
+
+	if state.board.Me().TestBit(f) {
+		if state.turn == 1 {
+			field = WHITE
+		} else {
+			field = BLACK
+		}
+		return
+	}
+
+	if state.board.Opp().TestBit(f) {
+		if state.turn == 1 {
+			field = BLACK
+		} else {
+			field = WHITE
+		}
+		return
+	}
+
+	moves := state.board.Moves()
+
+	if moves.TestBit(f) {
+		if state.turn == 1 {
+			field = MOVE_WHITE
+		} else {
+			field = MOVE_BLACK
+		}
+		return
+	}
+
+	field = EMPTY
+	return
 }
 
 type Controller struct {

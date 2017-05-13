@@ -20,6 +20,10 @@ func NewCommandLine() (cli *CommandLine) {
 	return
 }
 
+func (cli *CommandLine) Initialize() {
+
+}
+
 func (cli *CommandLine) asciiArt(state GameState) {
 	swap_disc_colors := state.turn == 1
 	state.board.AsciiArt(cli.writer, swap_disc_colors)
