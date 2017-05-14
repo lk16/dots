@@ -1,10 +1,10 @@
 ## Strategy games framework written in Golang
 
-# Run like this (or similar)
+### Run like this (or similar)
 go run -tags gtk_3_18 main.go
 
 
-# TODO
+### TODO
 - [x] split cli_game in controller with different front_ends:
     - [x] cli
     - [x] gtk
