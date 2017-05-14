@@ -11,7 +11,7 @@ import (
 type GtkController struct {
 	window     *gtk.Window
 	pix_buffs  map[int]*gdk.Pixbuf
-	ch         chan GameState
+	state      chan GameState
 	images     [8][8]*gtk.Image
 	human_move chan uint
 }
@@ -37,7 +37,7 @@ func cachePixbuf() (cache map[int]*gdk.Pixbuf) {
 
 func timeoutCallback(gtkc *GtkController) bool {
 	select {
-	case update := <-gtkc.ch:
+	case update := <-gtkc.state:
 		gtkc.updateFields(update)
 	default:
 		//fmt.Print("timeout received nothing\n")
@@ -58,7 +58,7 @@ func NewGtk() (gtkc *GtkController) {
 
 	gtkc = &GtkController{
 		window:     nil,
-		ch:         make(chan GameState),
+		state:      make(chan GameState),
 		pix_buffs:  cachePixbuf(),
 		human_move: make(chan uint)}
 
@@ -70,9 +70,6 @@ func NewGtk() (gtkc *GtkController) {
 
 	main_vbox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	main_window.Add(main_vbox)
-
-	//menu, _ := gtk.MenuNew()
-	//main_vbox.Add(menu)
 
 	board_container, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	main_vbox.Add(board_container)
@@ -126,11 +123,11 @@ func (gtkc *GtkController) updateFields(state GameState) {
 }
 
 func (gtkc *GtkController) OnUpdate(state GameState) {
-	gtkc.ch <- state
+	gtkc.state <- state
 }
 
 func (gtkc *GtkController) OnGameEnd(state GameState) {
-	gtkc.ch <- state
+	gtkc.state <- state
 
 	// click for new game
 	<-gtkc.human_move
@@ -143,7 +140,7 @@ func (gtkc *GtkController) OnHumanMove(state GameState) (afterwards board.Board)
 		if moves.TestBit(field_id) {
 			state.board.DoMove(field_id)
 			state.turn = 1 - state.turn
-			gtkc.ch <- state
+			gtkc.state <- state
 			afterwards = state.board
 			return
 		}
