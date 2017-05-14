@@ -8,7 +8,7 @@ import (
 	"dots/board"
 )
 
-type GtkUpdater struct {
+type GtkController struct {
 	window     *gtk.Window
 	pix_buffs  map[int]*gdk.Pixbuf
 	ch         chan GameState
@@ -35,28 +35,28 @@ func cachePixbuf() (cache map[int]*gdk.Pixbuf) {
 	return
 }
 
-func timeoutCallback(updater *GtkUpdater) bool {
+func timeoutCallback(gtkc *GtkController) bool {
 	select {
-	case update := <-updater.ch:
-		updater.updateFields(update)
+	case update := <-gtkc.ch:
+		gtkc.updateFields(update)
 	default:
 		//fmt.Print("timeout received nothing\n")
 	}
 
 	// HACK: add itself to timeout loop again since return value is being ignored
 	// this bug has been reported to lib authors, PR pending since 2014
-	glib.TimeoutAdd(uint(30), timeoutCallback, updater)
+	glib.TimeoutAdd(uint(30), timeoutCallback, gtkc)
 
 	// HACK: true is supposed to be returned but since call back return value is ignored
 	// it doesn't matter. This is for forward compatibility.
 	return false
 }
 
-func NewGtk() (updater *GtkUpdater) {
+func NewGtk() (gtkc *GtkController) {
 
 	gtk.Init(nil)
 
-	updater = &GtkUpdater{
+	gtkc = &GtkController{
 		window:     nil,
 		ch:         make(chan GameState),
 		pix_buffs:  cachePixbuf(),
@@ -88,62 +88,62 @@ func NewGtk() (updater *GtkUpdater) {
 
 			board_cell, _ := gtk.EventBoxNew()
 			board_cell.Connect("button-press-event", func() {
-				updater.human_move <- *field_id
+				gtkc.human_move <- *field_id
 			})
 
 			board_row.Add(board_cell)
 
-			pix_buff, _ := updater.pix_buffs[EMPTY]
+			pix_buff, _ := gtkc.pix_buffs[EMPTY]
 			image, _ := gtk.ImageNewFromPixbuf(pix_buff)
 			board_cell.Add(image)
 
-			updater.images[y][x] = image
+			gtkc.images[y][x] = image
 		}
 	}
 
-	updater.updateFields(GameState{
+	gtkc.updateFields(GameState{
 		board: *board.NewBoard(),
 		turn:  0})
 
-	updater.window = main_window
-	updater.window.ShowAll()
+	gtkc.window = main_window
+	gtkc.window.ShowAll()
 
-	glib.TimeoutAdd(uint(30), timeoutCallback, updater)
+	glib.TimeoutAdd(uint(30), timeoutCallback, gtkc)
 
 	go gtk.Main()
 
 	return
 }
 
-func (updater *GtkUpdater) updateFields(state GameState) {
+func (gtkc *GtkController) updateFields(state GameState) {
 
 	for f := uint(0); f < 64; f++ {
-		image := updater.images[f/8][f%8]
+		image := gtkc.images[f/8][f%8]
 		field_value := state.GetFieldValue(f)
-		image.SetFromPixbuf(updater.pix_buffs[field_value])
+		image.SetFromPixbuf(gtkc.pix_buffs[field_value])
 	}
 
 }
 
-func (updater *GtkUpdater) OnUpdate(state GameState) {
-	updater.ch <- state
+func (gtkc *GtkController) OnUpdate(state GameState) {
+	gtkc.ch <- state
 }
 
-func (updater *GtkUpdater) OnGameEnd(state GameState) {
-	updater.ch <- state
+func (gtkc *GtkController) OnGameEnd(state GameState) {
+	gtkc.ch <- state
 
 	// click for new game
-	<-updater.human_move
+	<-gtkc.human_move
 }
 
-func (updater *GtkUpdater) OnHumanMove(state GameState) (afterwards board.Board) {
+func (gtkc *GtkController) OnHumanMove(state GameState) (afterwards board.Board) {
 	moves := state.board.Moves()
 	for {
-		field_id := <-updater.human_move
+		field_id := <-gtkc.human_move
 		if moves.TestBit(field_id) {
 			state.board.DoMove(field_id)
 			state.turn = 1 - state.turn
-			updater.ch <- state
+			gtkc.ch <- state
 			afterwards = state.board
 			return
 		}
