@@ -16,6 +16,7 @@ type GtkController struct {
 	human_move chan uint
 }
 
+// Cache pixel buffers
 func cachePixbuf() (cache map[int]*gdk.Pixbuf) {
 
 	var image *gtk.Image
@@ -35,6 +36,7 @@ func cachePixbuf() (cache map[int]*gdk.Pixbuf) {
 	return
 }
 
+// Timeout function for updating the user interface
 func timeoutCallback(gtkc *GtkController) bool {
 	select {
 	case update := <-gtkc.state:
@@ -52,6 +54,7 @@ func timeoutCallback(gtkc *GtkController) bool {
 	return false
 }
 
+// Creates a new GtkController
 func NewGtk() (gtkc *GtkController) {
 
 	gtk.Init(nil)
@@ -112,6 +115,7 @@ func NewGtk() (gtkc *GtkController) {
 	return
 }
 
+// Updates fields of user interface to represent a GameState
 func (gtkc *GtkController) updateFields(state GameState) {
 
 	for f := uint(0); f < 64; f++ {
@@ -122,10 +126,12 @@ func (gtkc *GtkController) updateFields(state GameState) {
 
 }
 
+// Update user interface on GameState change
 func (gtkc *GtkController) OnUpdate(state GameState) {
 	gtkc.state <- state
 }
 
+// Update user interface on game end
 func (gtkc *GtkController) OnGameEnd(state GameState) {
 	gtkc.state <- state
 
@@ -133,6 +139,7 @@ func (gtkc *GtkController) OnGameEnd(state GameState) {
 	<-gtkc.human_move
 }
 
+// Wait for a human to move
 func (gtkc *GtkController) OnHumanMove(state GameState) (afterwards board.Board) {
 	moves := state.board.Moves()
 	for {

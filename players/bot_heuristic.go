@@ -17,6 +17,7 @@ type BotHeuristic struct {
 	writer       io.Writer
 }
 
+// Creates a new BotHeuristic
 func NewBotHeuristic(heuristic minimax.Heuristic, minimax minimax.Interface,
 	search_depth, exact_depth uint, writer io.Writer) (bot *BotHeuristic) {
 	bot = &BotHeuristic{
@@ -28,6 +29,7 @@ func NewBotHeuristic(heuristic minimax.Heuristic, minimax minimax.Interface,
 	return
 }
 
+// Does the best move according to heuristic and minimax algorithm
 func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 
 	children := b.GetChildren()

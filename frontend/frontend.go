@@ -9,3 +9,14 @@ type Frontend interface {
 	OnGameEnd(state GameState)
 	OnHumanMove(state GameState) board.Board
 }
+
+func Get(name string) (frontend Frontend) {
+	if name == "gtk" {
+		frontend = NewGtk()
+	} else if name == "cli" {
+		frontend = NewCommandLine()
+	} else {
+		panic("Invalid frontend name")
+	}
+	return
+}

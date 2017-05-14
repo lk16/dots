@@ -64,7 +64,6 @@ func NewController(black, white players.Player, writer io.Writer,
 		history:  make([]GameState, 100),
 		state_id: 0,
 		redo_max: 0}
-
 	return
 }
 
@@ -126,6 +125,7 @@ func (control *Controller) gameRunning() (running bool) {
 	return !control.GetState().board.IsLeaf()
 }
 
+// Undo last move
 func (control *Controller) Undo() {
 	if control.state_id != 0 {
 		control.state_id--
@@ -133,6 +133,7 @@ func (control *Controller) Undo() {
 	control.frontend.OnUpdate(control.GetState())
 }
 
+// Undo last undo
 func (control *Controller) Redo() {
 	if control.state_id != control.redo_max {
 		control.state_id++

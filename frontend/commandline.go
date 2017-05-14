@@ -14,25 +14,30 @@ type CommandLine struct {
 	writer io.Writer
 }
 
+// Create new CommandLine
 func NewCommandLine() (cli *CommandLine) {
 	cli = &CommandLine{
 		writer: os.Stdout}
 	return
 }
 
+// Initialize CommandLine (does nothing)
 func (cli *CommandLine) Initialize() {
 
 }
 
+// Print GameState to cli.writer
 func (cli *CommandLine) asciiArt(state GameState) {
 	swap_disc_colors := state.turn == 1
 	state.board.AsciiArt(cli.writer, swap_disc_colors)
 }
 
+// Print GameState to cli.writer on update
 func (cli *CommandLine) OnUpdate(state GameState) {
 	cli.asciiArt(state)
 }
 
+// Show game end details when game ends
 func (cli *CommandLine) OnGameEnd(state GameState) {
 	cli.asciiArt(state)
 
@@ -58,6 +63,7 @@ func (cli *CommandLine) OnGameEnd(state GameState) {
 	cli.writer.Write(bytes)
 }
 
+// Read human move from os.Stdin
 func (cli *CommandLine) OnHumanMove(state GameState) (afterwards board.Board) {
 	moves := state.board.Moves()
 
