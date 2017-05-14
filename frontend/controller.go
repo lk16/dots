@@ -8,11 +8,12 @@ import (
 )
 
 const (
-	BLACK      = 0
-	WHITE      = 1
-	MOVE_BLACK = 2
-	MOVE_WHITE = 3
-	EMPTY      = 4
+	SWITCH_TURN_MASK = 1
+	BLACK            = 0
+	WHITE            = BLACK | SWITCH_TURN_MASK
+	MOVE_BLACK       = 2
+	MOVE_WHITE       = MOVE_BLACK | SWITCH_TURN_MASK
+	EMPTY            = 4
 )
 
 type GameState struct {
@@ -21,40 +22,28 @@ type GameState struct {
 }
 
 // Returns field value
-func (state *GameState) GetField(x, y uint) (field int) {
+func (state *GameState) GetFieldValue(field uint) (field_value int) {
 
-	f := y*8 + x
+	if state.turn != 1 && state.turn != 0 {
+		panic("state.turn has impossible value")
+	}
 
-	if state.board.Me().TestBit(f) {
-		if state.turn == 1 {
-			field = WHITE
-		} else {
-			field = BLACK
-		}
+	if state.board.Me().TestBit(field) {
+		field_value = BLACK | state.turn
 		return
 	}
 
-	if state.board.Opp().TestBit(f) {
-		if state.turn == 1 {
-			field = BLACK
-		} else {
-			field = WHITE
-		}
+	if state.board.Opp().TestBit(field) {
+		field_value = WHITE ^ state.turn
 		return
 	}
 
-	moves := state.board.Moves()
-
-	if moves.TestBit(f) {
-		if state.turn == 1 {
-			field = MOVE_WHITE
-		} else {
-			field = MOVE_BLACK
-		}
+	if state.board.Moves().TestBit(field) {
+		field_value = MOVE_BLACK | state.turn
 		return
 	}
 
-	field = EMPTY
+	field_value = EMPTY
 	return
 }
 
@@ -153,17 +142,18 @@ func (control *Controller) Redo() {
 
 // Runs the game
 func (control *Controller) Run() {
+	for {
+		control.reset()
+		for control.gameRunning() {
 
-	control.reset()
-	for control.gameRunning() {
+			if control.canMove() {
+				control.doMove()
+			} else {
+				control.skipTurn()
+			}
+			control.frontend.OnUpdate(control.GetState())
 
-		if control.canMove() {
-			control.doMove()
-		} else {
-			control.skipTurn()
 		}
-		control.frontend.OnUpdate(control.GetState())
-
+		control.frontend.OnGameEnd(control.GetState())
 	}
-	control.frontend.OnGameEnd(control.GetState())
 }
