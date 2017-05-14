@@ -1,23 +1,33 @@
-## Strategy games framework written in Golang
+
+# Dots
+Strategy games framework written in Golang
 
 ### Run like this (or similar)
-go run -tags gtk_3_18 main.go
+```go run -tags gtk_3_18 main.go```
 
 
 ### TODO
-- [x] split cli_game in controller with different front_ends:
-    - [x] cli
+- [ ] support xot openings
+- [ ] support several front_ends:
+    - [x] command line
     - [x] gtk
     - [ ] webserver
 - [ ] game state evaluation:
+    - [x] mtdf
     - [ ] hashtable
-    - [ ] parallellised search
+    - [ ] parallel search
     - [ ] opening book
-- [ ] rated tournaments between players
-- [ ] read PGNs:
-    - [ ] kurnik
-    - [ ] flyordie
-- [ ] support for other games:
+        - [ ] learn from from games against bot
+        - [ ] learn from PGNs
+        - [ ] learn stand alone
+- [ ] rated tournaments between players and bots
+- [ ] PGNs:
+    - [ ] parse
+        - [ ] kurnik
+        - [ ] flyordie
+    - [ ] evaluate
+- [ ] support several games:
+    - [x] othello
     - [ ] connect four
     - [ ] checkers
     - [ ] trexo
