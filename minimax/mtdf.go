@@ -1,15 +1,32 @@
 package minimax
 
 import (
+	"time"
+
 	"dots/board"
 )
 
 type Mtdf struct {
-	heuristic Heuristic
+	heuristic       Heuristic
+	nodes           uint64
+	compute_time_ns uint64
+	search_start    time.Time
+}
+
+func (mtdf *Mtdf) preSearch(heuristic Heuristic) {
+	mtdf.heuristic = heuristic
+	mtdf.nodes = 0
+	mtdf.compute_time_ns = 0
+	mtdf.search_start = time.Now()
+}
+
+func (mtdf *Mtdf) postSearch() {
+	mtdf.compute_time_ns = uint64(time.Since(mtdf.search_start).Nanoseconds())
 }
 
 func (mtdf *Mtdf) Search(board board.Board, depth_left uint, heuristic Heuristic, alpha int) (heur int) {
-	mtdf.heuristic = heuristic
+	mtdf.preSearch(heuristic)
+	defer mtdf.postSearch()
 
 	/*
 	   Temporary hack:
@@ -28,10 +45,14 @@ func (mtdf *Mtdf) Search(board board.Board, depth_left uint, heuristic Heuristic
 	capped_beta := upper_limit
 
 	heur = mtdf.loop(board, depth_left, capped_alpha, capped_beta, 0, 1, false)
+
 	return
 }
 
 func (mtdf *Mtdf) ExactSearch(board board.Board, alpha int) (heur int) {
+	mtdf.preSearch(nil)
+	defer mtdf.postSearch()
+
 	heur = mtdf.loop(board, 64, alpha, Max_exact_heuristic, 0, 2, true)
 	return
 }
@@ -66,6 +87,8 @@ func (mtdf *Mtdf) loop(board board.Board, depth_left uint,
 
 func (mtdf *Mtdf) doMtdf(board board.Board, depth_left uint, alpha int) (heur int) {
 
+	mtdf.nodes += 1
+
 	if depth_left == 0 {
 		heur = mtdf.polish(mtdf.heuristic(board), alpha)
 		return
@@ -95,6 +118,8 @@ func (mtdf *Mtdf) doMtdf(board board.Board, depth_left uint, alpha int) (heur in
 }
 
 func (mtdf *Mtdf) doMtdfExact(board board.Board, alpha int) (heur int) {
+
+	mtdf.nodes += 1
 
 	if moves := board.Moves(); moves != 0 {
 		heur = alpha
@@ -130,5 +155,15 @@ func (mtdf *Mtdf) polish(heur, alpha int) (outheur int) {
 
 func (mtdf Mtdf) Name() (name string) {
 	name = "mtdf"
+	return
+}
+
+func (mtdf *Mtdf) Nodes() (nodes uint64) {
+	nodes = mtdf.nodes
+	return
+}
+
+func (mtdf *Mtdf) ComputeTimeNs() (ns uint64) {
+	ns = mtdf.compute_time_ns
 	return
 }

@@ -6,11 +6,13 @@ import (
 
 type Minimax struct {
 	heuristic Heuristic
+	nodes     uint64
 }
 
 func (minimax *Minimax) Search(board board.Board, depth_left uint,
 	heuristic Heuristic, alpha int) (heur int) {
 
+	minimax.nodes = 0
 	minimax.heuristic = heuristic
 	heur = -minimax.doMinimax(board, depth_left, true)
 	return
@@ -18,6 +20,8 @@ func (minimax *Minimax) Search(board board.Board, depth_left uint,
 
 func (minimax *Minimax) doMinimax(board board.Board, depth_left uint,
 	is_max bool) (heur int) {
+
+	minimax.nodes++
 
 	if depth_left == 0 {
 		if is_max {
@@ -64,11 +68,14 @@ func (minimax *Minimax) doMinimax(board board.Board, depth_left uint,
 }
 
 func (minimax *Minimax) ExactSearch(board board.Board, alpha int) (heur int) {
+	minimax.nodes = 0
 	heur = -minimax.doMinimaxExact(board, true)
 	return
 }
 
 func (minimax *Minimax) doMinimaxExact(board board.Board, is_max bool) (heur int) {
+
+	minimax.nodes++
 
 	if moves := board.Moves(); moves != 0 {
 		if is_max {
@@ -108,5 +115,16 @@ func (minimax *Minimax) doMinimaxExact(board board.Board, is_max bool) (heur int
 
 func (minimax Minimax) Name() (name string) {
 	name = "minimax"
+	return
+}
+
+func (minimax *Minimax) NodesVisited() (nodes uint64) {
+	nodes = minimax.nodes
+	return
+}
+
+func (minimax *Minimax) ComputeTimeNs() (ns uint64) {
+	// TODO
+	ns = 0
 	return
 }
