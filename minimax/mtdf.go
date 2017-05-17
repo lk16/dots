@@ -11,6 +11,7 @@ type Mtdf struct {
 	nodes           uint64
 	compute_time_ns uint64
 	search_start    time.Time
+	board           board.Board
 }
 
 func (mtdf *Mtdf) preSearch(heuristic Heuristic) {
@@ -69,9 +70,11 @@ func (mtdf *Mtdf) loop(board board.Board, depth_left uint,
 	for upper_bound-lower_bound >= step {
 		var bound int
 		if exact {
-			bound = -mtdf.doMtdfExact(board, -(f + 1))
+			mtdf.board = board
+			bound = -mtdf.doMtdfExact(-(f + 1))
 		} else {
-			bound = -mtdf.doMtdf(board, depth_left, -(f + 1))
+			mtdf.board = board
+			bound = -mtdf.doMtdf(depth_left, -(f + 1))
 		}
 		if bound == f {
 			f -= step
@@ -85,66 +88,68 @@ func (mtdf *Mtdf) loop(board board.Board, depth_left uint,
 	return
 }
 
-func (mtdf *Mtdf) doMtdf(board board.Board, depth_left uint, alpha int) (heur int) {
+func (mtdf *Mtdf) doMtdf(depth_left uint, alpha int) (heur int) {
 
 	mtdf.nodes += 1
 
 	if depth_left == 0 {
-		heur = mtdf.polish(mtdf.heuristic(board), alpha)
+		heur = mtdf.polish(mtdf.heuristic(mtdf.board), alpha)
 		return
 	}
 
-	if moves := board.Moves(); moves != 0 {
+	if moves := mtdf.board.Moves(); moves != 0 {
 		heur = alpha
-		//for _, child := range board.GetChildren() {
-		gen := board.ChildGen()
+		gen := mtdf.board.ChildGen()
 		for gen.Next() {
-			child_heur := -mtdf.doMtdf(board, depth_left-1, -(alpha + 1))
+			child_heur := -mtdf.doMtdf(depth_left-1, -(alpha + 1))
 			if child_heur > alpha {
 				heur = alpha + 1
+				gen.RestoreParent()
 				break
 			}
 		}
 		return
 	}
 
-	clone := board
-	clone.SwitchTurn()
-	if moves := clone.Moves(); moves != 0 {
-		heur = -mtdf.doMtdf(clone, depth_left, -(alpha + 1))
+	mtdf.board.SwitchTurn()
+	if moves := mtdf.board.Moves(); moves != 0 {
+		heur = -mtdf.doMtdf(depth_left, -(alpha + 1))
+		mtdf.board.SwitchTurn()
 		return
 	}
 
-	heur = mtdf.polish(Exact_score_factor*board.ExactScore(), alpha)
+	mtdf.board.SwitchTurn()
+	heur = mtdf.polish(Exact_score_factor*mtdf.board.ExactScore(), alpha)
 	return
 }
 
-func (mtdf *Mtdf) doMtdfExact(board board.Board, alpha int) (heur int) {
+func (mtdf *Mtdf) doMtdfExact(alpha int) (heur int) {
 
 	mtdf.nodes += 1
 
-	if moves := board.Moves(); moves != 0 {
+	if moves := mtdf.board.Moves(); moves != 0 {
 		heur = alpha
-		//for _, child := range board.GetChildren() {
-		gen := board.ChildGen()
+		gen := mtdf.board.ChildGen()
 		for gen.Next() {
-			child_heur := -mtdf.doMtdfExact(board, -(alpha + 1))
+			child_heur := -mtdf.doMtdfExact(-(alpha + 1))
 			if child_heur > alpha {
 				heur = alpha + 1
+				gen.RestoreParent()
 				break
 			}
 		}
 		return
 	}
 
-	clone := board
-	clone.SwitchTurn()
-	if moves := clone.Moves(); moves != 0 {
-		heur = -mtdf.doMtdfExact(clone, -(alpha + 1))
+	mtdf.board.SwitchTurn()
+	if moves := mtdf.board.Moves(); moves != 0 {
+		heur = -mtdf.doMtdfExact(-(alpha + 1))
+		mtdf.board.SwitchTurn()
 		return
 	}
 
-	heur = mtdf.polish(board.ExactScore(), alpha)
+	mtdf.board.SwitchTurn()
+	heur = mtdf.polish(mtdf.board.ExactScore(), alpha)
 	return
 }
 

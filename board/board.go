@@ -222,7 +222,7 @@ func (board *Board) ChildGen() (gen *ChildGenerator) {
 func (gen *ChildGenerator) Next() (ok bool) {
 
 	if gen.last_flipped != 0 {
-		gen.child.UndoMove(gen.last_move, gen.last_flipped)
+		gen.RestoreParent()
 	}
 
 	if gen.moves_left == 0 {
@@ -238,6 +238,12 @@ func (gen *ChildGenerator) Next() (ok bool) {
 
 	ok = true
 	return
+}
+
+// Force restore parent state
+// This is usefull when not visting all children
+func (gen *ChildGenerator) RestoreParent() {
+	gen.child.UndoMove(gen.last_move, gen.last_flipped)
 }
 
 func (board *Board) UndoMove(move_bit, flipped bitset.Bitset) {

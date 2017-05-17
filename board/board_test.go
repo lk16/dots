@@ -725,3 +725,13 @@ func TestBoardChildGenerator(t *testing.T) {
 
 	}
 }
+
+func TestBoardChildGenRestoreParent(t *testing.T) {
+	board := NewBoard()
+	gen := board.ChildGen()
+	gen.Next()
+	gen.RestoreParent()
+	if *board != *NewBoard() {
+		t.Errorf("Restore parent failed")
+	}
+}
