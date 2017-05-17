@@ -675,3 +675,53 @@ func TestBoardIsLeaf(t *testing.T) {
 	// game end
 	test(*CustomBoard(0, 0))
 }
+
+func TestBoardChildGenerator(t *testing.T) {
+
+	for board := range genTestBoards() {
+
+		expected_set := map[Board]struct{}{}
+
+		for _, child := range board.GetChildren() {
+			expected_set[child] = struct{}{}
+		}
+
+		got_set := map[Board]struct{}{}
+
+		clone := board
+		gen := clone.ChildGen()
+		for gen.Next() {
+			got_set[clone] = struct{}{}
+		}
+
+		if clone != board {
+			t.Errorf("Parent state not restored after looping over all children")
+		}
+
+		for g, _ := range got_set {
+			if _, ok := expected_set[g]; !ok {
+				t.Errorf("Children sets are unequal.\n")
+				break
+			}
+		}
+
+		if t.Failed() {
+			buff := new(bytes.Buffer)
+			t.Errorf("Expected set (%d):\n", len(expected_set))
+			for child, _ := range expected_set {
+				child.AsciiArt(buff, false)
+				buff.WriteString("\n\n")
+			}
+			t.Errorf(buff.String())
+			buff.Reset()
+			t.Errorf("Got set (%d):\n", len(got_set))
+			for child, _ := range got_set {
+				child.AsciiArt(buff, false)
+				buff.WriteString("\n\n")
+			}
+			t.Errorf(buff.String())
+			break
+		}
+
+	}
+}
