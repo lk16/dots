@@ -735,3 +735,14 @@ func TestBoardChildGenRestoreParent(t *testing.T) {
 		t.Errorf("Restore parent failed")
 	}
 }
+
+func TestBoardChildGenHasMoves(t *testing.T) {
+	if !NewBoard().ChildGen().HasMoves() {
+		t.Errorf("Expected initial board has moves!")
+	}
+
+	if RandomBoard(64).ChildGen().HasMoves() {
+		t.Errorf("Expected full board does not have moves")
+	}
+
+}

@@ -217,6 +217,11 @@ func (board *Board) ChildGen() (gen *ChildGenerator) {
 	return
 }
 
+func (gen *ChildGenerator) HasMoves() (has_moves bool) {
+	has_moves = (gen.moves_left != 0)
+	return
+}
+
 // Generate next child of a Board
 // After generating all children the parent state is restored
 func (gen *ChildGenerator) Next() (ok bool) {

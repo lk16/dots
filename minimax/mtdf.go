@@ -25,7 +25,9 @@ func (mtdf *Mtdf) postSearch() {
 	mtdf.compute_time_ns = uint64(time.Since(mtdf.search_start).Nanoseconds())
 }
 
-func (mtdf *Mtdf) Search(board board.Board, depth_left uint, heuristic Heuristic, alpha int) (heur int) {
+func (mtdf *Mtdf) Search(board board.Board, depth_left uint, heuristic Heuristic,
+	alpha int) (heur int) {
+
 	mtdf.preSearch(heuristic)
 	defer mtdf.postSearch()
 
@@ -45,7 +47,8 @@ func (mtdf *Mtdf) Search(board board.Board, depth_left uint, heuristic Heuristic
 
 	capped_beta := upper_limit
 
-	heur = mtdf.loop(board, depth_left, capped_alpha, capped_beta, 0, 1, false)
+	mtdf.board = board
+	heur = mtdf.loop(depth_left, capped_alpha, capped_beta, 0, 1, false)
 
 	return
 }
@@ -54,12 +57,14 @@ func (mtdf *Mtdf) ExactSearch(board board.Board, alpha int) (heur int) {
 	mtdf.preSearch(nil)
 	defer mtdf.postSearch()
 
-	heur = mtdf.loop(board, 64, alpha, Max_exact_heuristic, 0, 2, true)
+	mtdf.board = board
+	heur = mtdf.loop(64, alpha, Max_exact_heuristic, 0, 2, true)
 	return
 }
 
-func (mtdf *Mtdf) loop(board board.Board, depth_left uint,
-	lower_bound, upper_bound, guess, step int, exact bool) (heur int) {
+func (mtdf *Mtdf) loop(depth_left uint, lower_bound, upper_bound, guess, step int,
+	exact bool) (heur int) {
+
 	f := guess
 	if f < lower_bound {
 		f = lower_bound
@@ -70,10 +75,8 @@ func (mtdf *Mtdf) loop(board board.Board, depth_left uint,
 	for upper_bound-lower_bound >= step {
 		var bound int
 		if exact {
-			mtdf.board = board
 			bound = -mtdf.doMtdfExact(-(f + 1))
 		} else {
-			mtdf.board = board
 			bound = -mtdf.doMtdf(depth_left, -(f + 1))
 		}
 		if bound == f {
@@ -97,9 +100,10 @@ func (mtdf *Mtdf) doMtdf(depth_left uint, alpha int) (heur int) {
 		return
 	}
 
-	if moves := mtdf.board.Moves(); moves != 0 {
+	gen := mtdf.board.ChildGen()
+
+	if gen.HasMoves() {
 		heur = alpha
-		gen := mtdf.board.ChildGen()
 		for gen.Next() {
 			child_heur := -mtdf.doMtdf(depth_left-1, -(alpha + 1))
 			if child_heur > alpha {
@@ -127,9 +131,10 @@ func (mtdf *Mtdf) doMtdfExact(alpha int) (heur int) {
 
 	mtdf.nodes += 1
 
-	if moves := mtdf.board.Moves(); moves != 0 {
+	gen := mtdf.board.ChildGen()
+
+	if gen.HasMoves() {
 		heur = alpha
-		gen := mtdf.board.ChildGen()
 		for gen.Next() {
 			child_heur := -mtdf.doMtdfExact(-(alpha + 1))
 			if child_heur > alpha {
