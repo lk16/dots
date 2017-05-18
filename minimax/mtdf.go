@@ -152,7 +152,9 @@ func (mtdf *Mtdf) doMtdf(search_depth uint, alpha int) (heur int) {
 		return
 	}
 
-	gen := mtdf.board.ChildGen()
+	var gen board.ChildGenerator
+
+	gen = board.NewChildGen(&mtdf.board)
 
 	if gen.HasMoves() {
 		heur = alpha
@@ -205,8 +207,8 @@ func (mtdf *Mtdf) doMtdfExact(alpha int) (heur int) {
 
 		} else {
 			mtdf.hash_table[key] = HashTableValue{
-				upper_bound: 100,
-				lower_bound: -100}
+				upper_bound: Max_exact_heuristic,
+				lower_bound: Min_exact_heuristic}
 		}
 
 		defer func() {
@@ -224,7 +226,7 @@ func (mtdf *Mtdf) doMtdfExact(alpha int) (heur int) {
 		}()
 	}
 
-	gen := mtdf.board.ChildGen()
+	gen := board.NewChildGen(&mtdf.board)
 
 	if gen.HasMoves() {
 		heur = alpha

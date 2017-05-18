@@ -200,57 +200,6 @@ func (board Board) GetChildren() (children []Board) {
 	return
 }
 
-type ChildGenerator struct {
-	moves_left   bitset.Bitset
-	last_move    bitset.Bitset
-	last_flipped bitset.Bitset
-	child        *Board
-}
-
-// Returns a child generator for a Board
-func (board *Board) ChildGen() (gen *ChildGenerator) {
-	gen = &ChildGenerator{
-		moves_left:   board.Moves(),
-		last_move:    bitset.Bitset(0),
-		last_flipped: bitset.Bitset(0),
-		child:        board}
-	return
-}
-
-func (gen *ChildGenerator) HasMoves() (has_moves bool) {
-	has_moves = (gen.moves_left != 0)
-	return
-}
-
-// Generate next child of a Board
-// After generating all children the parent state is restored
-func (gen *ChildGenerator) Next() (ok bool) {
-
-	if gen.last_flipped != 0 {
-		gen.RestoreParent()
-	}
-
-	if gen.moves_left == 0 {
-		ok = false
-		return
-	}
-
-	index := gen.moves_left.FirstBitIndex()
-	gen.moves_left.ResetBit(index)
-
-	gen.last_flipped = gen.child.DoMove(index)
-	gen.last_move = bitset.Bitset(1 << index)
-
-	ok = true
-	return
-}
-
-// Force restore parent state
-// This is usefull when not visting all children
-func (gen *ChildGenerator) RestoreParent() {
-	gen.child.UndoMove(gen.last_move, gen.last_flipped)
-}
-
 func (board *Board) UndoMove(move_bit, flipped bitset.Bitset) {
 	tmp := board.me
 	board.me = board.opp &^ (flipped | move_bit)
