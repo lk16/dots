@@ -128,3 +128,9 @@ func (minimax *Minimax) ComputeTimeNs() (ns uint64) {
 	ns = 0
 	return
 }
+
+func (minimax *Minimax) Nodes() (ns uint64) {
+	// TODO
+	ns = 0
+	return
+}

@@ -112,3 +112,9 @@ func (alphabeta AlphaBeta) ComputeTimeNs() (ns uint64) {
 	ns = 0
 	return
 }
+
+func (alphabeta *AlphaBeta) Nodes() (ns uint64) {
+	// TODO
+	ns = 0
+	return
+}

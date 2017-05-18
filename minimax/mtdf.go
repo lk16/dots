@@ -6,12 +6,24 @@ import (
 	"dots/board"
 )
 
+type HashtableKey struct {
+	board board.Board
+	depth uint
+}
+
+type HashTableValue struct {
+	upper_bound int
+	lower_bound int
+}
+
 type Mtdf struct {
 	heuristic       Heuristic
 	nodes           uint64
 	compute_time_ns uint64
 	search_start    time.Time
+	search_depth    uint
 	board           board.Board
+	hash_table      map[HashtableKey]HashTableValue
 }
 
 func (mtdf *Mtdf) preSearch(heuristic Heuristic) {
@@ -19,13 +31,14 @@ func (mtdf *Mtdf) preSearch(heuristic Heuristic) {
 	mtdf.nodes = 0
 	mtdf.compute_time_ns = 0
 	mtdf.search_start = time.Now()
+	mtdf.hash_table = map[HashtableKey]HashTableValue{}
 }
 
 func (mtdf *Mtdf) postSearch() {
 	mtdf.compute_time_ns = uint64(time.Since(mtdf.search_start).Nanoseconds())
 }
 
-func (mtdf *Mtdf) Search(board board.Board, depth_left uint, heuristic Heuristic,
+func (mtdf *Mtdf) Search(board board.Board, search_depth uint, heuristic Heuristic,
 	alpha int) (heur int) {
 
 	mtdf.preSearch(heuristic)
@@ -48,7 +61,8 @@ func (mtdf *Mtdf) Search(board board.Board, depth_left uint, heuristic Heuristic
 	capped_beta := upper_limit
 
 	mtdf.board = board
-	heur = mtdf.loop(depth_left, capped_alpha, capped_beta, 0, 1, false)
+	mtdf.search_depth = search_depth
+	heur = mtdf.loop(capped_alpha, capped_beta, 0, 1, false)
 
 	return
 }
@@ -58,12 +72,11 @@ func (mtdf *Mtdf) ExactSearch(board board.Board, alpha int) (heur int) {
 	defer mtdf.postSearch()
 
 	mtdf.board = board
-	heur = mtdf.loop(64, alpha, Max_exact_heuristic, 0, 2, true)
+	heur = mtdf.loop(alpha, Max_exact_heuristic, 0, 2, true)
 	return
 }
 
-func (mtdf *Mtdf) loop(depth_left uint, lower_bound, upper_bound, guess, step int,
-	exact bool) (heur int) {
+func (mtdf *Mtdf) loop(lower_bound, upper_bound, guess, step int, exact bool) (heur int) {
 
 	f := guess
 	if f < lower_bound {
@@ -77,7 +90,7 @@ func (mtdf *Mtdf) loop(depth_left uint, lower_bound, upper_bound, guess, step in
 		if exact {
 			bound = -mtdf.doMtdfExact(-(f + 1))
 		} else {
-			bound = -mtdf.doMtdf(depth_left, -(f + 1))
+			bound = -mtdf.doMtdf(mtdf.search_depth, -(f + 1))
 		}
 		if bound == f {
 			f -= step
@@ -91,11 +104,50 @@ func (mtdf *Mtdf) loop(depth_left uint, lower_bound, upper_bound, guess, step in
 	return
 }
 
-func (mtdf *Mtdf) doMtdf(depth_left uint, alpha int) (heur int) {
+func (mtdf *Mtdf) doMtdf(search_depth uint, alpha int) (heur int) {
 
 	mtdf.nodes += 1
 
-	if depth_left == 0 {
+	if search_depth >= 3 {
+
+		key := HashtableKey{
+			depth: search_depth,
+			board: mtdf.board}
+
+		if entry, ok := mtdf.hash_table[key]; ok {
+
+			if entry.lower_bound > alpha {
+				heur = alpha + 1
+				return
+			}
+
+			if entry.upper_bound <= alpha {
+				heur = alpha
+				return
+			}
+
+		} else {
+			mtdf.hash_table[key] = HashTableValue{
+				upper_bound: 100,
+				lower_bound: -100}
+		}
+
+		defer func() {
+			value := mtdf.hash_table[key]
+
+			if heur == alpha {
+				if alpha < value.upper_bound {
+					value.upper_bound = alpha
+				}
+			} else {
+				if alpha+1 > value.lower_bound {
+					value.lower_bound = alpha + 1
+				}
+			}
+		}()
+	}
+
+	if search_depth == 0 {
 		heur = mtdf.polish(mtdf.heuristic(mtdf.board), alpha)
 		return
 	}
@@ -105,7 +157,7 @@ func (mtdf *Mtdf) doMtdf(depth_left uint, alpha int) (heur int) {
 	if gen.HasMoves() {
 		heur = alpha
 		for gen.Next() {
-			child_heur := -mtdf.doMtdf(depth_left-1, -(alpha + 1))
+			child_heur := -mtdf.doMtdf(search_depth-1, -(alpha + 1))
 			if child_heur > alpha {
 				heur = alpha + 1
 				gen.RestoreParent()
@@ -117,7 +169,7 @@ func (mtdf *Mtdf) doMtdf(depth_left uint, alpha int) (heur int) {
 
 	mtdf.board.SwitchTurn()
 	if moves := mtdf.board.Moves(); moves != 0 {
-		heur = -mtdf.doMtdf(depth_left, -(alpha + 1))
+		heur = -mtdf.doMtdf(search_depth, -(alpha + 1))
 		mtdf.board.SwitchTurn()
 		return
 	}
@@ -130,6 +182,47 @@ func (mtdf *Mtdf) doMtdf(depth_left uint, alpha int) (heur int) {
 func (mtdf *Mtdf) doMtdfExact(alpha int) (heur int) {
 
 	mtdf.nodes += 1
+
+	search_depth := mtdf.board.CountEmpties()
+
+	if search_depth >= 6 {
+
+		key := HashtableKey{
+			depth: search_depth,
+			board: mtdf.board}
+
+		if entry, ok := mtdf.hash_table[key]; ok {
+
+			if entry.lower_bound > alpha {
+				heur = alpha + 1
+				return
+			}
+
+			if entry.upper_bound <= alpha {
+				heur = alpha
+				return
+			}
+
+		} else {
+			mtdf.hash_table[key] = HashTableValue{
+				upper_bound: 100,
+				lower_bound: -100}
+		}
+
+		defer func() {
+			value := mtdf.hash_table[key]
+
+			if heur == alpha {
+				if alpha < value.upper_bound {
+					value.upper_bound = alpha
+				}
+			} else {
+				if alpha+1 > value.lower_bound {
+					value.lower_bound = alpha + 1
+				}
+			}
+		}()
+	}
 
 	gen := mtdf.board.ChildGen()
 
