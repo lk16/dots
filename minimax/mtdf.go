@@ -153,8 +153,12 @@ func (mtdf *Mtdf) doMtdf(search_depth uint, alpha int) (heur int) {
 	}
 
 	var gen board.ChildGenerator
-
+	/*if search_depth >= 4 {
+	gen = board.NewChildGenSorted(&mtdf.board, mtdf.heuristic)
+	} else {
+	*/
 	gen = board.NewChildGen(&mtdf.board)
+	//}
 
 	if gen.HasMoves() {
 		heur = alpha

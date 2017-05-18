@@ -2,6 +2,8 @@ package board
 
 import (
 	"dots/bitset"
+
+	"sort"
 )
 
 type ChildGenerator interface {
@@ -59,4 +61,63 @@ func (gen *UnsortedChildGenerator) Next() (ok bool) {
 // This is usefull when not visting all children
 func (gen *UnsortedChildGenerator) RestoreParent() {
 	gen.child.UndoMove(gen.last_move, gen.last_flipped)
+}
+
+type sortedBoard struct {
+	board Board
+	heur  int
+}
+
+type SortedChildGenerator struct {
+	parent      Board
+	child       *Board
+	child_index int
+	children    []sortedBoard
+}
+
+func NewChildGenSorted(board *Board, heuristic func(Board) int) (gen *SortedChildGenerator) {
+	gen = &SortedChildGenerator{
+		parent:      *board,
+		child:       board,
+		children:    []sortedBoard{},
+		child_index: 0}
+
+	child := *board
+
+	unsorted_gen := NewChildGen(&child)
+	for unsorted_gen.Next() {
+		gen.children = append(gen.children, sortedBoard{
+			board: child,
+			heur:  heuristic(child),
+		})
+
+	}
+
+	sort.Slice(gen.children, func(i, j int) bool {
+		return gen.children[i].heur > gen.children[j].heur
+	})
+
+	return
+}
+
+func (gen *SortedChildGenerator) RestoreParent() {
+	*gen.child = gen.parent
+}
+
+func (gen *SortedChildGenerator) Next() (ok bool) {
+	if gen.child_index == len(gen.children) {
+		gen.RestoreParent()
+		ok = false
+		return
+	}
+
+	*gen.child = gen.children[gen.child_index].board
+	gen.child_index++
+	ok = true
+	return
+}
+
+func (gen *SortedChildGenerator) HasMoves() (has_moves bool) {
+	has_moves = len(gen.children) != 0
+	return
 }
