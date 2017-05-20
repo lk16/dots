@@ -118,9 +118,19 @@ func (board Board) AsciiArt(writer io.Writer, swap_disc_colors bool) {
 	writer.Write(buffer.Bytes())
 }
 
-// Returns a Bitset with all valid moves for a Board
-func (board Board) Moves() (moves bitset.Bitset) {
+// Returns a Bitset with all valid moves for a board for the player to move
+func (board Board) Moves() (moves_set bitset.Bitset) {
+	moves_set = moves(board.me, board.opp)
+	return
+}
 
+// Returns a Bitset with all valid moves for a board for the opponent of the player to move
+func (board Board) OpponentMoves() (moves_set bitset.Bitset) {
+	moves_set = moves(board.opp, board.me)
+	return
+}
+
+func moves(me, opp bitset.Bitset) (moves_set bitset.Bitset) {
 	// Returns a subset of the moves for a Board
 	movesPartial := func(me, mask, n bitset.Bitset) (moves bitset.Bitset) {
 		flip_l := mask & (me << n)
@@ -138,14 +148,14 @@ func (board Board) Moves() (moves bitset.Bitset) {
 	}
 
 	// this function is a modified version of code from Edax
-	mask := board.opp & 0x7E7E7E7E7E7E7E7E
+	mask := opp & 0x7E7E7E7E7E7E7E7E
 
-	moves = movesPartial(board.me, mask, 1)
-	moves |= movesPartial(board.me, mask, 7)
-	moves |= movesPartial(board.me, mask, 9)
-	moves |= movesPartial(board.me, board.opp, 8)
+	moves_set = movesPartial(me, mask, 1)
+	moves_set |= movesPartial(me, mask, 7)
+	moves_set |= movesPartial(me, mask, 9)
+	moves_set |= movesPartial(me, opp, 8)
 
-	moves &^= (board.me | board.opp)
+	moves_set &^= (me | opp)
 	return
 }
 

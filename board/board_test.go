@@ -675,3 +675,19 @@ func TestBoardIsLeaf(t *testing.T) {
 	// game end
 	test(*CustomBoard(0, 0))
 }
+
+func TestBoardOpponentMoves(t *testing.T) {
+	for board := range genTestBoards() {
+
+		clone := board
+		clone.SwitchTurn()
+
+		expected := clone.Moves()
+		got := board.OpponentMoves()
+
+		if expected != got {
+			t.Errorf("Expected %d, got %d", expected, got)
+		}
+
+	}
+}

@@ -50,7 +50,6 @@ func (mtdf *Mtdf) Search(board board.Board, search_depth uint, heuristic Heurist
 	alpha int) (heur int) {
 
 	mtdf.preSearch(heuristic)
-	defer mtdf.postSearch()
 
 	mtdf.board = board
 	mtdf.search_depth = search_depth
@@ -59,42 +58,31 @@ func (mtdf *Mtdf) Search(board board.Board, search_depth uint, heuristic Heurist
 	lower_limit := -100
 
 	capped_alpha := clamp(alpha, lower_limit, upper_limit)
-	heur = mtdf.loop(capped_alpha, upper_limit, 0, 1, false)
+	heur = mtdf.loop(capped_alpha, upper_limit, 0, 1, mtdf.doMtdf)
 
 	if heur <= lower_limit || heur >= 100 {
-		heur = mtdf.loop(Min_heuristic, Max_heuristic, 0, 2*Exact_score_factor, false)
+		heur = mtdf.loop(Min_heuristic, Max_heuristic, 0, 2*Exact_score_factor, mtdf.doMtdf)
 	}
+
+	mtdf.postSearch()
 
 	return
 }
 
 func (mtdf *Mtdf) ExactSearch(board board.Board, alpha int) (heur int) {
 	mtdf.preSearch(nil)
-	defer mtdf.postSearch()
-
 	mtdf.board = board
-	heur = mtdf.loop(alpha, Max_exact_heuristic, 0, 2, true)
+	heur = mtdf.loop(alpha, Max_exact_heuristic, 0, 2, mtdf.doMtdfExact)
+	mtdf.postSearch()
 	return
 }
 
-func (mtdf *Mtdf) loop(lower_bound, upper_bound, guess, step int, exact bool) (heur int) {
-
-	var call func(int) int
-
-	if exact {
-		call = func(alpha int) int {
-			return -mtdf.doMtdfExact(-(alpha + 1))
-		}
-	} else {
-		call = func(alpha int) int {
-			return -mtdf.doMtdf(mtdf.search_depth, -(alpha + 1))
-		}
-	}
+func (mtdf *Mtdf) loop(lower_bound, upper_bound, guess, step int, call func(int) int) (heur int) {
 
 	f := clamp(guess, lower_bound, upper_bound)
 
 	for upper_bound-lower_bound >= step {
-		bound := call(f)
+		bound := -call(-(f + 1))
 		if f == bound {
 			f -= step
 			upper_bound = bound
@@ -107,11 +95,11 @@ func (mtdf *Mtdf) loop(lower_bound, upper_bound, guess, step int, exact bool) (h
 	return
 }
 
-func (mtdf *Mtdf) doMtdf(search_depth uint, alpha int) (heur int) {
+func (mtdf *Mtdf) doMtdf(alpha int) (heur int) {
 
 	mtdf.nodes += 1
 
-	if search_depth == 0 {
+	if mtdf.search_depth == 0 {
 		heur = mtdf.polish(mtdf.heuristic(mtdf.board), alpha)
 		return
 	}
@@ -119,26 +107,27 @@ func (mtdf *Mtdf) doMtdf(search_depth uint, alpha int) (heur int) {
 	gen := board.NewChildGen(&mtdf.board)
 
 	if gen.HasMoves() {
+		mtdf.search_depth--
 		heur = alpha
 		for gen.Next() {
-			child_heur := -mtdf.doMtdf(search_depth-1, -(alpha + 1))
+			child_heur := -mtdf.doMtdf(-(alpha + 1))
 			if child_heur > alpha {
 				heur = alpha + 1
 				gen.RestoreParent()
 				break
 			}
 		}
+		mtdf.search_depth++
 		return
 	}
 
-	mtdf.board.SwitchTurn()
-	if moves := mtdf.board.Moves(); moves != 0 {
-		heur = -mtdf.doMtdf(search_depth, -(alpha + 1))
+	if mtdf.board.OpponentMoves() != 0 {
+		mtdf.board.SwitchTurn()
+		heur = -mtdf.doMtdf(-(alpha + 1))
 		mtdf.board.SwitchTurn()
 		return
 	}
 
-	mtdf.board.SwitchTurn()
 	heur = mtdf.polish(Exact_score_factor*mtdf.board.ExactScore(), alpha)
 	return
 }
