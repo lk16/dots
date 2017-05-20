@@ -304,6 +304,7 @@ func (board *Board) doMoveToLowerBits(line bitset.Bitset) (flipped bitset.Bitset
 	}
 	bit := line_mask.LastBit()
 	line &^= bitset.Bitset((bit << 1) - 1)
+
 	if line&board.opp == line {
 		flipped = line
 	}

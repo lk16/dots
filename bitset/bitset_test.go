@@ -231,3 +231,29 @@ func TestBitsetResetBit(t *testing.T) {
 	}
 
 }
+
+func TestBitsetAny(t *testing.T) {
+
+	bs := Bitset(0)
+	if bs.Any() {
+		t.Errorf("Bitset(0).Any() should not be true")
+	}
+
+	bs = Bitset(1)
+	if !bs.Any() {
+		t.Errorf("Bitset(1).Any() should not be false")
+	}
+}
+
+func TestBitsetNone(t *testing.T) {
+
+	bs := Bitset(0)
+	if !bs.None() {
+		t.Errorf("Bitset(0).None() should be true")
+	}
+
+	bs = Bitset(1)
+	if bs.None() {
+		t.Errorf("Bitset(1).None() should be false")
+	}
+}
