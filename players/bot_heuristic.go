@@ -4,11 +4,17 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"sort"
 	"time"
 
 	"dots/board"
 	"dots/minimax"
 )
+
+type SortedBoard struct {
+	board board.Board
+	heur  int
+}
 
 type BotHeuristic struct {
 	heuristic    minimax.Heuristic
@@ -100,9 +106,12 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 		beta = minimax.Max_exact_heuristic
 		depth = b.CountEmpties()
 	} else {
-		alpha = minimax.Min_heuristic
-		beta = minimax.Max_heuristic
 		depth = bot.search_depth
+
+		// HACK: stumbling upon an exact solution
+		// takes forever to compute. we set limits to solve that for now.
+		alpha = -100
+		beta = 100
 	}
 
 	header := "      | heuri || child |  child  | child || total |  total  |  avg  |\n"
@@ -117,42 +126,48 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 		nodes:   0,
 		time_ns: 0}
 
-	for i, child := range children {
+	sorted_children := []SortedBoard{}
 
-		var guess int
-		if i == 0 {
-			guess = 0
-		} else {
-			guess = alpha
-		}
-
-		query := SearchQuery{
-			board:       b,
-			lower_bound: alpha,
-			upper_bound: beta,
-			depth:       depth,
-			guess:       guess,
-			heuristic:   bot.heuristic}
-
-		// run new thread
-		go RunQuery(query, result_chan)
-
-		// but wait for it anyway
-		result := <-result_chan
-
-		child_stats := result.stats
-
-		total_stats.nodes += child_stats.nodes
-		total_stats.time_ns += child_stats.time_ns
-
-		bot.logChildEvaluation(i, result.heur, alpha, child_stats, total_stats)
-
-		if result.heur > alpha {
-			alpha = result.heur
-			afterwards = child
-		}
+	for _, child := range children {
+		sorted_children = append(sorted_children, SortedBoard{board: child, heur: 0})
 	}
 
+	for d := depth % 2; d <= depth; d += 2 {
+
+		for i, child := range sorted_children {
+
+			query := SearchQuery{
+				board:       child.board,
+				lower_bound: alpha,
+				upper_bound: beta,
+				depth:       d,
+				guess:       child.heur,
+				heuristic:   bot.heuristic}
+
+			go RunQuery(query, result_chan)
+			result := <-result_chan
+
+			child_stats := result.stats
+			total_stats.nodes += child_stats.nodes
+			total_stats.time_ns += child_stats.time_ns
+
+			sorted_children[i].heur = result.heur
+
+			if d == depth {
+				bot.logChildEvaluation(i, result.heur, alpha, child_stats, total_stats)
+				if result.heur > alpha {
+					alpha = result.heur
+				}
+			}
+
+		}
+
+		sort.Slice(sorted_children, func(i, j int) bool {
+			return sorted_children[i].heur > sorted_children[j].heur
+		})
+	}
+
+	afterwards = sorted_children[0].board
 	bot.writer.Write(bytes.NewBufferString("\n\n").Bytes())
 	return
 }
@@ -239,7 +254,10 @@ func (thread *SearchThread) loop(step int, call func(int) int) (heur int) {
 	high := thread.query.upper_bound
 	low := thread.query.lower_bound
 
-	f := clamp(thread.query.guess, low, high)
+	// prevent odd results for exact search
+	f := thread.query.guess & ^int(2)
+
+	f = clamp(f, low, high)
 
 	for high-low >= step {
 		bound := -call(-(f + 1))
