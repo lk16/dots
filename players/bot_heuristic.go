@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"time"
 
 	"dots/board"
 	"dots/minimax"
@@ -11,26 +12,24 @@ import (
 
 type BotHeuristic struct {
 	heuristic    minimax.Heuristic
-	minimax      minimax.Interface
 	search_depth uint
 	exact_depth  uint
 	writer       io.Writer
 }
 
 // Creates a new BotHeuristic
-func NewBotHeuristic(heuristic minimax.Heuristic, minimax minimax.Interface,
+func NewBotHeuristic(heuristic minimax.Heuristic,
 	search_depth, exact_depth uint, writer io.Writer) (bot *BotHeuristic) {
 	bot = &BotHeuristic{
 		heuristic:    heuristic,
-		minimax:      minimax,
 		search_depth: search_depth,
 		exact_depth:  exact_depth,
 		writer:       writer}
 	return
 }
 
-func (bot *BotHeuristic) logChildEvaluation(child_id, heur, alpha int, nodes,
-	total_nodes, time_ns, total_time_ns uint64) {
+func (bot *BotHeuristic) logChildEvaluation(child_id, heur, alpha int,
+	child_stats, total_stats SearchStats) {
 
 	fmt_big := func(n uint64) string {
 
@@ -66,12 +65,12 @@ func (bot *BotHeuristic) logChildEvaluation(child_id, heur, alpha int, nodes,
 		return num / den
 	}
 
-	avg_speed := safe_div(1000000000*total_nodes, total_time_ns)
-	child_speed := safe_div(1000000000*nodes, time_ns)
+	avg_speed := safe_div(1000000000*total_stats.nodes, total_stats.time_ns)
+	child_speed := safe_div(1000000000*child_stats.nodes, child_stats.time_ns)
 
 	buff.WriteString(fmt.Sprintf("%s | %5dms | %s || %s | %5dms | %s |\n",
-		fmt_big(nodes), time_ns/1000000, fmt_big(child_speed),
-		fmt_big(total_nodes), total_time_ns/1000000, fmt_big(avg_speed)))
+		fmt_big(child_stats.nodes), child_stats.time_ns/1000000, fmt_big(child_speed),
+		fmt_big(total_stats.nodes), total_stats.time_ns/1000000, fmt_big(avg_speed)))
 	bot.writer.Write(buff.Bytes())
 }
 
@@ -93,20 +92,17 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 		return
 	}
 
-	var child_eval func(board.Board, uint, minimax.Heuristic, int) int
-	var alpha int
+	var alpha, beta int
+	var depth uint
 
 	if b.CountEmpties() <= bot.exact_depth {
 		alpha = minimax.Min_exact_heuristic
-		// wrapper function to achieve same prototype for ExactSearch() as Search()
-		// it just drops arguments depth and heuristic
-		child_eval = func(child board.Board, depth uint,
-			heuristic minimax.Heuristic, alpha int) int {
-			return bot.minimax.ExactSearch(child, alpha)
-		}
+		beta = minimax.Max_exact_heuristic
+		depth = b.CountEmpties()
 	} else {
 		alpha = minimax.Min_heuristic
-		child_eval = bot.minimax.Search
+		beta = minimax.Max_heuristic
+		depth = bot.search_depth
 	}
 
 	header := "      | heuri || child |  child  | child || total |  total  |  avg  |\n"
@@ -115,26 +111,222 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 
 	bot.writer.Write(bytes.NewBufferString(header).Bytes())
 
-	total_nodes := uint64(0)
-	total_time_ns := uint64(0)
+	result_chan := make(chan SearchResult)
+
+	total_stats := SearchStats{
+		nodes:   0,
+		time_ns: 0}
 
 	for i, child := range children {
 
-		heur := child_eval(child, bot.search_depth, bot.heuristic, alpha)
+		var guess int
+		if i == 0 {
+			guess = 0
+		} else {
+			guess = alpha
+		}
 
-		nodes := bot.minimax.Nodes()
-		total_nodes += nodes
-		ns := bot.minimax.ComputeTimeNs()
-		total_time_ns += ns
+		query := SearchQuery{
+			board:       b,
+			lower_bound: alpha,
+			upper_bound: beta,
+			depth:       depth,
+			guess:       guess,
+			heuristic:   bot.heuristic}
 
-		bot.logChildEvaluation(i, heur, alpha, nodes, total_nodes, ns, total_time_ns)
+		// run new thread
+		go RunQuery(query, result_chan)
 
-		if heur > alpha {
-			alpha = heur
+		// but wait for it anyway
+		result := <-result_chan
+
+		child_stats := result.stats
+
+		total_stats.nodes += child_stats.nodes
+		total_stats.time_ns += child_stats.time_ns
+
+		bot.logChildEvaluation(i, result.heur, alpha, child_stats, total_stats)
+
+		if result.heur > alpha {
+			alpha = result.heur
 			afterwards = child
 		}
 	}
 
 	bot.writer.Write(bytes.NewBufferString("\n\n").Bytes())
+	return
+}
+
+func clamp(x, min, max int) int {
+	if x > max {
+		return max
+	}
+	if x < min {
+		return min
+	}
+	return x
+}
+
+type SearchQuery struct {
+	board       board.Board
+	lower_bound int
+	upper_bound int
+	depth       uint
+	guess       int
+	heuristic   minimax.Heuristic
+}
+
+type SearchResult struct {
+	query SearchQuery
+	stats SearchStats
+	heur  int
+}
+
+type SearchStats struct {
+	nodes   uint64
+	time_ns uint64
+}
+
+type SearchState struct {
+	depth uint
+	board board.Board
+}
+
+type SearchThread struct {
+	start time.Time
+	query SearchQuery
+	state SearchState
+	stats SearchStats
+}
+
+func RunQuery(query SearchQuery, ch chan SearchResult) {
+
+	stats := SearchStats{
+		nodes:   0,
+		time_ns: 0}
+
+	state := SearchState{
+		depth: query.depth,
+		board: query.board}
+
+	thread := &SearchThread{
+		query: query,
+		start: time.Now(),
+		state: state,
+		stats: stats}
+
+	var heur int
+	if thread.query.board.CountEmpties() > thread.query.depth {
+		heur = thread.loop(1, thread.doMtdf)
+	} else {
+		heur = thread.loop(2, thread.doMtdfExact)
+	}
+
+	result := SearchResult{
+		query: thread.query,
+		heur:  heur,
+		stats: thread.stats}
+
+	result.stats.time_ns = uint64(time.Since(thread.start).Nanoseconds())
+
+	ch <- result
+
+}
+
+func (thread *SearchThread) loop(step int, call func(int) int) (heur int) {
+
+	// copy values because thread.query should not be modified
+	high := thread.query.upper_bound
+	low := thread.query.lower_bound
+
+	f := clamp(thread.query.guess, low, high)
+
+	for high-low >= step {
+		bound := -call(-(f + 1))
+		if f == bound {
+			f -= step
+			high = bound
+		} else {
+			f += step
+			low = bound
+		}
+	}
+	heur = high
+	return
+}
+
+func (thread *SearchThread) doMtdf(alpha int) (heur int) {
+
+	thread.stats.nodes += 1
+
+	if thread.state.depth == 0 {
+		heur = mtdf_polish(thread.query.heuristic(thread.state.board), alpha)
+		return
+	}
+
+	gen := board.NewChildGen(&thread.state.board)
+
+	if gen.HasMoves() {
+		thread.state.depth--
+		heur = alpha
+		for gen.Next() {
+			child_heur := -thread.doMtdf(-(alpha + 1))
+			if child_heur > alpha {
+				heur = alpha + 1
+				gen.RestoreParent()
+				break
+			}
+		}
+		thread.state.depth++
+		return
+	}
+
+	if thread.state.board.OpponentMoves() != 0 {
+		thread.state.board.SwitchTurn()
+		heur = -thread.doMtdf(-(alpha + 1))
+		thread.state.board.SwitchTurn()
+		return
+	}
+
+	heur = mtdf_polish(minimax.Exact_score_factor*thread.state.board.ExactScore(), alpha)
+	return
+}
+
+func (thread *SearchThread) doMtdfExact(alpha int) (heur int) {
+
+	thread.stats.nodes += 1
+
+	gen := board.NewChildGen(&thread.state.board)
+
+	if gen.HasMoves() {
+		heur = alpha
+		for gen.Next() {
+			child_heur := -thread.doMtdfExact(-(alpha + 1))
+			if child_heur > alpha {
+				heur = alpha + 1
+				gen.RestoreParent()
+				break
+			}
+		}
+		return
+	}
+
+	if thread.state.board.OpponentMoves() != 0 {
+		thread.state.board.SwitchTurn()
+		heur = -thread.doMtdfExact(-(alpha + 1))
+		thread.state.board.SwitchTurn()
+		return
+	}
+
+	heur = mtdf_polish(thread.state.board.ExactScore(), alpha)
+	return
+}
+
+func mtdf_polish(heur, alpha int) (outheur int) {
+	if heur > alpha {
+		outheur = alpha + 1
+		return
+	}
+	outheur = alpha
 	return
 }
