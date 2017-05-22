@@ -254,8 +254,10 @@ func (thread *SearchThread) loop(step int, call func(int) int) (heur int) {
 	high := thread.query.upper_bound
 	low := thread.query.lower_bound
 
+	f := thread.query.guess
+
 	// prevent odd results for exact search
-	f := thread.query.guess & ^int(2)
+	f -= (f % step)
 
 	f = clamp(f, low, high)
 
