@@ -127,7 +127,7 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 		}
 
 		query := SearchQuery{
-			board:       b,
+			board:       child,
 			lower_bound: alpha,
 			upper_bound: beta,
 			depth:       depth,
