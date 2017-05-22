@@ -34,27 +34,41 @@ func NewBotHeuristic(heuristic minimax.Heuristic,
 	return
 }
 
+func fmt_big(n uint64) string {
+
+	if n < 10000 {
+		return fmt.Sprintf(" %4d", n)
+	}
+
+	suffixes := "KMGTPE"
+
+	n /= 1000
+	suffix_index := 0
+
+	for (n > 10000) && (suffix_index < len(suffixes)-1) {
+		n /= 1000
+		suffix_index++
+	}
+
+	return fmt.Sprintf("%4d%c", n, suffixes[suffix_index])
+}
+
+func fmt_ns(n uint64) string {
+
+	suffix_index := 0
+
+	suffixes := []string{"n", "μ", "m", " "}
+
+	for (n > 10000) && (suffix_index < len(suffixes)-1) {
+		n /= 1000
+		suffix_index++
+	}
+
+	return fmt.Sprintf("%5d%ss", n, suffixes[suffix_index])
+}
+
 func (bot *BotHeuristic) logChildEvaluation(child_id, heur, alpha int,
 	child_stats, total_stats SearchStats) {
-
-	fmt_big := func(n uint64) string {
-
-		if n < 10000 {
-			return fmt.Sprintf(" %4d", n)
-		}
-
-		n /= 1000
-		suffix_index := 0
-
-		for n > 10000 {
-			n /= 1000
-			suffix_index++
-		}
-
-		suffixes := "KMGTPE"
-
-		return fmt.Sprintf("%4d%c", n, suffixes[suffix_index])
-	}
 
 	str := fmt.Sprintf("%5d | ", child_id+1)
 	buff := bytes.NewBufferString(str)
@@ -74,9 +88,9 @@ func (bot *BotHeuristic) logChildEvaluation(child_id, heur, alpha int,
 	avg_speed := safe_div(1000000000*total_stats.nodes, total_stats.time_ns)
 	child_speed := safe_div(1000000000*child_stats.nodes, child_stats.time_ns)
 
-	buff.WriteString(fmt.Sprintf("%s | %5dms | %s || %s | %5dms | %s |\n",
-		fmt_big(child_stats.nodes), child_stats.time_ns/1000000, fmt_big(child_speed),
-		fmt_big(total_stats.nodes), total_stats.time_ns/1000000, fmt_big(avg_speed)))
+	buff.WriteString(fmt.Sprintf("%s | %s | %s || %s | %s | %s |\n",
+		fmt_big(child_stats.nodes), fmt_ns(child_stats.time_ns), fmt_big(child_speed),
+		fmt_big(total_stats.nodes), fmt_ns(total_stats.time_ns), fmt_big(avg_speed)))
 	bot.writer.Write(buff.Bytes())
 }
 
@@ -154,7 +168,7 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 			sorted_children[i].heur = result.heur
 
 			if d == depth {
-				bot.logChildEvaluation(i, result.heur, alpha, child_stats, total_stats)
+				bot.logChildEvaluation(i, result.heur, alpha, *child_stats, total_stats)
 				if result.heur > alpha {
 					alpha = result.heur
 				}
@@ -192,8 +206,8 @@ type SearchQuery struct {
 }
 
 type SearchResult struct {
-	query SearchQuery
-	stats SearchStats
+	query *SearchQuery
+	stats *SearchStats
 	heur  int
 }
 
@@ -209,38 +223,33 @@ type SearchState struct {
 
 type SearchThread struct {
 	start time.Time
-	query SearchQuery
-	state SearchState
-	stats SearchStats
+	query *SearchQuery
+	state *SearchState
+	stats *SearchStats
 }
 
 func RunQuery(query SearchQuery, ch chan SearchResult) {
 
-	stats := SearchStats{
-		nodes:   0,
-		time_ns: 0}
-
-	state := SearchState{
-		depth: query.depth,
-		board: query.board}
-
 	thread := &SearchThread{
-		query: query,
+		query: &query,
 		start: time.Now(),
-		state: state,
-		stats: stats}
-
-	var heur int
-	if thread.query.board.CountEmpties() > thread.query.depth {
-		heur = thread.loop(1, thread.doMtdf)
-	} else {
-		heur = thread.loop(2, thread.doMtdfExact)
-	}
+		state: &SearchState{
+			depth: query.depth,
+			board: query.board},
+		stats: &SearchStats{
+			nodes:   0,
+			time_ns: 0}}
 
 	result := SearchResult{
 		query: thread.query,
-		heur:  heur,
+		heur:  0,
 		stats: thread.stats}
+
+	if thread.query.board.CountEmpties() > thread.query.depth {
+		result.heur = thread.loop(1, thread.doMtdf)
+	} else {
+		result.heur = thread.loop(2, thread.doMtdfExact)
+	}
 
 	result.stats.time_ns = uint64(time.Since(thread.start).Nanoseconds())
 
