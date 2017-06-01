@@ -97,14 +97,18 @@ func (bot *BotHeuristic) logChildEvaluation(child_id, heur, alpha int,
 // Does the best move according to heuristic and minimax algorithm
 func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 
-	children := b.GetChildren()
+	children := []SortedBoard{}
+
+	for _, child := range b.GetChildren() {
+		children = append(children, SortedBoard{board: child, heur: 0})
+	}
 
 	if len(children) == 0 {
 		panic("Cannot do move, because there are no moves.")
 	}
 
 	// prevent returning empty board when bot cannot prevent losing all discs
-	afterwards = children[0]
+	afterwards = children[0].board
 
 	if len(children) == 1 {
 		buff := bytes.NewBufferString("Only one move. Skipping evaluation.\n")
@@ -140,15 +144,9 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 		nodes:   0,
 		time_ns: 0}
 
-	sorted_children := []SortedBoard{}
-
-	for _, child := range children {
-		sorted_children = append(sorted_children, SortedBoard{board: child, heur: 0})
-	}
-
 	for d := depth % 2; d <= depth; d += 2 {
 
-		for i, child := range sorted_children {
+		for i, child := range children {
 
 			query := SearchQuery{
 				board:       child.board,
@@ -165,23 +163,23 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 			total_stats.nodes += child_stats.nodes
 			total_stats.time_ns += child_stats.time_ns
 
-			sorted_children[i].heur = result.heur
+			child.heur = result.heur
 
 			if d == depth {
 				bot.logChildEvaluation(i, result.heur, alpha, *child_stats, total_stats)
 				if result.heur > alpha {
 					alpha = result.heur
+					afterwards = child.board
 				}
 			}
 
 		}
 
-		sort.Slice(sorted_children, func(i, j int) bool {
-			return sorted_children[i].heur > sorted_children[j].heur
+		sort.Slice(children, func(i, j int) bool {
+			return children[i].heur > children[j].heur
 		})
 	}
 
-	afterwards = sorted_children[0].board
 	bot.writer.Write(bytes.NewBufferString("\n\n").Bytes())
 	return
 }
