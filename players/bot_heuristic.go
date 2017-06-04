@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"sort"
 	"time"
 
 	"dots/board"
@@ -21,6 +20,7 @@ type BotHeuristic struct {
 	search_depth uint
 	exact_depth  uint
 	writer       io.Writer
+	result_chan  chan SearchResult
 }
 
 // Creates a new BotHeuristic
@@ -30,7 +30,8 @@ func NewBotHeuristic(heuristic minimax.Heuristic,
 		heuristic:    heuristic,
 		search_depth: search_depth,
 		exact_depth:  exact_depth,
-		writer:       writer}
+		writer:       writer,
+		result_chan:  make(chan SearchResult, 32)}
 	return
 }
 
@@ -138,46 +139,46 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 
 	bot.writer.Write(bytes.NewBufferString(header).Bytes())
 
-	result_chan := make(chan SearchResult)
-
 	total_stats := SearchStats{
 		nodes:   0,
 		time_ns: 0}
 
-	for d := depth % 2; d <= depth; d += 2 {
+	processResult := func(child_id int) {
+		result := <-bot.result_chan
 
-		for i, child := range children {
+		child_stats := result.stats
+		total_stats.nodes += child_stats.nodes
+		total_stats.time_ns += child_stats.time_ns
 
-			query := SearchQuery{
-				board:       child.board,
-				lower_bound: alpha,
-				upper_bound: beta,
-				depth:       d,
-				guess:       child.heur,
-				heuristic:   bot.heuristic}
-
-			go RunQuery(query, result_chan)
-			result := <-result_chan
-
-			child_stats := result.stats
-			total_stats.nodes += child_stats.nodes
-			total_stats.time_ns += child_stats.time_ns
-
-			child.heur = result.heur
-
-			if d == depth {
-				bot.logChildEvaluation(i, result.heur, alpha, *child_stats, total_stats)
-				if result.heur > alpha {
-					alpha = result.heur
-					afterwards = child.board
-				}
-			}
-
+		bot.logChildEvaluation(child_id, result.heur, alpha, *child_stats, total_stats)
+		if result.heur > alpha {
+			alpha = result.heur
+			afterwards = result.query.board
 		}
 
-		sort.Slice(children, func(i, j int) bool {
-			return children[i].heur > children[j].heur
-		})
+	}
+
+	for i, child := range children {
+
+		query := SearchQuery{
+			board:       child.board,
+			lower_bound: alpha,
+			upper_bound: beta,
+			depth:       depth,
+			guess:       child.heur,
+			heuristic:   bot.heuristic}
+
+		query.Run(bot.result_chan)
+
+		// evaluate first child before launching other child threads
+		if i == 0 {
+			processResult(0)
+		}
+
+	}
+
+	for i := int(1); i < len(children); i++ {
+		processResult(i)
 	}
 
 	bot.writer.Write(bytes.NewBufferString("\n\n").Bytes())
@@ -226,10 +227,10 @@ type SearchThread struct {
 	stats *SearchStats
 }
 
-func RunQuery(query SearchQuery, ch chan SearchResult) {
+func (query *SearchQuery) Run(ch chan SearchResult) {
 
 	thread := &SearchThread{
-		query: &query,
+		query: query,
 		start: time.Now(),
 		state: &SearchState{
 			depth: query.depth,
@@ -238,6 +239,10 @@ func RunQuery(query SearchQuery, ch chan SearchResult) {
 			nodes:   0,
 			time_ns: 0}}
 
+	go thread.Run(ch)
+}
+
+func (thread *SearchThread) Run(ch chan SearchResult) {
 	result := SearchResult{
 		query: thread.query,
 		heur:  0,
@@ -248,11 +253,8 @@ func RunQuery(query SearchQuery, ch chan SearchResult) {
 	} else {
 		result.heur = thread.loop(2, thread.doMtdfExact)
 	}
-
 	result.stats.time_ns = uint64(time.Since(thread.start).Nanoseconds())
-
 	ch <- result
-
 }
 
 func (thread *SearchThread) loop(step int, call func(int) int) (heur int) {
