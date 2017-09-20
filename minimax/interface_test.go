@@ -18,7 +18,6 @@ func genInterfaceTestConfig() (ch chan interfaceTestConfig) {
 	go func() {
 		ch <- interfaceTestConfig{algorithm: &Minimax{}, max_depth: 4}
 		ch <- interfaceTestConfig{algorithm: &AlphaBeta{}, max_depth: 60}
-		ch <- interfaceTestConfig{algorithm: &Mtdf{}, max_depth: 60}
 		close(ch)
 	}()
 	return

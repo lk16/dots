@@ -143,12 +143,14 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 		nodes:   0,
 		time_ns: 0}
 
+	start_time := time.Now()
+
 	processResult := func(child_id int) {
 		result := <-bot.result_chan
 
 		child_stats := result.stats
 		total_stats.nodes += child_stats.nodes
-		total_stats.time_ns += child_stats.time_ns
+		total_stats.time_ns = uint64(time.Since(start_time).Nanoseconds())
 
 		bot.logChildEvaluation(child_id, result.heur, alpha, *child_stats, total_stats)
 		if result.heur > alpha {
@@ -221,7 +223,6 @@ type SearchState struct {
 }
 
 type SearchThread struct {
-	start time.Time
 	query *SearchQuery
 	state *SearchState
 	stats *SearchStats
@@ -231,7 +232,6 @@ func (query *SearchQuery) Run(ch chan SearchResult) {
 
 	thread := &SearchThread{
 		query: query,
-		start: time.Now(),
 		state: &SearchState{
 			depth: query.depth,
 			board: query.board},
@@ -253,7 +253,6 @@ func (thread *SearchThread) Run(ch chan SearchResult) {
 	} else {
 		result.heur = thread.loop(2, thread.doMtdfExact)
 	}
-	result.stats.time_ns = uint64(time.Since(thread.start).Nanoseconds())
 	ch <- result
 }
 
