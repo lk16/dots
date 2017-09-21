@@ -7,8 +7,25 @@ import (
 	"time"
 
 	"dots/board"
-	"dots/minimax"
 )
+
+const (
+	Max_exact_heuristic = 64
+	Min_exact_heuristic = -Max_exact_heuristic
+	Exact_score_factor  = 1000
+	Max_heuristic       = Exact_score_factor * Max_exact_heuristic
+	Min_heuristic       = Exact_score_factor * Min_exact_heuristic
+)
+
+type Heuristic func(board board.Board) (heur int)
+
+type Interface interface {
+	Search(board board.Board, depth_left uint, heuristic Heuristic, alpha int) (heur int)
+	ExactSearch(board board.Board, alpha int) (heur int)
+	Name() (name string)
+	Nodes() (nodes uint64)
+	ComputeTimeNs() (ns uint64)
+}
 
 type SortedBoard struct {
 	board board.Board
@@ -16,7 +33,7 @@ type SortedBoard struct {
 }
 
 type BotHeuristic struct {
-	heuristic    minimax.Heuristic
+	heuristic    Heuristic
 	search_depth uint
 	exact_depth  uint
 	writer       io.Writer
@@ -24,7 +41,7 @@ type BotHeuristic struct {
 }
 
 // Creates a new BotHeuristic
-func NewBotHeuristic(heuristic minimax.Heuristic,
+func NewBotHeuristic(heuristic Heuristic,
 	search_depth, exact_depth uint, writer io.Writer) (bot *BotHeuristic) {
 	bot = &BotHeuristic{
 		heuristic:    heuristic,
@@ -121,8 +138,8 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 	var depth uint
 
 	if b.CountEmpties() <= bot.exact_depth {
-		alpha = minimax.Min_exact_heuristic
-		beta = minimax.Max_exact_heuristic
+		alpha = Min_exact_heuristic
+		beta = Max_exact_heuristic
 		depth = b.CountEmpties()
 	} else {
 		depth = bot.search_depth
@@ -203,7 +220,7 @@ type SearchQuery struct {
 	upper_bound int
 	depth       uint
 	guess       int
-	heuristic   minimax.Heuristic
+	heuristic   Heuristic
 }
 
 type SearchResult struct {
@@ -316,7 +333,7 @@ func (thread *SearchThread) doMtdf(alpha int) (heur int) {
 		return
 	}
 
-	heur = mtdf_polish(minimax.Exact_score_factor*thread.state.board.ExactScore(), alpha)
+	heur = mtdf_polish(Exact_score_factor*thread.state.board.ExactScore(), alpha)
 	return
 }
 
