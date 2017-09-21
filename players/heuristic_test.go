@@ -1,4 +1,4 @@
-package heuristic
+package players
 
 import (
 	"bytes"

@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"dots/board"
-	"dots/heuristic"
 )
 
 type Player interface {
@@ -23,7 +22,7 @@ func Get(name string, lvl uint) (player Player) {
 		if perfect_depth > 6 {
 			perfect_depth -= 2
 		}
-		player = NewBotHeuristic(heuristic.Squared, search_depth, perfect_depth, os.Stdout)
+		player = NewBotHeuristic(Squared, search_depth, perfect_depth, os.Stdout)
 	} else {
 		panic("Invalid player name")
 	}
