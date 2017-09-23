@@ -14,8 +14,7 @@ func Squared(board board.Board) (heur int) {
 	corner_diff := me_corners - opp_corners
 
 	me_moves := bits.OnesCount64(board.Moves())
-	board.SwitchTurn()
-	opp_moves := bits.OnesCount64(board.Moves())
+	opp_moves := bits.OnesCount64(board.OpponentMoves())
 	move_diff := me_moves - opp_moves
 
 	heur = int((3 * corner_diff) + move_diff)

@@ -30,7 +30,7 @@ func (cli *CommandLine) Initialize() {
 // Print GameState to cli.writer
 func (cli *CommandLine) asciiArt(state GameState) {
 	swap_disc_colors := state.turn == 1
-	state.board.AsciiArt(cli.writer, swap_disc_colors)
+	state.board.ASCIIArt(cli.writer, swap_disc_colors)
 }
 
 // Print GameState to cli.writer on update

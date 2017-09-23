@@ -11,27 +11,27 @@ func TestBoardChildGenNext(t *testing.T) {
 
 	for board := range genTestBoards() {
 
-		expected_set := map[Board]struct{}{}
+		expectedSet := map[Board]struct{}{}
 
 		for _, child := range board.GetChildren() {
-			expected_set[child] = struct{}{}
+			expectedSet[child] = struct{}{}
 		}
 
-		got_set := map[Board]struct{}{}
+		gotSet := map[Board]struct{}{}
 
 		clone := board
 
 		gen := NewChildGen(&clone)
 		for gen.Next() {
-			got_set[clone] = struct{}{}
+			gotSet[clone] = struct{}{}
 		}
 
 		if clone != board {
 			t.Errorf("Parent state not restored after looping over all children")
 		}
 
-		for g, _ := range got_set {
-			if _, ok := expected_set[g]; !ok {
+		for g := range gotSet {
+			if _, ok := expectedSet[g]; !ok {
 				t.Errorf("Children sets are unequal.\n")
 				break
 			}
@@ -39,16 +39,16 @@ func TestBoardChildGenNext(t *testing.T) {
 
 		if t.Failed() {
 			buff := new(bytes.Buffer)
-			t.Errorf("Expected set (%d):\n", len(expected_set))
-			for child, _ := range expected_set {
-				child.AsciiArt(buff, false)
+			t.Errorf("Expected set (%d):\n", len(expectedSet))
+			for child := range expectedSet {
+				child.ASCIIArt(buff, false)
 				buff.WriteString("\n\n")
 			}
 			t.Errorf(buff.String())
 			buff.Reset()
-			t.Errorf("Got set (%d):\n", len(got_set))
-			for child, _ := range got_set {
-				child.AsciiArt(buff, false)
+			t.Errorf("Got set (%d):\n", len(gotSet))
+			for child := range gotSet {
+				child.ASCIIArt(buff, false)
 				buff.WriteString("\n\n")
 			}
 			t.Errorf(buff.String())
@@ -79,7 +79,7 @@ func TestBoardChildGenHasMoves(t *testing.T) {
 
 }
 
-func lame_heuristic(board Board) int {
+func lameHeuristic(board Board) int {
 	return bits.OnesCount64(board.Me()) - bits.OnesCount64(board.Opp())
 }
 
@@ -87,27 +87,27 @@ func TestBoardChildGenSortedNext(t *testing.T) {
 
 	for board := range genTestBoards() {
 
-		expected_set := map[Board]struct{}{}
+		expectedSet := map[Board]struct{}{}
 
 		for _, child := range board.GetChildren() {
-			expected_set[child] = struct{}{}
+			expectedSet[child] = struct{}{}
 		}
 
-		got_set := map[Board]struct{}{}
+		gotSet := map[Board]struct{}{}
 
 		clone := board
 
-		gen := NewChildGenSorted(&clone, lame_heuristic)
+		gen := NewChildGenSorted(&clone, lameHeuristic)
 		for gen.Next() {
-			got_set[clone] = struct{}{}
+			gotSet[clone] = struct{}{}
 		}
 
 		if clone != board {
 			t.Errorf("Parent state not restored after looping over all children")
 		}
 
-		for g, _ := range got_set {
-			if _, ok := expected_set[g]; !ok {
+		for g := range gotSet {
+			if _, ok := expectedSet[g]; !ok {
 				t.Errorf("Children sets are unequal.\n")
 				break
 			}
@@ -115,16 +115,16 @@ func TestBoardChildGenSortedNext(t *testing.T) {
 
 		if t.Failed() {
 			buff := new(bytes.Buffer)
-			t.Errorf("Expected set (%d):\n", len(expected_set))
-			for child, _ := range expected_set {
-				child.AsciiArt(buff, false)
+			t.Errorf("Expected set (%d):\n", len(expectedSet))
+			for child := range expectedSet {
+				child.ASCIIArt(buff, false)
 				buff.WriteString("\n\n")
 			}
 			t.Errorf(buff.String())
 			buff.Reset()
-			t.Errorf("Got set (%d):\n", len(got_set))
-			for child, _ := range got_set {
-				child.AsciiArt(buff, false)
+			t.Errorf("Got set (%d):\n", len(gotSet))
+			for child := range gotSet {
+				child.ASCIIArt(buff, false)
 				buff.WriteString("\n\n")
 			}
 			t.Errorf(buff.String())
@@ -136,7 +136,7 @@ func TestBoardChildGenSortedNext(t *testing.T) {
 
 func TestBoardChildGenSortedRestoreParent(t *testing.T) {
 	board := NewBoard()
-	gen := NewChildGenSorted(board, lame_heuristic)
+	gen := NewChildGenSorted(board, lameHeuristic)
 	gen.Next()
 	gen.RestoreParent()
 	if *board != *NewBoard() {
@@ -145,11 +145,11 @@ func TestBoardChildGenSortedRestoreParent(t *testing.T) {
 }
 
 func TestBoardChildGenSortedHasMoves(t *testing.T) {
-	if !NewChildGenSorted(NewBoard(), lame_heuristic).HasMoves() {
+	if !NewChildGenSorted(NewBoard(), lameHeuristic).HasMoves() {
 		t.Errorf("Expected initial board has moves!")
 	}
 
-	if NewChildGenSorted(RandomBoard(64), lame_heuristic).HasMoves() {
+	if NewChildGenSorted(RandomBoard(64), lameHeuristic).HasMoves() {
 		t.Errorf("Expected full board does not have moves")
 	}
 

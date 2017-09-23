@@ -125,8 +125,9 @@ func (control *Controller) reset() {
 }
 
 // Checks if a game is running
-func (control *Controller) gameRunning() (running bool) {
-	return !control.GetState().board.IsLeaf()
+func (control *Controller) gameRunning() bool {
+	board := control.GetState().board
+	return board.Moves() != 0 || board.OpponentMoves() != 0
 }
 
 // Undo last move

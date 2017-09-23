@@ -8,29 +8,30 @@ import (
 	"math/rand"
 )
 
+// Board represents the state of an othello board game
 type Board struct {
 	me, opp uint64
 }
 
-// Returns a Board in start state
+// NewBoard returns a Board representing the initial state
 func NewBoard() (board *Board) {
 	board = new(Board)
-	board.me = (1 << 28) | (1 << 35)
-	board.opp = (1 << 27) | (1 << 36)
+	board.me = 1<<28 | 1<<35
+	board.opp = 1<<27 | 1<<36
 	return
 }
 
-// Returns a custom Board
+// CustomBoard returns a Board with a custom state
 func CustomBoard(me, opp uint64) (board *Board) {
 	return &Board{
 		me:  me,
 		opp: opp}
 }
 
-// Returns a random Board reachable from normal play with a certain number of discs
+// RandomBoard returns a random Board with a given number of discs
 func RandomBoard(discs int) (board *Board) {
 
-	if (discs < 4) || (discs > 64) {
+	if discs < 4 || discs > 64 {
 		panic("Cannot create random board: invalid number of discs required")
 	}
 
@@ -59,39 +60,15 @@ func RandomBoard(discs int) (board *Board) {
 	return
 }
 
-// Returns whether a Board is valid
-// False positives of validity may occur
-func (board *Board) IsValid() (valid bool) {
-
-	// no field can be occupied by two discs
-	if (board.me & board.opp) != 0 {
-		valid = false
-		return
-	}
-
-	// start discs are never removed
-	start_board := NewBoard()
-	start_mask := start_board.me | start_board.opp
-
-	if (board.me|board.opp)&start_mask != start_mask {
-		valid = false
-		return
-	}
-
-	// no indication board is invalid
-	valid = true
-	return
-}
-
-// Writers a String of ASCII-art of a Board
-func (board Board) AsciiArt(writer io.Writer, swap_disc_colors bool) {
+// ASCIIArt writes ascii-art of a Board to a writer
+func (board Board) ASCIIArt(writer io.Writer, SwapDiscColors bool) {
 
 	buffer := new(bytes.Buffer)
 	buffer.WriteString("+-a-b-c-d-e-f-g-h-+\n")
 
 	moves := board.Moves()
 
-	if swap_disc_colors {
+	if SwapDiscColors {
 		board.SwitchTurn()
 	}
 
@@ -118,49 +95,46 @@ func (board Board) AsciiArt(writer io.Writer, swap_disc_colors bool) {
 	writer.Write(buffer.Bytes())
 }
 
-// Returns a Bitset with all valid moves for a board for the player to move
-func (board Board) Moves() (moves_set uint64) {
-	moves_set = moves(board.me, board.opp)
-	return
+// Moves returns a bitset of valid moves for a Board
+func (board Board) Moves() uint64 {
+	return moves(board.me, board.opp)
 }
 
-// Returns a Bitset with all valid moves for a board for the opponent of the player to move
-func (board Board) OpponentMoves() (moves_set uint64) {
-	moves_set = moves(board.opp, board.me)
-	return
+// OpponentMoves returns a bitset with all valid moves for the opponent
+func (board Board) OpponentMoves() uint64 {
+	return moves(board.opp, board.me)
 }
 
-func moves(me, opp uint64) (moves_set uint64) {
+func moves(me, opp uint64) (movesSet uint64) {
 	// Returns a subset of the moves for a Board
 	movesPartial := func(me, mask, n uint64) (moves uint64) {
-		flip_l := mask & (me << n)
-		flip_l |= mask & (flip_l << n)
-		mask_l := mask & (mask << n)
-		flip_l |= mask_l & (flip_l << (2 * n))
-		flip_l |= mask_l & (flip_l << (2 * n))
-		flip_r := mask & (me >> n)
-		flip_r |= mask & (flip_r >> n)
-		mask_r := mask & (mask >> n)
-		flip_r |= mask_r & (flip_r >> (2 * n))
-		flip_r |= mask_r & (flip_r >> (2 * n))
-		moves = (flip_l << n) | (flip_r >> n)
+		flipL := mask & (me << n)
+		flipL |= mask & (flipL << n)
+		maskL := mask & (mask << n)
+		flipL |= maskL & (flipL << (2 * n))
+		flipL |= maskL & (flipL << (2 * n))
+		flipR := mask & (me >> n)
+		flipR |= mask & (flipR >> n)
+		maskR := mask & (mask >> n)
+		flipR |= maskR & (flipR >> (2 * n))
+		flipR |= maskR & (flipR >> (2 * n))
+		moves = (flipL << n) | (flipR >> n)
 		return
 	}
 
 	// this function is a modified version of code from Edax
 	mask := opp & 0x7E7E7E7E7E7E7E7E
 
-	moves_set = movesPartial(me, mask, 1)
-	moves_set |= movesPartial(me, mask, 7)
-	moves_set |= movesPartial(me, mask, 9)
-	moves_set |= movesPartial(me, opp, 8)
+	movesSet = movesPartial(me, mask, 1)
+	movesSet |= movesPartial(me, mask, 7)
+	movesSet |= movesPartial(me, mask, 9)
+	movesSet |= movesPartial(me, opp, 8)
 
-	moves_set &^= (me | opp)
+	movesSet &^= (me | opp)
 	return
 }
 
-// Does the move at field index on a Board
-// Returns the flipped discs
+// DoMove does a move and returns the flipped discs
 func (board *Board) DoMove(index int) (flipped uint64) {
 
 	doMoveFuncs := []func() uint64{
@@ -191,7 +165,7 @@ func (board *Board) DoMove(index int) (flipped uint64) {
 	return flipped
 }
 
-// Returns a slice with all children of a Board
+// GetChildren returns a slice with all children of a Board
 func (board Board) GetChildren() (children []Board) {
 
 	moves := board.Moves()
@@ -209,93 +183,71 @@ func (board Board) GetChildren() (children []Board) {
 	return
 }
 
-func (board *Board) UndoMove(move_bit, flipped uint64) {
+// UndoMove undoes a move
+func (board *Board) UndoMove(moveBit, flipped uint64) {
 	tmp := board.me
-	board.me = board.opp &^ (flipped | move_bit)
+	board.me = board.opp &^ (flipped | moveBit)
 	board.opp = tmp | flipped
 }
 
-// Does a random move on a Board
+// DoRandomMove does a random move on a Board
 func (board *Board) DoRandomMove() {
-	move_count := bits.OnesCount64(board.Moves())
-	if move_count == 0 {
+	moveCount := bits.OnesCount64(board.Moves())
+	if moveCount == 0 {
 		panic("Cannot do a random move when there are no moves.")
 	}
-	child_index := rand.Int() % move_count
-	*board = board.GetChildren()[child_index]
+	childIndex := rand.Int() % moveCount
+	*board = board.GetChildren()[childIndex]
 }
 
-// Switches turn of a Board
+// SwitchTurn effectively passes a turn
 func (board *Board) SwitchTurn() {
-	tmp := board.me
-	board.me = board.opp
-	board.opp = tmp
+	board.me, board.opp = board.opp, board.me
 }
 
-// Returns the amount of discs on a board
-func (board Board) CountDiscs() (count int) {
-	count = bits.OnesCount64(board.me | board.opp)
-	return
+// CountDiscs counts the number of discs on a Board
+func (board Board) CountDiscs() int {
+	return bits.OnesCount64(board.me | board.opp)
 }
 
-// Returns the amount of empty fields on a board
-func (board Board) CountEmpties() (count int) {
-	empties := ^(board.me | board.opp)
-	count = bits.OnesCount64(empties)
-	return
+// CountEmpties returns the number of empty fields on a Board
+func (board Board) CountEmpties() int {
+	return 64 - board.CountDiscs()
 }
 
-// Returns the final score of a board as if it is end of game
-func (board Board) ExactScore() (score int) {
-	me_count := bits.OnesCount64(board.me)
-	opp_count := bits.OnesCount64(board.opp)
+// ExactScore returns the final score of a Board
+func (board Board) ExactScore() int {
+	meCount := bits.OnesCount64(board.me)
+	oppCount := bits.OnesCount64(board.opp)
 
-	if me_count > opp_count {
-		score = 64 - (2 * opp_count)
-	} else if me_count < opp_count {
-		score = -64 + (2 * me_count)
+	if meCount > oppCount {
+		return 64 - (2 * oppCount)
 	}
-	return
-}
-
-// Returns a bitset with the discs of the player to move
-func (board Board) Me() (me uint64) {
-	me = board.me
-	return
-}
-
-// Returns a bitset with the discs of the opponent of the player to move
-func (board Board) Opp() (opp uint64) {
-	opp = board.opp
-	return
-}
-
-// Returns whether this board is a leaf in the game tree
-func (board Board) IsLeaf() (is_leaf bool) {
-	is_leaf = false
-
-	if board.Moves() != 0 {
-		return
+	if meCount < oppCount {
+		return -64 + (2 * meCount)
 	}
+	return 0
+}
 
-	board.SwitchTurn()
-	if board.Moves() != 0 {
-		return
-	}
+// Me returns a bitset with the discs of the player to move
+func (board Board) Me() uint64 {
+	return board.me
+}
 
-	is_leaf = true
-	return
+// Opp returns a bitset with the discs of the opponent of the player to move
+func (board Board) Opp() uint64 {
+	return board.opp
 }
 
 // Flips discs on a Board, given a flipping line.
 // This only affects the directions right, left down, down and right down
 // Returns the flipped discs.
 func (board *Board) doMoveToHigherBits(line uint64) (flipped uint64) {
-	line_mask := line & board.me
-	if line_mask == 0 {
+	lineMask := line & board.me
+	if lineMask == 0 {
 		return
 	}
-	bit := line_mask & (-line_mask)
+	bit := lineMask & (-lineMask)
 	line &= uint64(bit - 1)
 	if line&board.opp == line {
 		flipped = line
@@ -307,11 +259,11 @@ func (board *Board) doMoveToHigherBits(line uint64) (flipped uint64) {
 // This only affects the directions left up, up, right up and left
 // Returns the flipped discs.
 func (board *Board) doMoveToLowerBits(line uint64) (flipped uint64) {
-	line_mask := line & board.me
-	if line_mask == 0 {
+	lineMask := line & board.me
+	if lineMask == 0 {
 		return
 	}
-	bit := uint64(1) << uint(bits.Len64(line_mask)-1)
+	bit := uint64(1) << uint(bits.Len64(lineMask)-1)
 	line &^= uint64((bit << 1) - 1)
 
 	if line&board.opp == line {

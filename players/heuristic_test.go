@@ -28,7 +28,7 @@ func TestHeuristicSquared(t *testing.T) {
 
 		if got != test.expected {
 			buff := new(bytes.Buffer)
-			test.board.AsciiArt(buff, false)
+			test.board.ASCIIArt(buff, false)
 			t.Errorf("Expected %d, got %d for board\n%s\n\n",
 				test.expected, got, buff.String())
 		}
