@@ -1,10 +1,9 @@
 
 # Dots
-Strategy games framework written in Golang
+Othello game with AI
 
-### Run like this (or similar)
-```go run -tags gtk_3_18 main.go```
-
+### Install
+```go get -tags gtk_3_18 github.com/lk16/dots```
 
 ### TODO
 - [ ] support xot openings
@@ -16,19 +15,13 @@ Strategy games framework written in Golang
     - [x] mtdf
     - [ ] hashtable
     - [ ] parallel search
-    - [ ] opening book
-        - [ ] learn from from games against bot
-        - [ ] learn from PGNs
-        - [ ] learn stand alone
+    - [ ] learning opening book
+        - [ ] from from games against bot
+        - [ ] from PGNs
+        - [ ] stand alone
 - [ ] rated tournaments between players and bots
 - [ ] PGNs:
     - [ ] parse
         - [ ] kurnik
         - [ ] flyordie
     - [ ] evaluate
-- [ ] support several games:
-    - [x] othello
-    - [ ] connect four
-    - [ ] checkers
-    - [ ] trexo
-    - [ ] chess

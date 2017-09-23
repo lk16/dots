@@ -96,7 +96,8 @@ func TestBitsetLastBit(t *testing.T) {
 		}
 
 		if expected != got {
-			t.Errorf("Expected %d but got %d\n", expected, got)
+			t.Errorf("Bitset %d, expected %d but got %d\n", bs, expected, got)
+			t.FailNow()
 		}
 	}
 }
@@ -117,7 +118,7 @@ func TestBitsetTestBit(t *testing.T) {
 			}
 
 			if expected != got {
-				t.Errorf("Expected %d but got %d\n", expected, got)
+				t.Errorf("Expected %v but got %v\n", expected, got)
 			}
 		}
 	}
