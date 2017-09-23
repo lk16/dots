@@ -10,7 +10,7 @@ type Player interface {
 	DoMove(board.Board) board.Board
 }
 
-func Get(name string, lvl uint) (player Player) {
+func Get(name string, lvl int) (player Player) {
 
 	if name == "human" {
 		player = nil

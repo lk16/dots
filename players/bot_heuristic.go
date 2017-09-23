@@ -34,15 +34,15 @@ type SortedBoard struct {
 
 type BotHeuristic struct {
 	heuristic    Heuristic
-	search_depth uint
-	exact_depth  uint
+	search_depth int
+	exact_depth  int
 	writer       io.Writer
 	result_chan  chan SearchResult
 }
 
 // Creates a new BotHeuristic
 func NewBotHeuristic(heuristic Heuristic,
-	search_depth, exact_depth uint, writer io.Writer) (bot *BotHeuristic) {
+	search_depth, exact_depth int, writer io.Writer) (bot *BotHeuristic) {
 	bot = &BotHeuristic{
 		heuristic:    heuristic,
 		search_depth: search_depth,
@@ -135,7 +135,7 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 	}
 
 	var alpha, beta int
-	var depth uint
+	var depth int
 
 	if b.CountEmpties() <= bot.exact_depth {
 		alpha = Min_exact_heuristic
@@ -218,7 +218,7 @@ type SearchQuery struct {
 	board       board.Board
 	lower_bound int
 	upper_bound int
-	depth       uint
+	depth       int
 	guess       int
 	heuristic   Heuristic
 }
@@ -235,7 +235,7 @@ type SearchStats struct {
 }
 
 type SearchState struct {
-	depth uint
+	depth int
 	board board.Board
 }
 

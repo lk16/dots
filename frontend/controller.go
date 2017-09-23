@@ -5,6 +5,8 @@ import (
 
 	"dots/board"
 	"dots/players"
+
+	"math/bits"
 )
 
 const (
@@ -28,17 +30,19 @@ func (state *GameState) GetFieldValue(field uint) (field_value int) {
 		panic("state.turn has impossible value")
 	}
 
-	if state.board.Me().TestBit(field) {
+	mask := uint64(1) << field
+
+	if state.board.Me()&mask != 0 {
 		field_value = BLACK | state.turn
 		return
 	}
 
-	if state.board.Opp().TestBit(field) {
+	if state.board.Opp()&mask != 0 {
 		field_value = WHITE ^ state.turn
 		return
 	}
 
-	if state.board.Moves().TestBit(field) {
+	if state.board.Moves()&mask != 0 {
 		field_value = MOVE_BLACK | state.turn
 		return
 	}
@@ -105,7 +109,7 @@ func (control *Controller) doMove() {
 
 // Returns whether the player to move can do a move
 func (control *Controller) canMove() (can_move bool) {
-	moves_count := control.GetState().board.Moves().Count()
+	moves_count := bits.OnesCount64(control.GetState().board.Moves())
 	can_move = (moves_count != 0)
 	return
 }

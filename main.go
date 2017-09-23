@@ -16,10 +16,10 @@ func main() {
 	seed := flag.Int64("seed", default_seed, "Custom seed")
 
 	black_name := flag.String("bp", "human", "Black player: Bot name or \"human\"")
-	black_lvl := flag.Uint("bl", 5, "Black player search level (ignored for human)")
+	black_lvl := flag.Int("bl", 5, "Black player search level (ignored for human)")
 
 	white_name := flag.String("wp", "human", "White player: Bot name or \"human\"")
-	white_lvl := flag.Uint("wl", 5, "White player search level (ignored for human)")
+	white_lvl := flag.Int("wl", 5, "White player search level (ignored for human)")
 
 	frontend_name := flag.String("frontend", "gtk", "Frontend: \"gtk\" or \"cli\"")
 

@@ -8,12 +8,12 @@ import (
 func TestBotRandomDoMove(t *testing.T) {
 	bot := NewBotRandom()
 
-	for discs := uint(4); discs <= 64; discs++ {
+	for discs := 4; discs <= 64; discs++ {
 		for i := 0; i < 10; i++ {
 
 			board := board.RandomBoard(discs)
 
-			if board.Moves().Count() == 0 {
+			if board.Moves() == 0 {
 				continue
 			}
 

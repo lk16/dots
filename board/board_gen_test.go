@@ -3,6 +3,8 @@ package board
 import (
 	"bytes"
 	"testing"
+
+	"math/bits"
 )
 
 func TestBoardChildGenNext(t *testing.T) {
@@ -78,7 +80,7 @@ func TestBoardChildGenHasMoves(t *testing.T) {
 }
 
 func lame_heuristic(board Board) int {
-	return int(board.Me().Count() - board.Opp().Count())
+	return bits.OnesCount64(board.Me()) - bits.OnesCount64(board.Opp())
 }
 
 func TestBoardChildGenSortedNext(t *testing.T) {

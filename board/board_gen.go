@@ -1,8 +1,7 @@
 package board
 
 import (
-	"dots/bitset"
-
+	"math/bits"
 	"sort"
 )
 
@@ -13,9 +12,9 @@ type ChildGenerator interface {
 }
 
 type UnsortedChildGenerator struct {
-	moves_left   bitset.Bitset
-	last_move    bitset.Bitset
-	last_flipped bitset.Bitset
+	moves_left   uint64
+	last_move    uint64
+	last_flipped uint64
 	child        *Board
 }
 
@@ -23,8 +22,8 @@ type UnsortedChildGenerator struct {
 func NewChildGen(board *Board) (gen *UnsortedChildGenerator) {
 	gen = &UnsortedChildGenerator{
 		moves_left:   board.Moves(),
-		last_move:    bitset.Bitset(0),
-		last_flipped: bitset.Bitset(0),
+		last_move:    0,
+		last_flipped: 0,
 		child:        board}
 	return
 }
@@ -47,11 +46,11 @@ func (gen *UnsortedChildGenerator) Next() (ok bool) {
 		return
 	}
 
-	index := gen.moves_left.FirstBitIndex()
-	gen.moves_left.ResetBit(index)
+	index := bits.TrailingZeros64(gen.moves_left)
 
+	gen.last_move = uint64(1) << uint(index)
 	gen.last_flipped = gen.child.DoMove(index)
-	gen.last_move = bitset.Bitset(1 << index)
+	gen.moves_left &^= gen.last_move
 
 	ok = true
 	return

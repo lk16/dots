@@ -4,32 +4,31 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"math/bits"
 	"math/rand"
-
-	"dots/bitset"
 )
 
 type Board struct {
-	me, opp bitset.Bitset
+	me, opp uint64
 }
 
 // Returns a Board in start state
 func NewBoard() (board *Board) {
 	board = new(Board)
-	board.me.SetBit(28).SetBit(35)
-	board.opp.SetBit(27).SetBit(36)
+	board.me = (1 << 28) | (1 << 35)
+	board.opp = (1 << 27) | (1 << 36)
 	return
 }
 
 // Returns a custom Board
-func CustomBoard(me, opp bitset.Bitset) (board *Board) {
+func CustomBoard(me, opp uint64) (board *Board) {
 	return &Board{
 		me:  me,
 		opp: opp}
 }
 
 // Returns a random Board reachable from normal play with a certain number of discs
-func RandomBoard(discs uint) (board *Board) {
+func RandomBoard(discs int) (board *Board) {
 
 	if (discs < 4) || (discs > 64) {
 		panic("Cannot create random board: invalid number of discs required")
@@ -47,7 +46,7 @@ func RandomBoard(discs uint) (board *Board) {
 			continue
 		}
 
-		if board.Moves().Count() == 0 {
+		if bits.OnesCount64(board.Moves()) == 0 {
 			skips++
 			board.SwitchTurn()
 			continue
@@ -100,11 +99,12 @@ func (board Board) AsciiArt(writer io.Writer, swap_disc_colors bool) {
 		buffer.WriteString(fmt.Sprintf("%d ", y+1))
 
 		for x := uint(0); x < 8; x++ {
-			if board.me.TestBit(y*8 + x) {
+			mask := uint64(1) << (y*8 + x)
+			if board.me&mask != 0 {
 				buffer.WriteString("○ ")
-			} else if board.opp.TestBit(y*8 + x) {
+			} else if board.opp&mask != 0 {
 				buffer.WriteString("● ")
-			} else if moves.TestBit(y*8 + x) {
+			} else if moves&mask != 0 {
 				buffer.WriteString("- ")
 			} else {
 				buffer.WriteString("  ")
@@ -119,20 +119,20 @@ func (board Board) AsciiArt(writer io.Writer, swap_disc_colors bool) {
 }
 
 // Returns a Bitset with all valid moves for a board for the player to move
-func (board Board) Moves() (moves_set bitset.Bitset) {
+func (board Board) Moves() (moves_set uint64) {
 	moves_set = moves(board.me, board.opp)
 	return
 }
 
 // Returns a Bitset with all valid moves for a board for the opponent of the player to move
-func (board Board) OpponentMoves() (moves_set bitset.Bitset) {
+func (board Board) OpponentMoves() (moves_set uint64) {
 	moves_set = moves(board.opp, board.me)
 	return
 }
 
-func moves(me, opp bitset.Bitset) (moves_set bitset.Bitset) {
+func moves(me, opp uint64) (moves_set uint64) {
 	// Returns a subset of the moves for a Board
-	movesPartial := func(me, mask, n bitset.Bitset) (moves bitset.Bitset) {
+	movesPartial := func(me, mask, n uint64) (moves uint64) {
 		flip_l := mask & (me << n)
 		flip_l |= mask & (flip_l << n)
 		mask_l := mask & (mask << n)
@@ -161,9 +161,9 @@ func moves(me, opp bitset.Bitset) (moves_set bitset.Bitset) {
 
 // Does the move at field index on a Board
 // Returns the flipped discs
-func (board *Board) DoMove(index uint) (flipped bitset.Bitset) {
+func (board *Board) DoMove(index int) (flipped uint64) {
 
-	doMoveFuncs := []func() bitset.Bitset{
+	doMoveFuncs := []func() uint64{
 		board.doMove0, board.doMove1, board.doMove2, board.doMove3,
 		board.doMove4, board.doMove5, board.doMove6, board.doMove7,
 		board.doMove8, board.doMove9, board.doMove10, board.doMove11,
@@ -183,8 +183,7 @@ func (board *Board) DoMove(index uint) (flipped bitset.Bitset) {
 
 	flipped = doMoveFuncs[index]()
 
-	tmp := board.me | flipped
-	tmp.SetBit(index)
+	tmp := board.me | flipped | uint64(1)<<uint(index)
 
 	board.me = board.opp &^ tmp
 	board.opp = tmp
@@ -199,8 +198,8 @@ func (board Board) GetChildren() (children []Board) {
 	children = make([]Board, 0)
 
 	for moves != 0 {
-		index := moves.FirstBitIndex()
-		moves.ResetBit(index)
+		index := bits.TrailingZeros64(moves)
+		moves &^= uint64(1) << uint(index)
 
 		child := board
 		child.DoMove(index)
@@ -210,7 +209,7 @@ func (board Board) GetChildren() (children []Board) {
 	return
 }
 
-func (board *Board) UndoMove(move_bit, flipped bitset.Bitset) {
+func (board *Board) UndoMove(move_bit, flipped uint64) {
 	tmp := board.me
 	board.me = board.opp &^ (flipped | move_bit)
 	board.opp = tmp | flipped
@@ -218,11 +217,11 @@ func (board *Board) UndoMove(move_bit, flipped bitset.Bitset) {
 
 // Does a random move on a Board
 func (board *Board) DoRandomMove() {
-	move_count := board.Moves().Count()
+	move_count := bits.OnesCount64(board.Moves())
 	if move_count == 0 {
 		panic("Cannot do a random move when there are no moves.")
 	}
-	child_index := uint(rand.Uint32()) % move_count
+	child_index := rand.Int() % move_count
 	*board = board.GetChildren()[child_index]
 }
 
@@ -234,22 +233,22 @@ func (board *Board) SwitchTurn() {
 }
 
 // Returns the amount of discs on a board
-func (board Board) CountDiscs() (count uint) {
-	count = (board.me | board.opp).Count()
+func (board Board) CountDiscs() (count int) {
+	count = bits.OnesCount64(board.me | board.opp)
 	return
 }
 
 // Returns the amount of empty fields on a board
-func (board Board) CountEmpties() (count uint) {
+func (board Board) CountEmpties() (count int) {
 	empties := ^(board.me | board.opp)
-	count = empties.Count()
+	count = bits.OnesCount64(empties)
 	return
 }
 
 // Returns the final score of a board as if it is end of game
 func (board Board) ExactScore() (score int) {
-	me_count := int(board.me.Count())
-	opp_count := int(board.opp.Count())
+	me_count := bits.OnesCount64(board.me)
+	opp_count := bits.OnesCount64(board.opp)
 
 	if me_count > opp_count {
 		score = 64 - (2 * opp_count)
@@ -260,13 +259,13 @@ func (board Board) ExactScore() (score int) {
 }
 
 // Returns a bitset with the discs of the player to move
-func (board Board) Me() (me bitset.Bitset) {
+func (board Board) Me() (me uint64) {
 	me = board.me
 	return
 }
 
 // Returns a bitset with the discs of the opponent of the player to move
-func (board Board) Opp() (opp bitset.Bitset) {
+func (board Board) Opp() (opp uint64) {
 	opp = board.opp
 	return
 }
@@ -275,12 +274,12 @@ func (board Board) Opp() (opp bitset.Bitset) {
 func (board Board) IsLeaf() (is_leaf bool) {
 	is_leaf = false
 
-	if board.Moves().Count() != 0 {
+	if board.Moves() != 0 {
 		return
 	}
 
 	board.SwitchTurn()
-	if board.Moves().Count() != 0 {
+	if board.Moves() != 0 {
 		return
 	}
 
@@ -291,13 +290,13 @@ func (board Board) IsLeaf() (is_leaf bool) {
 // Flips discs on a Board, given a flipping line.
 // This only affects the directions right, left down, down and right down
 // Returns the flipped discs.
-func (board *Board) doMoveToHigherBits(line bitset.Bitset) (flipped bitset.Bitset) {
+func (board *Board) doMoveToHigherBits(line uint64) (flipped uint64) {
 	line_mask := line & board.me
 	if line_mask == 0 {
 		return
 	}
-	bit := line_mask.FirstBit()
-	line &= bitset.Bitset(bit - 1)
+	bit := line_mask & (-line_mask)
+	line &= uint64(bit - 1)
 	if line&board.opp == line {
 		flipped = line
 	}
@@ -307,13 +306,13 @@ func (board *Board) doMoveToHigherBits(line bitset.Bitset) (flipped bitset.Bitse
 // Flips discs on a Board, given a flipping line.
 // This only affects the directions left up, up, right up and left
 // Returns the flipped discs.
-func (board *Board) doMoveToLowerBits(line bitset.Bitset) (flipped bitset.Bitset) {
+func (board *Board) doMoveToLowerBits(line uint64) (flipped uint64) {
 	line_mask := line & board.me
 	if line_mask == 0 {
 		return
 	}
-	bit := line_mask.LastBit()
-	line &^= bitset.Bitset((bit << 1) - 1)
+	bit := uint64(1) << uint(bits.Len64(line_mask)-1)
+	line &^= uint64((bit << 1) - 1)
 
 	if line&board.opp == line {
 		flipped = line
@@ -323,7 +322,7 @@ func (board *Board) doMoveToLowerBits(line bitset.Bitset) (flipped bitset.Bitset
 
 //Does the move at field 0.
 //Returns the flipped discs.
-func (board *Board) doMove0() (flipped bitset.Bitset) {
+func (board *Board) doMove0() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00000000000000FE)
 	flipped |= board.doMoveToHigherBits(0x0101010101010100)
 	flipped |= board.doMoveToHigherBits(0x8040201008040200)
@@ -332,7 +331,7 @@ func (board *Board) doMove0() (flipped bitset.Bitset) {
 
 //Does the move at field 1.
 //Returns the flipped discs.
-func (board *Board) doMove1() (flipped bitset.Bitset) {
+func (board *Board) doMove1() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00000000000000FC)
 	flipped |= board.doMoveToHigherBits(0x0202020202020200)
 	flipped |= board.doMoveToHigherBits(0x0080402010080400)
@@ -341,7 +340,7 @@ func (board *Board) doMove1() (flipped bitset.Bitset) {
 
 //Does the move at field 2.
 //Returns the flipped discs.
-func (board *Board) doMove2() (flipped bitset.Bitset) {
+func (board *Board) doMove2() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00000000000000F8)
 	flipped |= board.doMoveToHigherBits(0x0000000000010200)
 	flipped |= board.doMoveToHigherBits(0x0404040404040400)
@@ -352,7 +351,7 @@ func (board *Board) doMove2() (flipped bitset.Bitset) {
 
 //Does the move at field 3.
 //Returns the flipped discs.
-func (board *Board) doMove3() (flipped bitset.Bitset) {
+func (board *Board) doMove3() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00000000000000F0)
 	flipped |= board.doMoveToHigherBits(0x0000000001020400)
 	flipped |= board.doMoveToHigherBits(0x0808080808080800)
@@ -363,7 +362,7 @@ func (board *Board) doMove3() (flipped bitset.Bitset) {
 
 //Does the move at field 4.
 //Returns the flipped discs.
-func (board *Board) doMove4() (flipped bitset.Bitset) {
+func (board *Board) doMove4() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00000000000000E0)
 	flipped |= board.doMoveToHigherBits(0x0000000102040800)
 	flipped |= board.doMoveToHigherBits(0x1010101010101000)
@@ -374,7 +373,7 @@ func (board *Board) doMove4() (flipped bitset.Bitset) {
 
 //Does the move at field 5.
 //Returns the flipped discs.
-func (board *Board) doMove5() (flipped bitset.Bitset) {
+func (board *Board) doMove5() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00000000000000C0)
 	flipped |= board.doMoveToHigherBits(0x0000010204081000)
 	flipped |= board.doMoveToHigherBits(0x2020202020202000)
@@ -385,7 +384,7 @@ func (board *Board) doMove5() (flipped bitset.Bitset) {
 
 //Does the move at field 6.
 //Returns the flipped discs.
-func (board *Board) doMove6() (flipped bitset.Bitset) {
+func (board *Board) doMove6() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0001020408102000)
 	flipped |= board.doMoveToHigherBits(0x4040404040404000)
 	flipped |= board.doMoveToLowerBits(0x000000000000003F)
@@ -394,7 +393,7 @@ func (board *Board) doMove6() (flipped bitset.Bitset) {
 
 //Does the move at field 7.
 //Returns the flipped discs.
-func (board *Board) doMove7() (flipped bitset.Bitset) {
+func (board *Board) doMove7() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0102040810204000)
 	flipped |= board.doMoveToHigherBits(0x8080808080808000)
 	flipped |= board.doMoveToLowerBits(0x000000000000007F)
@@ -403,7 +402,7 @@ func (board *Board) doMove7() (flipped bitset.Bitset) {
 
 //Does the move at field 8.
 //Returns the flipped discs.
-func (board *Board) doMove8() (flipped bitset.Bitset) {
+func (board *Board) doMove8() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x000000000000FE00)
 	flipped |= board.doMoveToHigherBits(0x0101010101010000)
 	flipped |= board.doMoveToHigherBits(0x4020100804020000)
@@ -412,7 +411,7 @@ func (board *Board) doMove8() (flipped bitset.Bitset) {
 
 //Does the move at field 9.
 //Returns the flipped discs.
-func (board *Board) doMove9() (flipped bitset.Bitset) {
+func (board *Board) doMove9() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x000000000000FC00)
 	flipped |= board.doMoveToHigherBits(0x0202020202020000)
 	flipped |= board.doMoveToHigherBits(0x8040201008040000)
@@ -421,7 +420,7 @@ func (board *Board) doMove9() (flipped bitset.Bitset) {
 
 //Does the move at field 10.
 //Returns the flipped discs.
-func (board *Board) doMove10() (flipped bitset.Bitset) {
+func (board *Board) doMove10() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x000000000000F800)
 	flipped |= board.doMoveToHigherBits(0x0000000001020000)
 	flipped |= board.doMoveToHigherBits(0x0404040404040000)
@@ -432,7 +431,7 @@ func (board *Board) doMove10() (flipped bitset.Bitset) {
 
 //Does the move at field 11.
 //Returns the flipped discs.
-func (board *Board) doMove11() (flipped bitset.Bitset) {
+func (board *Board) doMove11() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x000000000000F000)
 	flipped |= board.doMoveToHigherBits(0x0000000102040000)
 	flipped |= board.doMoveToHigherBits(0x0808080808080000)
@@ -443,7 +442,7 @@ func (board *Board) doMove11() (flipped bitset.Bitset) {
 
 //Does the move at field 12.
 //Returns the flipped discs.
-func (board *Board) doMove12() (flipped bitset.Bitset) {
+func (board *Board) doMove12() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x000000000000E000)
 	flipped |= board.doMoveToHigherBits(0x0000010204080000)
 	flipped |= board.doMoveToHigherBits(0x1010101010100000)
@@ -454,7 +453,7 @@ func (board *Board) doMove12() (flipped bitset.Bitset) {
 
 //Does the move at field 13.
 //Returns the flipped discs.
-func (board *Board) doMove13() (flipped bitset.Bitset) {
+func (board *Board) doMove13() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x000000000000C000)
 	flipped |= board.doMoveToHigherBits(0x0001020408100000)
 	flipped |= board.doMoveToHigherBits(0x2020202020200000)
@@ -465,7 +464,7 @@ func (board *Board) doMove13() (flipped bitset.Bitset) {
 
 //Does the move at field 14.
 //Returns the flipped discs.
-func (board *Board) doMove14() (flipped bitset.Bitset) {
+func (board *Board) doMove14() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0102040810200000)
 	flipped |= board.doMoveToHigherBits(0x4040404040400000)
 	flipped |= board.doMoveToLowerBits(0x0000000000003F00)
@@ -474,7 +473,7 @@ func (board *Board) doMove14() (flipped bitset.Bitset) {
 
 //Does the move at field 15.
 //Returns the flipped discs.
-func (board *Board) doMove15() (flipped bitset.Bitset) {
+func (board *Board) doMove15() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0204081020400000)
 	flipped |= board.doMoveToHigherBits(0x8080808080800000)
 	flipped |= board.doMoveToLowerBits(0x0000000000007F00)
@@ -483,7 +482,7 @@ func (board *Board) doMove15() (flipped bitset.Bitset) {
 
 //Does the move at field 16.
 //Returns the flipped discs.
-func (board *Board) doMove16() (flipped bitset.Bitset) {
+func (board *Board) doMove16() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0000000000FE0000)
 	flipped |= board.doMoveToHigherBits(0x0101010101000000)
 	flipped |= board.doMoveToHigherBits(0x2010080402000000)
@@ -494,7 +493,7 @@ func (board *Board) doMove16() (flipped bitset.Bitset) {
 
 //Does the move at field 17.
 //Returns the flipped discs.
-func (board *Board) doMove17() (flipped bitset.Bitset) {
+func (board *Board) doMove17() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0000000000FC0000)
 	flipped |= board.doMoveToHigherBits(0x0202020202000000)
 	flipped |= board.doMoveToHigherBits(0x4020100804000000)
@@ -505,7 +504,7 @@ func (board *Board) doMove17() (flipped bitset.Bitset) {
 
 //Does the move at field 18.
 //Returns the flipped discs.
-func (board *Board) doMove18() (flipped bitset.Bitset) {
+func (board *Board) doMove18() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0000000000F80000)
 	flipped |= board.doMoveToHigherBits(0x0000000102000000)
 	flipped |= board.doMoveToHigherBits(0x0404040404000000)
@@ -519,7 +518,7 @@ func (board *Board) doMove18() (flipped bitset.Bitset) {
 
 //Does the move at field 19.
 //Returns the flipped discs.
-func (board *Board) doMove19() (flipped bitset.Bitset) {
+func (board *Board) doMove19() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0000000000F00000)
 	flipped |= board.doMoveToHigherBits(0x0000010204000000)
 	flipped |= board.doMoveToHigherBits(0x0808080808000000)
@@ -533,7 +532,7 @@ func (board *Board) doMove19() (flipped bitset.Bitset) {
 
 //Does the move at field 20.
 //Returns the flipped discs.
-func (board *Board) doMove20() (flipped bitset.Bitset) {
+func (board *Board) doMove20() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0000000000E00000)
 	flipped |= board.doMoveToHigherBits(0x0001020408000000)
 	flipped |= board.doMoveToHigherBits(0x1010101010000000)
@@ -547,7 +546,7 @@ func (board *Board) doMove20() (flipped bitset.Bitset) {
 
 //Does the move at field 21.
 //Returns the flipped discs.
-func (board *Board) doMove21() (flipped bitset.Bitset) {
+func (board *Board) doMove21() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0000000000C00000)
 	flipped |= board.doMoveToHigherBits(0x0102040810000000)
 	flipped |= board.doMoveToHigherBits(0x2020202020000000)
@@ -561,7 +560,7 @@ func (board *Board) doMove21() (flipped bitset.Bitset) {
 
 //Does the move at field 22.
 //Returns the flipped discs.
-func (board *Board) doMove22() (flipped bitset.Bitset) {
+func (board *Board) doMove22() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0204081020000000)
 	flipped |= board.doMoveToHigherBits(0x4040404040000000)
 	flipped |= board.doMoveToLowerBits(0x00000000003F0000)
@@ -572,7 +571,7 @@ func (board *Board) doMove22() (flipped bitset.Bitset) {
 
 //Does the move at field 23.
 //Returns the flipped discs.
-func (board *Board) doMove23() (flipped bitset.Bitset) {
+func (board *Board) doMove23() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0408102040000000)
 	flipped |= board.doMoveToHigherBits(0x8080808080000000)
 	flipped |= board.doMoveToLowerBits(0x00000000007F0000)
@@ -583,7 +582,7 @@ func (board *Board) doMove23() (flipped bitset.Bitset) {
 
 //Does the move at field 24.
 //Returns the flipped discs.
-func (board *Board) doMove24() (flipped bitset.Bitset) {
+func (board *Board) doMove24() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00000000FE000000)
 	flipped |= board.doMoveToHigherBits(0x0101010100000000)
 	flipped |= board.doMoveToHigherBits(0x1008040200000000)
@@ -594,7 +593,7 @@ func (board *Board) doMove24() (flipped bitset.Bitset) {
 
 //Does the move at field 25.
 //Returns the flipped discs.
-func (board *Board) doMove25() (flipped bitset.Bitset) {
+func (board *Board) doMove25() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00000000FC000000)
 	flipped |= board.doMoveToHigherBits(0x0202020200000000)
 	flipped |= board.doMoveToHigherBits(0x2010080400000000)
@@ -605,7 +604,7 @@ func (board *Board) doMove25() (flipped bitset.Bitset) {
 
 //Does the move at field 26.
 //Returns the flipped discs.
-func (board *Board) doMove26() (flipped bitset.Bitset) {
+func (board *Board) doMove26() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00000000F8000000)
 	flipped |= board.doMoveToHigherBits(0x0000010200000000)
 	flipped |= board.doMoveToHigherBits(0x0404040400000000)
@@ -619,7 +618,7 @@ func (board *Board) doMove26() (flipped bitset.Bitset) {
 
 //Does the move at field 27.
 //Returns the flipped discs.
-func (board *Board) doMove27() (flipped bitset.Bitset) {
+func (board *Board) doMove27() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00000000F0000000)
 	flipped |= board.doMoveToHigherBits(0x0001020400000000)
 	flipped |= board.doMoveToHigherBits(0x0808080800000000)
@@ -633,7 +632,7 @@ func (board *Board) doMove27() (flipped bitset.Bitset) {
 
 //Does the move at field 28.
 //Returns the flipped discs.
-func (board *Board) doMove28() (flipped bitset.Bitset) {
+func (board *Board) doMove28() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00000000E0000000)
 	flipped |= board.doMoveToHigherBits(0x0102040800000000)
 	flipped |= board.doMoveToHigherBits(0x1010101000000000)
@@ -647,7 +646,7 @@ func (board *Board) doMove28() (flipped bitset.Bitset) {
 
 //Does the move at field 29.
 //Returns the flipped discs.
-func (board *Board) doMove29() (flipped bitset.Bitset) {
+func (board *Board) doMove29() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00000000C0000000)
 	flipped |= board.doMoveToHigherBits(0x0204081000000000)
 	flipped |= board.doMoveToHigherBits(0x2020202000000000)
@@ -661,7 +660,7 @@ func (board *Board) doMove29() (flipped bitset.Bitset) {
 
 //Does the move at field 30.
 //Returns the flipped discs.
-func (board *Board) doMove30() (flipped bitset.Bitset) {
+func (board *Board) doMove30() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0408102000000000)
 	flipped |= board.doMoveToHigherBits(0x4040404000000000)
 	flipped |= board.doMoveToLowerBits(0x000000003F000000)
@@ -672,7 +671,7 @@ func (board *Board) doMove30() (flipped bitset.Bitset) {
 
 //Does the move at field 31.
 //Returns the flipped discs.
-func (board *Board) doMove31() (flipped bitset.Bitset) {
+func (board *Board) doMove31() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0810204000000000)
 	flipped |= board.doMoveToHigherBits(0x8080808000000000)
 	flipped |= board.doMoveToLowerBits(0x000000007F000000)
@@ -683,7 +682,7 @@ func (board *Board) doMove31() (flipped bitset.Bitset) {
 
 //Does the move at field 32.
 //Returns the flipped discs.
-func (board *Board) doMove32() (flipped bitset.Bitset) {
+func (board *Board) doMove32() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x000000FE00000000)
 	flipped |= board.doMoveToHigherBits(0x0101010000000000)
 	flipped |= board.doMoveToHigherBits(0x0804020000000000)
@@ -694,7 +693,7 @@ func (board *Board) doMove32() (flipped bitset.Bitset) {
 
 //Does the move at field 33.
 //Returns the flipped discs.
-func (board *Board) doMove33() (flipped bitset.Bitset) {
+func (board *Board) doMove33() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x000000FC00000000)
 	flipped |= board.doMoveToHigherBits(0x0202020000000000)
 	flipped |= board.doMoveToHigherBits(0x1008040000000000)
@@ -705,7 +704,7 @@ func (board *Board) doMove33() (flipped bitset.Bitset) {
 
 //Does the move at field 34.
 //Returns the flipped discs.
-func (board *Board) doMove34() (flipped bitset.Bitset) {
+func (board *Board) doMove34() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x000000F800000000)
 	flipped |= board.doMoveToHigherBits(0x0001020000000000)
 	flipped |= board.doMoveToHigherBits(0x0404040000000000)
@@ -719,7 +718,7 @@ func (board *Board) doMove34() (flipped bitset.Bitset) {
 
 //Does the move at field 35.
 //Returns the flipped discs.
-func (board *Board) doMove35() (flipped bitset.Bitset) {
+func (board *Board) doMove35() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x000000F000000000)
 	flipped |= board.doMoveToHigherBits(0x0102040000000000)
 	flipped |= board.doMoveToHigherBits(0x0808080000000000)
@@ -733,7 +732,7 @@ func (board *Board) doMove35() (flipped bitset.Bitset) {
 
 //Does the move at field 36.
 //Returns the flipped discs.
-func (board *Board) doMove36() (flipped bitset.Bitset) {
+func (board *Board) doMove36() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x000000E000000000)
 	flipped |= board.doMoveToHigherBits(0x0204080000000000)
 	flipped |= board.doMoveToHigherBits(0x1010100000000000)
@@ -747,7 +746,7 @@ func (board *Board) doMove36() (flipped bitset.Bitset) {
 
 //Does the move at field 37.
 //Returns the flipped discs.
-func (board *Board) doMove37() (flipped bitset.Bitset) {
+func (board *Board) doMove37() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x000000C000000000)
 	flipped |= board.doMoveToHigherBits(0x0408100000000000)
 	flipped |= board.doMoveToHigherBits(0x2020200000000000)
@@ -761,7 +760,7 @@ func (board *Board) doMove37() (flipped bitset.Bitset) {
 
 //Does the move at field 38.
 //Returns the flipped discs.
-func (board *Board) doMove38() (flipped bitset.Bitset) {
+func (board *Board) doMove38() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0810200000000000)
 	flipped |= board.doMoveToHigherBits(0x4040400000000000)
 	flipped |= board.doMoveToLowerBits(0x0000003F00000000)
@@ -772,7 +771,7 @@ func (board *Board) doMove38() (flipped bitset.Bitset) {
 
 //Does the move at field 39.
 //Returns the flipped discs.
-func (board *Board) doMove39() (flipped bitset.Bitset) {
+func (board *Board) doMove39() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x1020400000000000)
 	flipped |= board.doMoveToHigherBits(0x8080800000000000)
 	flipped |= board.doMoveToLowerBits(0x0000007F00000000)
@@ -783,7 +782,7 @@ func (board *Board) doMove39() (flipped bitset.Bitset) {
 
 //Does the move at field 40.
 //Returns the flipped discs.
-func (board *Board) doMove40() (flipped bitset.Bitset) {
+func (board *Board) doMove40() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0000FE0000000000)
 	flipped |= board.doMoveToHigherBits(0x0101000000000000)
 	flipped |= board.doMoveToHigherBits(0x0402000000000000)
@@ -794,7 +793,7 @@ func (board *Board) doMove40() (flipped bitset.Bitset) {
 
 //Does the move at field 41.
 //Returns the flipped discs.
-func (board *Board) doMove41() (flipped bitset.Bitset) {
+func (board *Board) doMove41() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0000FC0000000000)
 	flipped |= board.doMoveToHigherBits(0x0202000000000000)
 	flipped |= board.doMoveToHigherBits(0x0804000000000000)
@@ -805,7 +804,7 @@ func (board *Board) doMove41() (flipped bitset.Bitset) {
 
 //Does the move at field 42.
 //Returns the flipped discs.
-func (board *Board) doMove42() (flipped bitset.Bitset) {
+func (board *Board) doMove42() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0000F80000000000)
 	flipped |= board.doMoveToHigherBits(0x0102000000000000)
 	flipped |= board.doMoveToHigherBits(0x0404000000000000)
@@ -819,7 +818,7 @@ func (board *Board) doMove42() (flipped bitset.Bitset) {
 
 //Does the move at field 43.
 //Returns the flipped discs.
-func (board *Board) doMove43() (flipped bitset.Bitset) {
+func (board *Board) doMove43() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0000F00000000000)
 	flipped |= board.doMoveToHigherBits(0x0204000000000000)
 	flipped |= board.doMoveToHigherBits(0x0808000000000000)
@@ -833,7 +832,7 @@ func (board *Board) doMove43() (flipped bitset.Bitset) {
 
 //Does the move at field 44.
 //Returns the flipped discs.
-func (board *Board) doMove44() (flipped bitset.Bitset) {
+func (board *Board) doMove44() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0000E00000000000)
 	flipped |= board.doMoveToHigherBits(0x0408000000000000)
 	flipped |= board.doMoveToHigherBits(0x1010000000000000)
@@ -847,7 +846,7 @@ func (board *Board) doMove44() (flipped bitset.Bitset) {
 
 //Does the move at field 45.
 //Returns the flipped discs.
-func (board *Board) doMove45() (flipped bitset.Bitset) {
+func (board *Board) doMove45() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0000C00000000000)
 	flipped |= board.doMoveToHigherBits(0x0810000000000000)
 	flipped |= board.doMoveToHigherBits(0x2020000000000000)
@@ -861,7 +860,7 @@ func (board *Board) doMove45() (flipped bitset.Bitset) {
 
 //Does the move at field 46.
 //Returns the flipped discs.
-func (board *Board) doMove46() (flipped bitset.Bitset) {
+func (board *Board) doMove46() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x1020000000000000)
 	flipped |= board.doMoveToHigherBits(0x4040000000000000)
 	flipped |= board.doMoveToLowerBits(0x00003F0000000000)
@@ -872,7 +871,7 @@ func (board *Board) doMove46() (flipped bitset.Bitset) {
 
 //Does the move at field 47.
 //Returns the flipped discs.
-func (board *Board) doMove47() (flipped bitset.Bitset) {
+func (board *Board) doMove47() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x2040000000000000)
 	flipped |= board.doMoveToHigherBits(0x8080000000000000)
 	flipped |= board.doMoveToLowerBits(0x00007F0000000000)
@@ -883,7 +882,7 @@ func (board *Board) doMove47() (flipped bitset.Bitset) {
 
 //Does the move at field 48.
 //Returns the flipped discs.
-func (board *Board) doMove48() (flipped bitset.Bitset) {
+func (board *Board) doMove48() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00FE000000000000)
 	flipped |= board.doMoveToLowerBits(0x0000020408102040)
 	flipped |= board.doMoveToLowerBits(0x0000010101010101)
@@ -892,7 +891,7 @@ func (board *Board) doMove48() (flipped bitset.Bitset) {
 
 //Does the move at field 49.
 //Returns the flipped discs.
-func (board *Board) doMove49() (flipped bitset.Bitset) {
+func (board *Board) doMove49() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00FC000000000000)
 	flipped |= board.doMoveToLowerBits(0x0000040810204080)
 	flipped |= board.doMoveToLowerBits(0x0000020202020202)
@@ -901,7 +900,7 @@ func (board *Board) doMove49() (flipped bitset.Bitset) {
 
 //Does the move at field 50.
 //Returns the flipped discs.
-func (board *Board) doMove50() (flipped bitset.Bitset) {
+func (board *Board) doMove50() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00F8000000000000)
 	flipped |= board.doMoveToLowerBits(0x0003000000000000)
 	flipped |= board.doMoveToLowerBits(0x0000081020408000)
@@ -912,7 +911,7 @@ func (board *Board) doMove50() (flipped bitset.Bitset) {
 
 //Does the move at field 51.
 //Returns the flipped discs.
-func (board *Board) doMove51() (flipped bitset.Bitset) {
+func (board *Board) doMove51() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00F0000000000000)
 	flipped |= board.doMoveToLowerBits(0x0007000000000000)
 	flipped |= board.doMoveToLowerBits(0x0000102040800000)
@@ -923,7 +922,7 @@ func (board *Board) doMove51() (flipped bitset.Bitset) {
 
 //Does the move at field 52.
 //Returns the flipped discs.
-func (board *Board) doMove52() (flipped bitset.Bitset) {
+func (board *Board) doMove52() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00E0000000000000)
 	flipped |= board.doMoveToLowerBits(0x000F000000000000)
 	flipped |= board.doMoveToLowerBits(0x0000204080000000)
@@ -934,7 +933,7 @@ func (board *Board) doMove52() (flipped bitset.Bitset) {
 
 //Does the move at field 53.
 //Returns the flipped discs.
-func (board *Board) doMove53() (flipped bitset.Bitset) {
+func (board *Board) doMove53() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00C0000000000000)
 	flipped |= board.doMoveToLowerBits(0x001F000000000000)
 	flipped |= board.doMoveToLowerBits(0x0000408000000000)
@@ -945,7 +944,7 @@ func (board *Board) doMove53() (flipped bitset.Bitset) {
 
 //Does the move at field 54.
 //Returns the flipped discs.
-func (board *Board) doMove54() (flipped bitset.Bitset) {
+func (board *Board) doMove54() (flipped uint64) {
 	flipped = board.doMoveToLowerBits(0x003F000000000000)
 	flipped |= board.doMoveToLowerBits(0x0000404040404040)
 	flipped |= board.doMoveToLowerBits(0x0000201008040201)
@@ -954,7 +953,7 @@ func (board *Board) doMove54() (flipped bitset.Bitset) {
 
 //Does the move at field 55.
 //Returns the flipped discs.
-func (board *Board) doMove55() (flipped bitset.Bitset) {
+func (board *Board) doMove55() (flipped uint64) {
 	flipped = board.doMoveToLowerBits(0x007F000000000000)
 	flipped |= board.doMoveToLowerBits(0x0000808080808080)
 	flipped |= board.doMoveToLowerBits(0x0000402010080402)
@@ -963,7 +962,7 @@ func (board *Board) doMove55() (flipped bitset.Bitset) {
 
 //Does the move at field 56.
 //Returns the flipped discs.
-func (board *Board) doMove56() (flipped bitset.Bitset) {
+func (board *Board) doMove56() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0xFE00000000000000)
 	flipped |= board.doMoveToLowerBits(0x0002040810204080)
 	flipped |= board.doMoveToLowerBits(0x0001010101010101)
@@ -972,7 +971,7 @@ func (board *Board) doMove56() (flipped bitset.Bitset) {
 
 //Does the move at field 57.
 //Returns the flipped discs.
-func (board *Board) doMove57() (flipped bitset.Bitset) {
+func (board *Board) doMove57() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0xFC00000000000000)
 	flipped |= board.doMoveToLowerBits(0x0004081020408000)
 	flipped |= board.doMoveToLowerBits(0x0002020202020202)
@@ -981,7 +980,7 @@ func (board *Board) doMove57() (flipped bitset.Bitset) {
 
 //Does the move at field 58.
 //Returns the flipped discs.
-func (board *Board) doMove58() (flipped bitset.Bitset) {
+func (board *Board) doMove58() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0xF800000000000000)
 	flipped |= board.doMoveToLowerBits(0x0300000000000000)
 	flipped |= board.doMoveToLowerBits(0x0008102040800000)
@@ -992,7 +991,7 @@ func (board *Board) doMove58() (flipped bitset.Bitset) {
 
 //Does the move at field 59.
 //Returns the flipped discs.
-func (board *Board) doMove59() (flipped bitset.Bitset) {
+func (board *Board) doMove59() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0xF000000000000000)
 	flipped |= board.doMoveToLowerBits(0x0700000000000000)
 	flipped |= board.doMoveToLowerBits(0x0010204080000000)
@@ -1003,7 +1002,7 @@ func (board *Board) doMove59() (flipped bitset.Bitset) {
 
 //Does the move at field 60.
 //Returns the flipped discs.
-func (board *Board) doMove60() (flipped bitset.Bitset) {
+func (board *Board) doMove60() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0xE000000000000000)
 	flipped |= board.doMoveToLowerBits(0x0F00000000000000)
 	flipped |= board.doMoveToLowerBits(0x0020408000000000)
@@ -1014,7 +1013,7 @@ func (board *Board) doMove60() (flipped bitset.Bitset) {
 
 //Does the move at field 61.
 //Returns the flipped discs.
-func (board *Board) doMove61() (flipped bitset.Bitset) {
+func (board *Board) doMove61() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0xC000000000000000)
 	flipped |= board.doMoveToLowerBits(0x1F00000000000000)
 	flipped |= board.doMoveToLowerBits(0x0040800000000000)
@@ -1025,7 +1024,7 @@ func (board *Board) doMove61() (flipped bitset.Bitset) {
 
 //Does the move at field 62.
 //Returns the flipped discs.
-func (board *Board) doMove62() (flipped bitset.Bitset) {
+func (board *Board) doMove62() (flipped uint64) {
 	flipped = board.doMoveToLowerBits(0x3F00000000000000)
 	flipped |= board.doMoveToLowerBits(0x0040404040404040)
 	flipped |= board.doMoveToLowerBits(0x0020100804020100)
@@ -1034,7 +1033,7 @@ func (board *Board) doMove62() (flipped bitset.Bitset) {
 
 //Does the move at field 63.
 //Returns the flipped discs.
-func (board *Board) doMove63() (flipped bitset.Bitset) {
+func (board *Board) doMove63() (flipped uint64) {
 	flipped = board.doMoveToLowerBits(0x7F00000000000000)
 	flipped |= board.doMoveToLowerBits(0x0080808080808080)
 	flipped |= board.doMoveToLowerBits(0x0040201008040201)

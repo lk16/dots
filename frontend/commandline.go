@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"math/bits"
 	"os"
 
 	"dots/board"
@@ -46,8 +47,8 @@ func (cli *CommandLine) OnGameEnd(state GameState) {
 		board.SwitchTurn()
 	}
 
-	white_count := board.Opp().Count()
-	black_count := board.Me().Count()
+	white_count := bits.OnesCount64(board.Opp())
+	black_count := bits.OnesCount64(board.Me())
 
 	var str string
 
@@ -82,16 +83,18 @@ func (cli *CommandLine) OnHumanMove(state GameState) (afterwards board.Board) {
 			continue
 		}
 
-		col := uint(line[0] - 'a')
-		row := uint(line[1] - '1')
+		col := line[0] - 'a'
+		row := line[1] - '1'
 
-		if col > 7 || row > 7 {
+		if col < 0 || row < 0 || col > 7 || row > 7 {
 			continue
 		}
 
-		index := 8*row + col
+		index := int(8*row + col)
 
-		if !moves.TestBit(index) {
+		mask := uint64(1) << uint(index)
+
+		if moves&mask == 0 {
 			continue
 		}
 

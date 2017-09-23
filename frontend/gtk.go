@@ -144,8 +144,8 @@ func (gtkc *GtkController) OnHumanMove(state GameState) (afterwards board.Board)
 	moves := state.board.Moves()
 	for {
 		field_id := <-gtkc.human_move
-		if moves.TestBit(field_id) {
-			state.board.DoMove(field_id)
+		if moves&(uint64(1)<<field_id) != 0 {
+			state.board.DoMove(int(field_id))
 			state.turn = 1 - state.turn
 			gtkc.state <- state
 			afterwards = state.board
