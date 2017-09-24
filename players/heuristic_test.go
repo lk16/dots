@@ -9,12 +9,12 @@ import (
 
 func TestHeuristicSquared(t *testing.T) {
 
-	type test_case struct {
+	type testCase struct {
 		board    board.Board
 		expected int
 	}
 
-	test_cases := []test_case{
+	testCases := []testCase{
 		{*board.CustomBoard(0, 0), 0},
 		{*board.NewBoard(), 0},
 		{*board.RandomBoard(5), 0},
@@ -22,7 +22,7 @@ func TestHeuristicSquared(t *testing.T) {
 		{*board.CustomBoard(0, 1), -3},
 		{*board.CustomBoard(1, 2), 4}}
 
-	for _, test := range test_cases {
+	for _, test := range testCases {
 
 		got := Squared(test.board)
 

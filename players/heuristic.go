@@ -6,17 +6,18 @@ import (
 	"dots/board"
 )
 
-func Squared(board board.Board) (heur int) {
-	corner_mask := 1<<0 | 1<<7 | uint64(1)<<56 | uint64(1)<<63
+// Squared is a heuristic taken from a similar project with that name
+// see http://github.com/lk16/squared
+func Squared(board board.Board) int {
+	cornerMask := uint64(1<<0 | 1<<7 | 1<<56 | 1<<63)
 
-	me_corners := bits.OnesCount64(corner_mask & board.Me())
-	opp_corners := bits.OnesCount64(corner_mask & board.Opp())
-	corner_diff := me_corners - opp_corners
+	meCorners := bits.OnesCount64(cornerMask & board.Me())
+	oppCorners := bits.OnesCount64(cornerMask & board.Opp())
+	cornerDiff := meCorners - oppCorners
 
-	me_moves := bits.OnesCount64(board.Moves())
-	opp_moves := bits.OnesCount64(board.OpponentMoves())
-	move_diff := me_moves - opp_moves
+	meMoves := bits.OnesCount64(board.Moves())
+	oppMoves := bits.OnesCount64(board.OpponentMoves())
+	moveDiff := meMoves - oppMoves
 
-	heur = int((3 * corner_diff) + move_diff)
-	return
+	return (3 * cornerDiff) + moveDiff
 }

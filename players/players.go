@@ -6,25 +6,30 @@ import (
 	"dots/board"
 )
 
+// Player is an interface for all structs that can play othello
 type Player interface {
 	DoMove(board.Board) board.Board
 }
 
-func Get(name string, lvl int) (player Player) {
+// Get gets a player by name and sets the level if applicable
+func Get(name string, lvl int) Player {
 
 	if name == "human" {
-		player = nil
-	} else if name == "random" {
-		player = NewBotRandom()
-	} else if name == "heur" {
-		search_depth := lvl
-		perfect_depth := 2 * lvl
-		if perfect_depth > 6 {
-			perfect_depth -= 2
-		}
-		player = NewBotHeuristic(Squared, search_depth, perfect_depth, os.Stdout)
-	} else {
-		panic("Invalid player name")
+		return nil
 	}
-	return
+
+	if name == "random" {
+		return NewBotRandom()
+	}
+
+	if name == "heur" {
+		searchDepth := lvl
+		perfectDepth := 2 * lvl
+		if perfectDepth > 6 {
+			perfectDepth -= 2
+		}
+		return NewBotHeuristic(Squared, searchDepth, perfectDepth, os.Stdout)
+	}
+
+	panic("Invalid player name")
 }
