@@ -23,12 +23,7 @@ func Get(name string, lvl int) Player {
 	}
 
 	if name == "heur" {
-		searchDepth := lvl
-		perfectDepth := 2 * lvl
-		if perfectDepth > 6 {
-			perfectDepth -= 2
-		}
-		return NewBotHeuristic(Squared, searchDepth, perfectDepth, os.Stdout)
+		return NewBotHeuristic(Squared, lvl, 2*lvl, os.Stdout)
 	}
 
 	panic("Invalid player name")

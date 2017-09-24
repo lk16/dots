@@ -16,11 +16,10 @@ type Board struct {
 }
 
 // NewBoard returns a Board representing the initial state
-func NewBoard() (board *Board) {
-	board = new(Board)
-	board.me = 1<<28 | 1<<35
-	board.opp = 1<<27 | 1<<36
-	return
+func NewBoard() *Board {
+	return &Board{
+		me:  1<<28 | 1<<35,
+		opp: 1<<27 | 1<<36}
 }
 
 // CustomBoard returns a Board with a custom state
@@ -34,7 +33,7 @@ func CustomBoard(me, opp uint64) (board *Board) {
 func RandomBoard(discs int) (board *Board) {
 
 	if discs < 4 || discs > 64 {
-		panic("Cannot create random board: invalid number of discs required")
+		return nil
 	}
 
 	board = NewBoard()
@@ -164,23 +163,23 @@ func (board *Board) DoMove(index int) (flipped uint64) {
 	board.me = board.opp &^ tmp
 	board.opp = tmp
 
-	return flipped
+	return
 }
 
 // GetChildren returns a slice with all children of a Board
 func (board Board) GetChildren() (children []Board) {
 
 	moves := board.Moves()
-	children = make([]Board, 0)
+	children = make([]Board, bits.OnesCount64(moves))
 
-	for moves != 0 {
-		index := bits.TrailingZeros64(moves)
-		moves &^= uint64(1) << uint(index)
+	for i := range children {
+		moveIndex := bits.TrailingZeros64(moves)
 
-		child := board
-		child.DoMove(index)
+		// reset lowest bit
+		moves &= moves - 1
 
-		children = append(children, child)
+		children[i] = board
+		children[i].DoMove(moveIndex)
 	}
 	return
 }
@@ -193,13 +192,14 @@ func (board *Board) UndoMove(moveBit, flipped uint64) {
 }
 
 // DoRandomMove does a random move on a Board
+// If no moves are possible, DoRandomMove does nothing
 func (board *Board) DoRandomMove() {
-	moveCount := bits.OnesCount64(board.Moves())
-	if moveCount == 0 {
-		panic("Cannot do a random move when there are no moves.")
+	children := board.GetChildren()
+	if len(children) == 0 {
+		return
 	}
-	childIndex := rand.Int() % moveCount
-	*board = board.GetChildren()[childIndex]
+	childID := rand.Int() % len(children)
+	*board = children[childID]
 }
 
 // SwitchTurn effectively passes a turn
@@ -244,34 +244,34 @@ func (board Board) Opp() uint64 {
 // Flips discs on a Board, given a flipping line.
 // This only affects the directions right, left down, down and right down
 // Returns the flipped discs.
-func (board *Board) doMoveToHigherBits(line uint64) (flipped uint64) {
+func (board *Board) doMoveToHigherBits(line uint64) uint64 {
 	lineMask := line & board.me
 	if lineMask == 0 {
-		return
+		return 0
 	}
 	bit := lineMask & (-lineMask)
 	line &= uint64(bit - 1)
 	if line&board.opp == line {
-		flipped = line
+		return line
 	}
-	return
+	return 0
 }
 
 // Flips discs on a Board, given a flipping line.
 // This only affects the directions left up, up, right up and left
 // Returns the flipped discs.
-func (board *Board) doMoveToLowerBits(line uint64) (flipped uint64) {
+func (board *Board) doMoveToLowerBits(line uint64) uint64 {
 	lineMask := line & board.me
 	if lineMask == 0 {
-		return
+		return 0
 	}
 	bit := uint64(1) << uint(bits.Len64(lineMask)-1)
 	line &^= uint64((bit << 1) - 1)
 
 	if line&board.opp == line {
-		flipped = line
+		return line
 	}
-	return
+	return 0
 }
 
 //Does the move at field 0.

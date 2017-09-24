@@ -22,5 +22,5 @@ func Get(name string) Frontend {
 		return newFrontend()
 	}
 
-	panic("Invalid frontend name")
+	return nil
 }

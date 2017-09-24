@@ -179,15 +179,7 @@ func TestBoardIsValid(t *testing.T) {
 }
 
 func TestRandomBoard(t *testing.T) {
-	for discs := 0; discs <= 65; discs++ {
-
-		if discs < 4 || discs > 64 {
-			func() {
-				defer assertPanic(t)
-				RandomBoard(discs)
-			}()
-			continue
-		}
+	for discs := 4; discs <= 64; discs++ {
 
 		expected := discs
 
@@ -201,7 +193,16 @@ func TestRandomBoard(t *testing.T) {
 		if !boardIsValid(board) {
 			t.Errorf("Invalid board:\n%s\n\n", board.asciiArtString(false))
 		}
+	}
 
+	board := RandomBoard(3)
+	if board != nil {
+		t.Errorf("Expected nil, got:\n%s\n\n", board.asciiArtString(false))
+	}
+
+	board = RandomBoard(65)
+	if board != nil {
+		t.Errorf("Expected nil, got:\n%s\n\n", board.asciiArtString(false))
 	}
 
 }
@@ -492,16 +493,17 @@ func TestBoardAsciiArt(t *testing.T) {
 func TestBoardDoRandomMove(t *testing.T) {
 	for board := range genTestBoards() {
 		clone := board
-		if clone.Moves() == 0 {
-			// No moves -> panic() should be called
-			func() {
-				defer assertPanic(t)
-				clone.DoRandomMove()
-			}()
-			continue
-		}
 
 		clone.DoRandomMove()
+
+		if board.Moves() == 0 {
+			// no moves means no change
+			if clone != board {
+				t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
+					board.asciiArtString(false), clone.asciiArtString(false))
+			}
+			continue
+		}
 
 		found := false
 		for _, child := range board.GetChildren() {

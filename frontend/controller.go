@@ -36,10 +36,6 @@ type GameState struct {
 // GetFieldValue returns the value of a field
 func (state *GameState) GetFieldValue(field uint) int {
 
-	if state.turn != 1 && state.turn != 0 {
-		panic("state.turn has impossible value")
-	}
-
 	mask := uint64(1) << field
 
 	if state.board.Me()&mask != 0 {

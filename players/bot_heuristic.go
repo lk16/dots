@@ -117,7 +117,7 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 	children := b.GetChildren()
 
 	if len(children) == 0 {
-		panic("Cannot do move, because there are no moves.")
+		return b
 	}
 
 	// prevent returning empty board when bot cannot prevent losing all discs
