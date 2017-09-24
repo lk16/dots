@@ -11,34 +11,33 @@ import (
 	"dots/board"
 )
 
+// CommandLine is used for command line interaction
 type CommandLine struct {
 	writer io.Writer
 }
 
-// Create new CommandLine
-func NewCommandLine() (cli *CommandLine) {
-	cli = &CommandLine{
+// NewCommandLine returns a new CommandLine
+func NewCommandLine() Frontend {
+	return &CommandLine{
 		writer: os.Stdout}
-	return
 }
 
-// Initialize CommandLine (does nothing)
+// Initialize initializes CommandLine. It does nothing.
 func (cli *CommandLine) Initialize() {
 
 }
 
-// Print GameState to cli.writer
 func (cli *CommandLine) asciiArt(state GameState) {
-	swap_disc_colors := state.turn == 1
-	state.board.ASCIIArt(cli.writer, swap_disc_colors)
+	swapDiscColors := state.turn == 1
+	state.board.ASCIIArt(cli.writer, swapDiscColors)
 }
 
-// Print GameState to cli.writer on update
+// OnUpdate shows the updated Board with asciiArt
 func (cli *CommandLine) OnUpdate(state GameState) {
 	cli.asciiArt(state)
 }
 
-// Show game end details when game ends
+// OnGameEnd shows game end details
 func (cli *CommandLine) OnGameEnd(state GameState) {
 	cli.asciiArt(state)
 
@@ -47,24 +46,24 @@ func (cli *CommandLine) OnGameEnd(state GameState) {
 		board.SwitchTurn()
 	}
 
-	white_count := bits.OnesCount64(board.Opp())
-	black_count := bits.OnesCount64(board.Me())
+	whiteCount := bits.OnesCount64(board.Opp())
+	blackCount := bits.OnesCount64(board.Me())
 
 	var str string
 
-	if white_count > black_count {
-		str = fmt.Sprintf("White wins: %d-%d\n", white_count, black_count)
-	} else if white_count < black_count {
-		str = fmt.Sprintf("Black wins: %d-%d\n", black_count, white_count)
+	if whiteCount > blackCount {
+		str = fmt.Sprintf("White wins: %d-%d\n", whiteCount, blackCount)
+	} else if whiteCount < blackCount {
+		str = fmt.Sprintf("Black wins: %d-%d\n", blackCount, whiteCount)
 	} else {
-		str = fmt.Sprintf("It's a draw: %d-%d\n", white_count, white_count)
+		str = fmt.Sprintf("It's a draw: %d-%d\n", whiteCount, whiteCount)
 	}
 
 	bytes := bytes.NewBufferString(str).Bytes()
 	cli.writer.Write(bytes)
 }
 
-// Read human move from os.Stdin
+// OnHumanMove reads a human move from os.Stdin
 func (cli *CommandLine) OnHumanMove(state GameState) (afterwards board.Board) {
 	moves := state.board.Moves()
 

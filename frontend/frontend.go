@@ -4,19 +4,23 @@ import (
 	"dots/board"
 )
 
+// Frontend is an interface for frontends of Controller
 type Frontend interface {
 	OnUpdate(state GameState)
 	OnGameEnd(state GameState)
 	OnHumanMove(state GameState) board.Board
 }
 
-func Get(name string) (frontend Frontend) {
-	if name == "gtk" {
-		frontend = NewGtk()
-	} else if name == "cli" {
-		frontend = NewCommandLine()
-	} else {
-		panic("Invalid frontend name")
+// Get gets a Frontend by name
+func Get(name string) Frontend {
+
+	frontendMap := map[string]func() Frontend{
+		"gtk": NewkGtkFrontend,
+		"cli": NewCommandLine}
+
+	if newFrontend, ok := frontendMap[name]; ok {
+		return newFrontend()
 	}
-	return
+
+	panic("Invalid frontend name")
 }

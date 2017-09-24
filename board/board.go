@@ -8,7 +8,9 @@ import (
 	"math/rand"
 )
 
-// Board represents the state of an othello board game
+// Board represents the state of an othello board game.
+// It does not keep track which discs are white or black.
+// Instead it keeps track which discs are owned by the player to move.
 type Board struct {
 	me, opp uint64
 }

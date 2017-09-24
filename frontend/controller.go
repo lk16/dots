@@ -5,26 +5,36 @@ import (
 
 	"dots/board"
 	"dots/players"
-
-	"math/bits"
 )
 
 const (
-	SWITCH_TURN_MASK = 1
-	BLACK            = 0
-	WHITE            = BLACK | SWITCH_TURN_MASK
-	MOVE_BLACK       = 2
-	MOVE_WHITE       = MOVE_BLACK | SWITCH_TURN_MASK
-	EMPTY            = 4
+
+	// Black represents a field with a black disc
+	Black = 0
+
+	// White represents a field with a white disc
+	White = 1
+
+	switchTurnMask = Black ^ White
+
+	// MoveBlack represents a field where black can place a disc
+	MoveBlack = 2
+
+	// MoveWhite represents a field where white can place a disc
+	MoveWhite = MoveBlack | switchTurnMask
+
+	// Empty represents a field without a disc
+	Empty = 4
 )
 
+// GameState is a Board combined with the color of the player to move
 type GameState struct {
 	board board.Board
 	turn  int
 }
 
-// Returns field value
-func (state *GameState) GetFieldValue(field uint) (field_value int) {
+// GetFieldValue returns the value of a field
+func (state *GameState) GetFieldValue(field uint) int {
 
 	if state.turn != 1 && state.turn != 0 {
 		panic("state.turn has impossible value")
@@ -33,66 +43,60 @@ func (state *GameState) GetFieldValue(field uint) (field_value int) {
 	mask := uint64(1) << field
 
 	if state.board.Me()&mask != 0 {
-		field_value = BLACK | state.turn
-		return
+		return Black ^ state.turn
 	}
 
 	if state.board.Opp()&mask != 0 {
-		field_value = WHITE ^ state.turn
-		return
+		return White ^ state.turn
 	}
 
 	if state.board.Moves()&mask != 0 {
-		field_value = MOVE_BLACK | state.turn
-		return
+		return MoveBlack ^ state.turn
 	}
 
-	field_value = EMPTY
-	return
+	return Empty
 }
 
+// Controller is a game controller for an othello game
 type Controller struct {
 	players  [2]players.Player
 	history  []GameState
-	state_id uint
-	redo_max uint
+	stateID  uint
+	redoMax  uint
 	frontend Frontend
 }
 
-// Returns a new Controller
+// NewController returns a new Controller
 func NewController(black, white players.Player, writer io.Writer,
 	frontend Frontend) (control *Controller) {
 	control = &Controller{
 		players:  [2]players.Player{black, white},
 		frontend: frontend,
 		history:  make([]GameState, 100),
-		state_id: 0,
-		redo_max: 0}
+		stateID:  0,
+		redoMax:  0}
 	return
 }
 
+// GetState returns the current state of a Controller
 func (control *Controller) GetState() (state GameState) {
-	state = control.history[control.state_id]
+	state = control.history[control.stateID]
 	return
 }
 
 func (control *Controller) setChild(child GameState) {
-
-	control.state_id++
-	control.history[control.state_id] = child
-	control.redo_max = control.state_id
+	control.stateID++
+	control.history[control.stateID] = child
+	control.redoMax = control.stateID
 }
 
-// Skips a turn (for when a player has no moves)
 func (control *Controller) skipTurn() {
-
 	child := control.GetState()
 	child.board.SwitchTurn()
 	child.turn = 1 - child.turn
 	control.setChild(child)
 }
 
-// Lets the player to move do a move
 func (control *Controller) doMove() {
 
 	child := control.GetState()
@@ -107,46 +111,41 @@ func (control *Controller) doMove() {
 	control.setChild(child)
 }
 
-// Returns whether the player to move can do a move
-func (control *Controller) canMove() (can_move bool) {
-	moves_count := bits.OnesCount64(control.GetState().board.Moves())
-	can_move = (moves_count != 0)
-	return
+func (control *Controller) canMove() bool {
+	return control.GetState().board.Moves() != 0
 }
 
-// Resets for a new game
 func (control *Controller) reset() {
-	control.state_id = 0
-	control.redo_max = 0
+	control.stateID = 0
+	control.redoMax = 0
 	control.history[0] = GameState{
 		board: *board.NewBoard(),
 		turn:  0}
 	control.frontend.OnUpdate(control.GetState())
 }
 
-// Checks if a game is running
 func (control *Controller) gameRunning() bool {
 	board := control.GetState().board
 	return board.Moves() != 0 || board.OpponentMoves() != 0
 }
 
-// Undo last move
+// Undo undoes the last move
 func (control *Controller) Undo() {
-	if control.state_id != 0 {
-		control.state_id--
+	if control.stateID != 0 {
+		control.stateID--
 	}
 	control.frontend.OnUpdate(control.GetState())
 }
 
-// Undo last undo
+// Redo does the last move again
 func (control *Controller) Redo() {
-	if control.state_id != control.redo_max {
-		control.state_id++
+	if control.stateID != control.redoMax {
+		control.stateID++
 	}
 	control.frontend.OnUpdate(control.GetState())
 }
 
-// Runs the game
+// Run is the main loop of the Controller
 func (control *Controller) Run() {
 	for {
 		control.reset()
