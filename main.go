@@ -12,26 +12,26 @@ import (
 
 func main() {
 
-	default_seed := time.Now().UTC().UnixNano()
-	seed := flag.Int64("seed", default_seed, "Custom seed")
+	defaultSeed := time.Now().UTC().UnixNano()
+	seed := flag.Int64("seed", defaultSeed, "Custom seed")
 
-	black_name := flag.String("bp", "human", "Black player: Bot name or \"human\"")
-	black_lvl := flag.Int("bl", 5, "Black player search level (ignored for human)")
+	blackName := flag.String("bp", "human", "Black player: Bot name or \"human\"")
+	blackLevel := flag.Int("bl", 5, "Black player search level (ignored for human)")
 
-	white_name := flag.String("wp", "human", "White player: Bot name or \"human\"")
-	white_lvl := flag.Int("wl", 5, "White player search level (ignored for human)")
+	whiteName := flag.String("wp", "human", "White player: Bot name or \"human\"")
+	whiteLevel := flag.Int("wl", 5, "White player search level (ignored for human)")
 
-	frontend_name := flag.String("frontend", "gtk", "Frontend: \"gtk\" or \"cli\"")
+	frontendName := flag.String("frontend", "gtk", "Frontend: \"gtk\" or \"cli\"")
 
 	flag.Parse()
 
 	rand.Seed(*seed)
 
-	fe := frontend.Get(*frontend_name)
+	fe := frontend.Get(*frontendName)
 
-	white_player := players.Get(*white_name, *white_lvl)
-	black_player := players.Get(*black_name, *black_lvl)
+	whitePlayer := players.Get(*whiteName, *whiteLevel)
+	blackPlayer := players.Get(*blackName, *blackLevel)
 
-	controller := frontend.NewController(black_player, white_player, os.Stdout, fe)
+	controller := frontend.NewController(blackPlayer, whitePlayer, os.Stdout, fe)
 	controller.Run()
 }
