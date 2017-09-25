@@ -23,7 +23,7 @@ func Get(name string, lvl int) Player {
 	}
 
 	if name == "heur" {
-		return NewBotHeuristic(Squared, lvl, 2*lvl, os.Stdout)
+		return NewBotHeuristic(board.Squared, lvl, 2*lvl, os.Stdout)
 	}
 
 	panic("Invalid player name")

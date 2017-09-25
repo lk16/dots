@@ -9,23 +9,23 @@ import (
 	"dots/board"
 )
 
-const (
-	// MaxScore is the highest game result score possible
-	MaxScore = 64
+func max(x, y int) int {
+	if x > y {
+		return x
+	}
+	return y
+}
 
-	// MinScore is the lowest game result score possible
-	MinScore = -MaxScore
+func min(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
+}
 
-	// ExactScoreFactor is the multiplication.
-	// This is used when a non exact search runs into an exact result
-	ExactScoreFactor = 1000
-
-	// MaxHeuristic is the highest heuristic value possible
-	MaxHeuristic = ExactScoreFactor * MaxScore
-
-	// MinHeuristic is the lowest heuristic value possible
-	MinHeuristic = ExactScoreFactor * MinScore
-)
+func clamp(x, low, high int) int {
+	return max(low, min(x, high))
+}
 
 // Heuristic is a function that estimates how promising a Board is.
 type Heuristic func(board.Board) int
@@ -84,10 +84,10 @@ func fmtNs(n uint64) string {
 	return fmt.Sprintf("%5d%ss", n, suffixes[suffixIndex])
 }
 
-func (bot *BotHeuristic) logChildEvaluation(childID, heur, alpha int,
+func (bot *BotHeuristic) logChildEvaluation(heur, alpha int,
 	childStats, totalStats SearchStats) {
 
-	str := fmt.Sprintf("%5d | ", childID+1)
+	str := "      | "
 	buff := bytes.NewBufferString(str)
 	if heur > alpha {
 		buff.WriteString(fmt.Sprintf("%5d || ", heur))
@@ -133,8 +133,8 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 	var depth int
 
 	if b.CountEmpties() <= bot.exactDepth {
-		alpha = MinScore
-		beta = MaxScore
+		alpha = board.MinScore
+		beta = board.MaxScore
 		depth = b.CountEmpties()
 	} else {
 		depth = bot.searchDepth
@@ -157,14 +157,14 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 
 	startTime := time.Now()
 
-	processResult := func(childID int) {
+	processResult := func() {
 		result := <-bot.resultChan
 
 		childStats := result.stats
 		totalStats.nodes += childStats.nodes
 		totalStats.timeNs = uint64(time.Since(startTime).Nanoseconds())
 
-		bot.logChildEvaluation(childID, result.heur, alpha, *childStats, totalStats)
+		bot.logChildEvaluation(result.heur, alpha, *childStats, totalStats)
 		if result.heur > alpha {
 			alpha = result.heur
 			afterwards = result.query.board
@@ -172,7 +172,7 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 
 	}
 
-	for i, child := range children {
+	for _, child := range children {
 
 		query := SearchQuery{
 			board:      child,
@@ -184,29 +184,11 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 
 		query.Run(bot.resultChan)
 
-		// evaluate first child before launching other child threads
-		if i == 0 {
-			processResult(0)
-		}
-
-	}
-
-	for i := int(1); i < len(children); i++ {
-		processResult(i)
+		processResult()
 	}
 
 	bot.writer.Write(bytes.NewBufferString("\n\n").Bytes())
 	return
-}
-
-func clamp(x, min, max int) int {
-	if x > max {
-		return max
-	}
-	if x < min {
-		return min
-	}
-	return x
 }
 
 // SearchQuery is a query for searching the best child of a Board
@@ -232,10 +214,16 @@ type SearchStats struct {
 	timeNs uint64
 }
 
+type tptValue struct {
+	high int
+	low  int
+}
+
 // SearchState is the state of a SearchQuery
 type SearchState struct {
-	depth int
-	board board.Board
+	board              board.Board
+	skipped            bool
+	transpositionTable map[board.Board]tptValue
 }
 
 // SearchThread contains all thread data for a SearchQuery
@@ -251,8 +239,9 @@ func (query *SearchQuery) Run(ch chan SearchResult) {
 	thread := &SearchThread{
 		query: query,
 		state: &SearchState{
-			depth: query.depth,
-			board: query.board},
+			board:              query.board,
+			skipped:            false,
+			transpositionTable: make(map[board.Board]tptValue, 50000)},
 		stats: &SearchStats{
 			nodes:  0,
 			timeNs: 0}}
@@ -267,21 +256,18 @@ func (thread *SearchThread) Run(ch chan SearchResult) {
 		heur:  0,
 		stats: thread.stats}
 
-	if thread.query.board.CountEmpties() > thread.query.depth {
-		result.heur = thread.loop(1, thread.doMtdf)
-	} else {
-		result.heur = thread.loop(2, thread.doMtdfExact)
-	}
-	ch <- result
-}
-
-func (thread *SearchThread) loop(step int, call func(int) int) (heur int) {
-
 	// copy values because thread.query should not be modified
 	high := thread.query.upperBound
 	low := thread.query.lowerBound
 
 	f := thread.query.guess
+
+	var step int
+	if thread.query.board.CountEmpties() > thread.query.depth {
+		step = 1
+	} else {
+		step = 2
+	}
 
 	// prevent odd results for exact search
 	f -= (f % step)
@@ -289,7 +275,13 @@ func (thread *SearchThread) loop(step int, call func(int) int) (heur int) {
 	f = clamp(f, low, high)
 
 	for high-low >= step {
-		bound := -call(-(f + 1))
+		var bound int
+		if thread.query.board.CountEmpties() > thread.query.depth {
+			bound = -thread.doMtdf(-(f + 1), thread.query.depth)
+		} else {
+			bound = -thread.doMtdfExact(-(f + 1))
+		}
+
 		if f == bound {
 			f -= step
 			high = bound
@@ -298,52 +290,85 @@ func (thread *SearchThread) loop(step int, call func(int) int) (heur int) {
 			low = bound
 		}
 	}
-	heur = high
-	return
+	result.heur = high
+
+	ch <- result
 }
 
-func (thread *SearchThread) doMtdf(alpha int) (heur int) {
+func (thread *SearchThread) doMtdf(alpha, depth int) (heur int) {
 
 	thread.stats.nodes++
+	b := thread.state.board
 
-	if thread.state.depth == 0 {
-		heur = mtdfPolish(thread.query.heuristic(thread.state.board), alpha)
-		return
+	if depth == 0 {
+		return mtdfPolish(thread.query.heuristic(b), alpha)
 	}
 
-	gen := board.NewChildGen(&thread.state.board)
+	if depth >= 5 {
 
-	if gen.HasMoves() {
-		thread.state.depth--
-		heur = alpha
-		for gen.Next() {
-			childHeur := -thread.doMtdf(-(alpha + 1))
-			if childHeur > alpha {
-				heur = alpha + 1
-				gen.RestoreParent()
-				break
+		if lookup, ok := thread.state.transpositionTable[b]; ok {
+			if lookup.high < alpha {
+				return alpha
+			}
+			if lookup.low > alpha+1 {
+				return alpha + 1
 			}
 		}
-		thread.state.depth++
+
+		defer func() {
+			entry, ok := thread.state.transpositionTable[b]
+
+			if !ok {
+				entry = tptValue{
+					low:  board.MinHeuristic,
+					high: board.MaxHeuristic}
+			}
+
+			if heur == alpha {
+				entry.high = min(alpha, entry.high)
+			} else {
+				entry.low = max(alpha+1, entry.low)
+			}
+			thread.state.transpositionTable[b] = entry
+
+		}()
+	}
+
+	// BUG: board.NewGenerator is broken with lookAhead > 0
+	gen := board.NewGenerator(&thread.state.board, 0) //depth/3)
+
+	if !gen.HasMoves() {
+
+		if thread.state.skipped {
+			return mtdfPolish(board.ExactScoreFactor*b.ExactScore(), alpha)
+		}
+
+		thread.state.skipped = true
+		b.SwitchTurn()
+		heur = -thread.doMtdf(-(alpha + 1), depth)
+		b.SwitchTurn()
 		return
 	}
 
-	if thread.state.board.OpponentMoves() != 0 {
-		thread.state.board.SwitchTurn()
-		heur = -thread.doMtdf(-(alpha + 1))
-		thread.state.board.SwitchTurn()
-		return
-	}
+	thread.state.skipped = false
 
-	heur = mtdfPolish(ExactScoreFactor*thread.state.board.ExactScore(), alpha)
-	return
+	for gen.Next() {
+		childHeur := -thread.doMtdf(-(alpha + 1), depth-1)
+		if childHeur > alpha {
+			gen.RestoreParent()
+			return alpha + 1
+		}
+	}
+	return alpha
 }
 
 func (thread *SearchThread) doMtdfExact(alpha int) (heur int) {
 
 	thread.stats.nodes++
 
-	gen := board.NewChildGen(&thread.state.board)
+	// BUG: board.NewGenerator is broken with lookAhead > 0
+	// emptiesCount := thread.state.board.CountEmpties()
+	gen := board.NewGenerator(&thread.state.board, 0) //emptiesCount/4)
 
 	if gen.HasMoves() {
 		heur = alpha

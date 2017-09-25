@@ -1,30 +1,28 @@
-package players
+package board
 
 import (
 	"bytes"
 	"testing"
-
-	"dots/board"
 )
 
 func TestHeuristicSquared(t *testing.T) {
 
 	type testCase struct {
-		board    board.Board
+		board    *Board
 		expected int
 	}
 
 	testCases := []testCase{
-		{*board.CustomBoard(0, 0), 0},
-		{*board.NewBoard(), 0},
-		{*board.RandomBoard(5), 0},
-		{*board.CustomBoard(1, 0), 3},
-		{*board.CustomBoard(0, 1), -3},
-		{*board.CustomBoard(1, 2), 4}}
+		{CustomBoard(0, 0), 0},
+		{NewBoard(), 0},
+		{RandomBoard(5), 0},
+		{CustomBoard(1, 0), 3},
+		{CustomBoard(0, 1), -3},
+		{CustomBoard(1, 2), 4}}
 
 	for _, test := range testCases {
 
-		got := Squared(test.board)
+		got := Squared(*test.board)
 
 		if got != test.expected {
 			buff := new(bytes.Buffer)

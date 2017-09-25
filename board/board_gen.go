@@ -5,6 +5,35 @@ import (
 	"sort"
 )
 
+func negamax(board Board, depth int) int {
+
+	if depth == 0 {
+		return Squared(board)
+	}
+
+	children := board.GetChildren()
+
+	if len(children) != 0 {
+		heur := MinHeuristic
+		for _, child := range children {
+			childHeur := -negamax(child, depth-1)
+			if childHeur > heur {
+				heur = childHeur
+			}
+		}
+		return heur
+	}
+
+	if board.OpponentMoves() != 0 {
+		board.SwitchTurn()
+		heur := -negamax(board, depth)
+		board.SwitchTurn()
+		return heur
+	}
+
+	return ExactScoreFactor * board.ExactScore()
+}
+
 // ChildGenerator is an interface for child generators
 type ChildGenerator interface {
 	HasMoves() bool
@@ -20,14 +49,18 @@ type UnsortedChildGenerator struct {
 	child       *Board
 }
 
-// NewChildGen returns a child generator for a parent Board
-func NewChildGen(board *Board) (gen *UnsortedChildGenerator) {
-	gen = &UnsortedChildGenerator{
-		movesLeft:   board.Moves(),
-		lastMove:    0,
-		lastFlipped: 0,
-		child:       board}
-	return
+// NewGenerator returns a child generator for a parent Board
+func NewGenerator(board *Board, lookAhead int) ChildGenerator {
+
+	if lookAhead == 0 {
+		return &UnsortedChildGenerator{
+			movesLeft:   board.Moves(),
+			lastMove:    0,
+			lastFlipped: 0,
+			child:       board}
+	}
+
+	return newChildGenSorted(board, lookAhead)
 }
 
 // HasMoves returns whether the parent Board has moves
@@ -76,8 +109,7 @@ type SortedChildGenerator struct {
 }
 
 // NewChildGenSorted returns a new SortedChildGenerator
-func NewChildGenSorted(board *Board,
-	heuristic func(Board) int) (gen *SortedChildGenerator) {
+func newChildGenSorted(board *Board, lookAhead int) (gen *SortedChildGenerator) {
 
 	gen = &SortedChildGenerator{
 		parent:     *board,
@@ -87,11 +119,16 @@ func NewChildGenSorted(board *Board,
 
 	child := *board
 
-	unsortedGen := NewChildGen(&child)
+	unsortedGen := &UnsortedChildGenerator{
+		movesLeft:   board.Moves(),
+		lastMove:    0,
+		lastFlipped: 0,
+		child:       board}
+
 	for unsortedGen.Next() {
 		gen.children = append(gen.children, sortedBoard{
 			board: child,
-			heur:  heuristic(child),
+			heur:  -negamax(child, lookAhead),
 		})
 	}
 
