@@ -49,18 +49,52 @@ type UnsortedChildGenerator struct {
 	child       *Board
 }
 
+type sortedBoard struct {
+	board Board
+	heur  int
+}
+
+// SortedChildGenerator generates children sorted by their heuristic values
+type SortedChildGenerator struct {
+	parent     Board
+	child      *Board
+	childIndex int
+	children   []sortedBoard
+}
+
 // NewGenerator returns a child generator for a parent Board
 func NewGenerator(board *Board, lookAhead int) ChildGenerator {
 
+	unsortedGen := &UnsortedChildGenerator{
+		movesLeft:   board.Moves(),
+		lastMove:    0,
+		lastFlipped: 0,
+		child:       board}
+
 	if lookAhead == 0 {
-		return &UnsortedChildGenerator{
-			movesLeft:   board.Moves(),
-			lastMove:    0,
-			lastFlipped: 0,
-			child:       board}
+		return unsortedGen
 	}
 
-	return newChildGenSorted(board, lookAhead)
+	sortedChildren := []sortedBoard{}
+
+	for _, child := range board.GetChildren() {
+		sortedChild := sortedBoard{
+			board: child,
+			heur:  -negamax(child, lookAhead)}
+		sortedChildren = append(sortedChildren, sortedChild)
+	}
+
+	sort.Slice(sortedChildren, func(i, j int) bool {
+		return sortedChildren[i].heur > sortedChildren[j].heur
+	})
+
+	sortedGen := &SortedChildGenerator{
+		parent:     *board,
+		child:      board,
+		children:   sortedChildren,
+		childIndex: 0}
+
+	return sortedGen
 }
 
 // HasMoves returns whether the parent Board has moves
@@ -95,50 +129,6 @@ func (gen *UnsortedChildGenerator) RestoreParent() {
 	gen.child.UndoMove(gen.lastMove, gen.lastFlipped)
 }
 
-type sortedBoard struct {
-	board Board
-	heur  int
-}
-
-// SortedChildGenerator generates children sorted by their heuristic values
-type SortedChildGenerator struct {
-	parent     Board
-	child      *Board
-	childIndex int
-	children   []sortedBoard
-}
-
-// NewChildGenSorted returns a new SortedChildGenerator
-func newChildGenSorted(board *Board, lookAhead int) (gen *SortedChildGenerator) {
-
-	gen = &SortedChildGenerator{
-		parent:     *board,
-		child:      board,
-		children:   []sortedBoard{},
-		childIndex: 0}
-
-	child := *board
-
-	unsortedGen := &UnsortedChildGenerator{
-		movesLeft:   board.Moves(),
-		lastMove:    0,
-		lastFlipped: 0,
-		child:       board}
-
-	for unsortedGen.Next() {
-		gen.children = append(gen.children, sortedBoard{
-			board: child,
-			heur:  -negamax(child, lookAhead),
-		})
-	}
-
-	sort.Slice(gen.children, func(i, j int) bool {
-		return gen.children[i].heur > gen.children[j].heur
-	})
-
-	return
-}
-
 // RestoreParent restores the state of the parent
 func (gen *SortedChildGenerator) RestoreParent() {
 	*gen.child = gen.parent
@@ -147,17 +137,15 @@ func (gen *SortedChildGenerator) RestoreParent() {
 // Next attempts to generate a child of a Board
 // After generating all children the parent state is restored
 // If no children are left, false is returned. Otherwise true is returned.
-func (gen *SortedChildGenerator) Next() (ok bool) {
+func (gen *SortedChildGenerator) Next() bool {
 	if gen.childIndex == len(gen.children) {
 		gen.RestoreParent()
-		ok = false
-		return
+		return false
 	}
 
 	*gen.child = gen.children[gen.childIndex].board
 	gen.childIndex++
-	ok = true
-	return
+	return true
 }
 
 // HasMoves returns whether the parent Board has moves
