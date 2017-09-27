@@ -37,6 +37,8 @@ type BotHeuristic struct {
 	exactDepth  int
 	writer      io.Writer
 	resultChan  chan SearchResult
+	stats       SearchStats
+	startTime   time.Time
 }
 
 // NewBotHeuristic creates a new BotHeuristic
@@ -47,7 +49,10 @@ func NewBotHeuristic(heuristic Heuristic,
 		searchDepth: searchDepth,
 		exactDepth:  exactDepth,
 		writer:      writer,
-		resultChan:  make(chan SearchResult, 32)}
+		resultChan:  make(chan SearchResult, 32),
+		stats: SearchStats{
+			nodes:  0,
+			timeNs: 0}}
 	return
 }
 
@@ -85,7 +90,7 @@ func fmtNs(n uint64) string {
 }
 
 func (bot *BotHeuristic) logChildEvaluation(heur, alpha int,
-	childStats, totalStats SearchStats) {
+	childStats SearchStats) {
 
 	str := "      | "
 	buff := bytes.NewBufferString(str)
@@ -102,13 +107,29 @@ func (bot *BotHeuristic) logChildEvaluation(heur, alpha int,
 		return num / den
 	}
 
-	avgSpeed := safeDiv(1000000000*totalStats.nodes, totalStats.timeNs)
+	avgSpeed := safeDiv(1000000000*bot.stats.nodes, bot.stats.timeNs)
 	childSpeed := safeDiv(1000000000*childStats.nodes, childStats.timeNs)
 
 	buff.WriteString(fmt.Sprintf("%s | %s | %s || %s | %s | %s |\n",
 		fmtBig(childStats.nodes), fmtNs(childStats.timeNs), fmtBig(childSpeed),
-		fmtBig(totalStats.nodes), fmtNs(totalStats.timeNs), fmtBig(avgSpeed)))
+		fmtBig(bot.stats.nodes), fmtNs(bot.stats.timeNs), fmtBig(avgSpeed)))
 	bot.writer.Write(buff.Bytes())
+}
+
+func (bot *BotHeuristic) processResult(result SearchResult, alpha *int,
+	afterwards *board.Board) {
+
+	childStats := result.stats
+	bot.stats.nodes += childStats.nodes
+	bot.stats.timeNs = uint64(time.Since(bot.startTime).Nanoseconds())
+
+	bot.logChildEvaluation(result.heur, *alpha, *childStats)
+
+	if result.heur > *alpha {
+		*alpha = result.heur
+		*afterwards = result.query.board
+	}
+
 }
 
 // DoMove does a move
@@ -151,28 +172,14 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 
 	bot.writer.Write(bytes.NewBufferString(header).Bytes())
 
-	totalStats := SearchStats{
-		nodes:  0,
-		timeNs: 0}
+	bot.startTime = time.Now()
+	bot.stats.nodes = 0
+	bot.stats.timeNs = 0
 
-	startTime := time.Now()
+	child := b
+	gen := board.NewGenerator(&child, 1)
 
-	processResult := func() {
-		result := <-bot.resultChan
-
-		childStats := result.stats
-		totalStats.nodes += childStats.nodes
-		totalStats.timeNs = uint64(time.Since(startTime).Nanoseconds())
-
-		bot.logChildEvaluation(result.heur, alpha, *childStats, totalStats)
-		if result.heur > alpha {
-			alpha = result.heur
-			afterwards = result.query.board
-		}
-
-	}
-
-	for _, child := range children {
+	for i := 0; gen.Next(); i++ {
 
 		query := SearchQuery{
 			board:      child,
@@ -184,8 +191,14 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 
 		query.Run(bot.resultChan)
 
-		processResult()
+		//if i == 0 {
+		bot.processResult(<-bot.resultChan, &alpha, &afterwards)
+		//}
 	}
+
+	/*for i := 1; i < bits.OnesCount64(b.Moves()); i++ {
+		bot.processResult(<-bot.resultChan, &alpha, &afterwards)
+	}*/
 
 	bot.writer.Write(bytes.NewBufferString("\n\n").Bytes())
 	return
