@@ -28,6 +28,7 @@ type SearchStats struct {
 	timeNs uint64
 }
 
+// value type for SearchState.transpositionTable
 type tptValue struct {
 	high int
 	low  int
@@ -130,10 +131,9 @@ func (thread *SearchThread) updateTranspositionTable(heur,alpha int) {
 	thread.state.transpositionTable[b] = entry
 }
 
-func (thread *SearchThread) checkTranspositionTable(alpha int)
-	(cutoff int,ok bool) {
+func (thread *SearchThread) checkTranspositionTable(alpha int) (cutOff int,ok bool) {
 
-	lookup, ok := thread.state.transpositionTable[b]
+	lookup, ok := thread.state.transpositionTable[thread.state.board]
 
 	if !ok {
 		return 0,false
@@ -159,8 +159,8 @@ func (thread *SearchThread) doMtdf(alpha, depth int) (heur int) {
 	}
 
 	if depth >= 5 {
-		if cutoff, ok := thread.checkTranspositionTable(alpha); ok {
-			return cutoff
+		if cutOff, ok := thread.checkTranspositionTable(alpha); ok {
+			return cutOff
 		}
 
 		defer thread.updateTranspositionTable(heur, alpha)
