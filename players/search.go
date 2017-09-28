@@ -1,9 +1,8 @@
 package players
 
-import(
+import (
 	"dots/board"
 )
-
 
 // SearchQuery is a query for searching the best child of a Board
 type SearchQuery struct {
@@ -37,7 +36,6 @@ type tptValue struct {
 // SearchState is the state of a SearchQuery
 type SearchState struct {
 	board              board.Board
-	skipped            bool
 	transpositionTable map[board.Board]tptValue
 }
 
@@ -55,7 +53,6 @@ func (query *SearchQuery) Run(ch chan SearchResult) {
 		query: query,
 		state: &SearchState{
 			board:              query.board,
-			skipped:            false,
 			transpositionTable: make(map[board.Board]tptValue, 50000)},
 		stats: &SearchStats{
 			nodes:  0,
@@ -110,8 +107,7 @@ func (thread *SearchThread) Run(ch chan SearchResult) {
 	ch <- result
 }
 
-
-func (thread *SearchThread) updateTranspositionTable(heur,alpha int) {
+func (thread *SearchThread) updateTranspositionTable(heur, alpha int) {
 
 	b := thread.state.board
 
@@ -131,18 +127,18 @@ func (thread *SearchThread) updateTranspositionTable(heur,alpha int) {
 	thread.state.transpositionTable[b] = entry
 }
 
-func (thread *SearchThread) checkTranspositionTable(alpha int) (cutOff int,ok bool) {
+func (thread *SearchThread) checkTranspositionTable(alpha int) (cutOff int, ok bool) {
 
-	lookup, ok := thread.state.transpositionTable[thread.state.board]
+	entry, ok := thread.state.transpositionTable[thread.state.board]
 
 	if !ok {
-		return 0,false
+		return 0, false
 	}
-	if lookup.high < alpha {
+	if entry.high <= alpha {
 		return alpha, true
 	}
-	if lookup.low > alpha+1 {
-		return alpha + 1,true
+	if entry.low >= alpha+1 {
+		return alpha + 1, true
 	}
 
 	return 0, false
@@ -152,55 +148,56 @@ func (thread *SearchThread) checkTranspositionTable(alpha int) (cutOff int,ok bo
 func (thread *SearchThread) doMtdf(alpha, depth int) (heur int) {
 
 	thread.stats.nodes++
-	b := thread.state.board
 
 	if depth == 0 {
-		return mtdfPolish(thread.query.heuristic(b), alpha)
+		return mtdfPolish(thread.query.heuristic(thread.state.board), alpha)
 	}
 
-	if depth >= 5 {
+	if depth >= 4 {
 		if cutOff, ok := thread.checkTranspositionTable(alpha); ok {
 			return cutOff
 		}
-
-		defer thread.updateTranspositionTable(heur, alpha)
 	}
 
-	// BUG: board.NewGenerator is broken with lookAhead > 0
-	gen := board.NewGenerator(&thread.state.board, 0) //depth/3)
+	gen := board.NewGenerator(&thread.state.board, 0)
 
 	if !gen.HasMoves() {
 
-		if thread.state.skipped {
-			return mtdfPolish(board.ExactScoreFactor*b.ExactScore(), alpha)
+		if thread.state.board.OpponentMoves() != 0 {
+			thread.state.board.SwitchTurn()
+			heur = -thread.doMtdf(-(alpha + 1), depth)
+			thread.state.board.SwitchTurn()
+			thread.updateTranspositionTable(heur, alpha)
+			return heur
 		}
 
-		thread.state.skipped = true
-		b.SwitchTurn()
-		heur = -thread.doMtdf(-(alpha + 1), depth)
-		b.SwitchTurn()
-		return
+		heur = mtdfPolish(board.ExactScoreFactor*
+			thread.state.board.ExactScore(), alpha)
+		thread.updateTranspositionTable(heur, alpha)
+		return heur
 	}
 
-	thread.state.skipped = false
-
+	heur = alpha
 	for gen.Next() {
 		childHeur := -thread.doMtdf(-(alpha + 1), depth-1)
 		if childHeur > alpha {
 			gen.RestoreParent()
-			return alpha + 1
+			heur = alpha + 1
+			break
 		}
 	}
-	return alpha
+
+	if depth >= 4 {
+		thread.updateTranspositionTable(heur, alpha)
+	}
+	return heur
 }
 
 func (thread *SearchThread) doMtdfExact(alpha int) (heur int) {
 
 	thread.stats.nodes++
 
-	// BUG: board.NewGenerator is broken with lookAhead > 0
-	// emptiesCount := thread.state.board.CountEmpties()
-	gen := board.NewGenerator(&thread.state.board, 0) //emptiesCount/4)
+	gen := board.NewGenerator(&thread.state.board, 0)
 
 	if gen.HasMoves() {
 		heur = alpha
