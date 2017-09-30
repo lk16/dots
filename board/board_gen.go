@@ -5,35 +5,6 @@ import (
 	"sort"
 )
 
-func negamax(board Board, depth int) int {
-
-	if depth == 0 {
-		return Squared(board)
-	}
-
-	children := board.GetChildren()
-
-	if len(children) != 0 {
-		heur := MinHeuristic
-		for _, child := range children {
-			childHeur := -negamax(child, depth-1)
-			if childHeur > heur {
-				heur = childHeur
-			}
-		}
-		return heur
-	}
-
-	if board.OpponentMoves() != 0 {
-		board.SwitchTurn()
-		heur := -negamax(board, depth)
-		board.SwitchTurn()
-		return heur
-	}
-
-	return ExactScoreFactor * board.ExactScore()
-}
-
 // ChildGenerator is an interface for child generators
 type ChildGenerator interface {
 	HasMoves() bool
@@ -80,7 +51,7 @@ func NewGenerator(board *Board, lookAhead int) ChildGenerator {
 	for _, child := range board.GetChildren() {
 		sortedChild := sortedBoard{
 			board: child,
-			heur:  -negamax(child, lookAhead)}
+			heur:  -Negamax(child, lookAhead)}
 		sortedChildren = append(sortedChildren, sortedChild)
 	}
 

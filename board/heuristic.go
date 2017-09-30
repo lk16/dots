@@ -22,6 +22,37 @@ const (
 	MinHeuristic = ExactScoreFactor * MinScore
 )
 
+// Negamax does a heuristic tree search using the Squared heuristic
+func Negamax(board Board, depth int) int {
+
+	if depth == 0 {
+		return Squared(board)
+	}
+
+	children := board.GetChildren()
+
+	if len(children) == 0 {
+		if board.OpponentMoves() == 0 {
+			return ExactScoreFactor * board.ExactScore()
+		}
+
+		board.SwitchTurn()
+		heur := -Negamax(board, depth)
+		board.SwitchTurn()
+		return heur
+	}
+
+	heur := MinHeuristic
+	for _, child := range children {
+		childHeur := -Negamax(child, depth-1)
+		if childHeur > heur {
+			heur = childHeur
+		}
+	}
+	return heur
+
+}
+
 // Squared is a heuristic taken from a similar project with that name
 // see http://github.com/lk16/squared
 func Squared(board Board) int {
