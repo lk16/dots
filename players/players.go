@@ -22,6 +22,10 @@ func Get(name string, lvl int) Player {
 		return NewBotRandom()
 	}
 
+	if name == "beam" {
+		return &BotBeam{}
+	}
+
 	if name == "heur" {
 		return NewBotHeuristic(board.Squared, lvl, 2*lvl, os.Stdout)
 	}

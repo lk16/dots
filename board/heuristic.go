@@ -23,15 +23,15 @@ const (
 )
 
 // Negamax does a heuristic tree search using the Squared heuristic
-func Negamax(board Board, depth int) int {
+func Negamax(board *Board, depth int) int {
 
 	if depth == 0 {
-		return Squared(board)
+		return Squared(*board)
 	}
 
-	children := board.GetChildren()
+	gen := NewGenerator(board, 0)
 
-	if len(children) == 0 {
+	if !gen.HasMoves() {
 		if board.OpponentMoves() == 0 {
 			return ExactScoreFactor * board.ExactScore()
 		}
@@ -43,14 +43,47 @@ func Negamax(board Board, depth int) int {
 	}
 
 	heur := MinHeuristic
-	for _, child := range children {
-		childHeur := -Negamax(child, depth-1)
+	for gen.Next() {
+		childHeur := -Negamax(board, depth-1)
 		if childHeur > heur {
 			heur = childHeur
 		}
 	}
 	return heur
+}
 
+// AlphaBeta does a heuristic tree search using the Squared heuristic
+func AlphaBeta(board *Board, alpha, beta, depth int) int {
+
+	if depth == 0 {
+		return Squared(*board)
+	}
+
+	gen := NewGenerator(board, 0)
+
+	if !gen.HasMoves() {
+		if board.OpponentMoves() == 0 {
+			return ExactScoreFactor * board.ExactScore()
+		}
+
+		board.SwitchTurn()
+		heur := -AlphaBeta(board, -beta, -alpha, depth)
+		board.SwitchTurn()
+		return heur
+	}
+
+	heur := alpha
+	for gen.Next() {
+		childHeur := -AlphaBeta(board, -beta, -alpha, depth-1)
+		if childHeur >= beta {
+			gen.RestoreParent()
+			return beta
+		}
+		if childHeur > heur {
+			heur = childHeur
+		}
+	}
+	return heur
 }
 
 // Squared is a heuristic taken from a similar project with that name

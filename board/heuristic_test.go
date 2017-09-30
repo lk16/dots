@@ -77,17 +77,46 @@ func minimax(board Board, depth int, sign int) int {
 
 func TestNegaMax(t *testing.T) {
 	for board := range genTestBoards() {
-		negamaxHeur := Negamax(board, 3)
-		minimaxHeur := minimax(board, 3, 1)
+		for depth := 1; depth <= 3; depth++ {
+			copy := board
+			negamaxHeur := Negamax(&board, 3)
 
-		if negamaxHeur != minimaxHeur {
-			var buff bytes.Buffer
-			board.ASCIIArt(&buff, false)
+			if copy != board {
+				t.Error("negamax modified the board")
+			}
 
-			t.Errorf("minimax=%d, negamx=%d for board\n\n%s\n",
-				minimaxHeur, negamaxHeur, buff.String())
+			minimaxHeur := minimax(board, 3, 1)
+
+			if negamaxHeur != minimaxHeur {
+				var buff bytes.Buffer
+				board.ASCIIArt(&buff, false)
+
+				t.Errorf("minimax=%d, negamx=%d for board\n\n%s\n",
+					minimaxHeur, negamaxHeur, buff.String())
+			}
 		}
-
 	}
+}
 
+func TestAlphaBeta(t *testing.T) {
+	for board := range genTestBoards() {
+		for depth := 1; depth <= 3; depth++ {
+			copy := board
+			alphaBetaHeur := AlphaBeta(&board, MinHeuristic, MaxHeuristic, 3)
+
+			if copy != board {
+				t.Error("alphabeta modified the board")
+			}
+
+			minimaxHeur := minimax(board, 3, 1)
+
+			if alphaBetaHeur != minimaxHeur {
+				var buff bytes.Buffer
+				board.ASCIIArt(&buff, false)
+
+				t.Errorf("minimax=%d, alphabeta=%d for board\n\n%s\n",
+					minimaxHeur, alphaBetaHeur, buff.String())
+			}
+		}
+	}
 }

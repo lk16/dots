@@ -51,7 +51,7 @@ func NewGenerator(board *Board, lookAhead int) ChildGenerator {
 	for _, child := range board.GetChildren() {
 		sortedChild := sortedBoard{
 			board: child,
-			heur:  -Negamax(child, lookAhead)}
+			heur:  -Negamax(&child, lookAhead)}
 		sortedChildren = append(sortedChildren, sortedChild)
 	}
 
