@@ -8,6 +8,8 @@ import (
 
 	"dots/frontend"
 	"dots/players"
+
+	"runtime/pprof"
 )
 
 func main() {
@@ -23,7 +25,18 @@ func main() {
 
 	frontendName := flag.String("frontend", "gtk", "Frontend: \"gtk\" or \"cli\"")
 
+	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to file")
+
 	flag.Parse()
+
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			panic(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
 
 	rand.Seed(*seed)
 
