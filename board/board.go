@@ -269,23 +269,12 @@ func (board Board) Opp() uint64 {
 // This only affects the directions right, left down, down and right down
 // Returns the flipped discs.
 func (board *Board) doMoveToHigherBits(line uint64) uint64 {
-	holes := ^line
-	b := (holes | board.opp) + 1
+	b := (^line | board.opp) + 1
 	lineEnd := (b & -b) & board.me
 	if lineEnd == 0 {
 		return 0
 	}
-	flipped := (lineEnd - 1) & board.opp & line
-
-	/*var buff bytes.Buffer
-	board.ASCIIArt(&buff, false)
-
-	fmt.Printf("board:\n%s\n", buff.String())
-	fmt.Printf("holes:\n%s\n", bitsetASCIIArtString(holes))
-	fmt.Printf("b:\n%s\n", bitsetASCIIArtString(b))
-	fmt.Printf("lineEnd:\n%s\n", bitsetASCIIArtString(lineEnd))
-	fmt.Printf("flipped:\n%s\n", bitsetASCIIArtString(flipped))*/
-	return flipped
+	return (lineEnd - 1) & board.opp & line
 }
 
 // Flips discs on a Board, given a flipping line.
