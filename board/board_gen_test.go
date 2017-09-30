@@ -6,6 +6,9 @@ import (
 )
 
 func TestBoardChildGenNext(t *testing.T) {
+	if testing.Short() {
+		t.SkipNow()
+	}
 
 	for depth := 0; depth < 4; depth++ {
 		for board := range genTestBoards() {

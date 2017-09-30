@@ -76,6 +76,10 @@ func minimax(board Board, depth int, sign int) int {
 }
 
 func TestNegaMax(t *testing.T) {
+	if testing.Short() {
+		t.SkipNow()
+	}
+
 	for board := range genTestBoards() {
 		for depth := 1; depth <= 3; depth++ {
 			copy := board
@@ -99,6 +103,10 @@ func TestNegaMax(t *testing.T) {
 }
 
 func TestAlphaBeta(t *testing.T) {
+	if testing.Short() {
+		t.SkipNow()
+	}
+
 	for board := range genTestBoards() {
 		for depth := 1; depth <= 3; depth++ {
 			copy := board
