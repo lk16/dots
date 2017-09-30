@@ -8,6 +8,30 @@ import (
 	"math/rand"
 )
 
+func bitsetASCIIArtString(bs uint64) (output string) {
+	buffer := new(bytes.Buffer)
+	buffer.WriteString("+-a-b-c-d-e-f-g-h-+\n")
+
+	for y := uint(0); y < 8; y++ {
+		buffer.WriteString(fmt.Sprintf("%d ", y+1))
+
+		for x := uint(0); x < 8; x++ {
+			f := y*8 + x
+			if bs&uint64(1<<f) != 0 {
+				buffer.WriteString("@ ")
+			} else {
+				buffer.WriteString("- ")
+			}
+
+		}
+		buffer.WriteString("|\n")
+	}
+	buffer.WriteString("+-----------------+\n")
+
+	output = buffer.String()
+	return
+}
+
 // Board represents the state of an othello board game.
 // It does not keep track which discs are white or black.
 // Instead it keeps track which discs are owned by the player to move.
@@ -245,16 +269,23 @@ func (board Board) Opp() uint64 {
 // This only affects the directions right, left down, down and right down
 // Returns the flipped discs.
 func (board *Board) doMoveToHigherBits(line uint64) uint64 {
-	lineMask := line & board.me
-	if lineMask == 0 {
+	holes := ^line
+	b := (holes | board.opp) + 1
+	lineEnd := (b & -b) & board.me
+	if lineEnd == 0 {
 		return 0
 	}
-	bit := lineMask & (-lineMask)
-	line &= uint64(bit - 1)
-	if line&board.opp == line {
-		return line
-	}
-	return 0
+	flipped := (lineEnd - 1) & board.opp & line
+
+	/*var buff bytes.Buffer
+	board.ASCIIArt(&buff, false)
+
+	fmt.Printf("board:\n%s\n", buff.String())
+	fmt.Printf("holes:\n%s\n", bitsetASCIIArtString(holes))
+	fmt.Printf("b:\n%s\n", bitsetASCIIArtString(b))
+	fmt.Printf("lineEnd:\n%s\n", bitsetASCIIArtString(lineEnd))
+	fmt.Printf("flipped:\n%s\n", bitsetASCIIArtString(flipped))*/
+	return flipped
 }
 
 // Flips discs on a Board, given a flipping line.

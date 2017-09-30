@@ -36,57 +36,10 @@ func (board Board) asciiArtString(swapDiscColors bool) (output string) {
 	return
 }
 
-func bitsetASCIIArtString(bs uint64) (output string) {
-	buffer := new(bytes.Buffer)
-
-	buffer.WriteString("+-----------------+\n")
-
-	for y := uint(0); y < 8; y++ {
-
-		buffer.WriteString("| ")
-
-		for x := uint(0); x < 8; x++ {
-
-			f := y*8 + x
-
-			if bs&(uint64(1)<<f) != 0 {
-				buffer.WriteString("@ ")
-			} else {
-				buffer.WriteString("  ")
-			}
-
-		}
-
-		buffer.WriteString("|\n")
-	}
-	buffer.WriteString("+-----------------+\n")
-
-	output = buffer.String()
-	return
-}
-
 // Test board generator
 func genTestBoards() (ch chan Board) {
 	ch = make(chan Board)
 	go func() {
-		ch <- Board{me: 0, opp: 0}
-		ch <- *NewBoard()
-
-		// random reachable boards with 4-64 discs
-		for i := 0; i < 10; i++ {
-			for discs := 4; discs <= 64; discs++ {
-				ch <- *RandomBoard(discs)
-			}
-		}
-
-		// random boards not necessarily reachable
-		for i := 0; i < 1000; i++ {
-			board := Board{
-				me:  rand.Uint64(),
-				opp: rand.Uint64()}
-			board.opp &^= board.me
-			ch <- board
-		}
 
 		// generate all boards with all flipping lines from each square
 
@@ -125,6 +78,25 @@ func genTestBoards() (ch chan Board) {
 					}
 				}
 			}
+		}
+
+		ch <- Board{me: 0, opp: 0}
+		ch <- *NewBoard()
+
+		// random reachable boards with 4-64 discs
+		for i := 0; i < 10; i++ {
+			for discs := 4; discs <= 64; discs++ {
+				ch <- *RandomBoard(discs)
+			}
+		}
+
+		// random boards not necessarily reachable
+		for i := 0; i < 1000; i++ {
+			board := Board{
+				me:  rand.Uint64(),
+				opp: rand.Uint64()}
+			board.opp &^= board.me
+			ch <- board
 		}
 
 		close(ch)
@@ -187,22 +159,22 @@ func TestRandomBoard(t *testing.T) {
 		got := bits.OnesCount64(board.me | board.opp)
 
 		if expected != got {
-			t.Errorf("Expected disc count %d, got %d\n", expected, got)
+			t.Fatalf("Expected disc count %d, got %d\n", expected, got)
 		}
 
 		if !boardIsValid(board) {
-			t.Errorf("Invalid board:\n%s\n\n", board.asciiArtString(false))
+			t.Fatalf("Invalid board:\n%s\n\n", board.asciiArtString(false))
 		}
 	}
 
 	board := RandomBoard(3)
 	if board != nil {
-		t.Errorf("Expected nil, got:\n%s\n\n", board.asciiArtString(false))
+		t.Fatalf("Expected nil, got:\n%s\n\n", board.asciiArtString(false))
 	}
 
 	board = RandomBoard(65)
 	if board != nil {
-		t.Errorf("Expected nil, got:\n%s\n\n", board.asciiArtString(false))
+		t.Fatalf("Expected nil, got:\n%s\n\n", board.asciiArtString(false))
 	}
 
 }
@@ -362,14 +334,12 @@ func TestBoardMoves(t *testing.T) {
 		got := clone.Moves()
 		if expected != got {
 			t.Errorf("For board\n%s", board.asciiArtString(false))
-			t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
+			t.Fatalf("Expected:\n%s\n\nGot:\n%s\n\n",
 				bitsetASCIIArtString(expected), bitsetASCIIArtString(got))
-			t.FailNow()
 		}
 		if clone != board {
-			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
+			t.Fatalf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
 				board.asciiArtString(false), clone.asciiArtString(false))
-			t.FailNow()
 		}
 	}
 }
@@ -401,7 +371,7 @@ func TestBoardGetChildren(t *testing.T) {
 		got := clone.GetChildren()
 
 		if clone != board {
-			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
+			t.Fatalf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
 				board.asciiArtString(false), clone.asciiArtString(false))
 		}
 
@@ -410,26 +380,23 @@ func TestBoardGetChildren(t *testing.T) {
 			childDiscs := child.me | child.opp
 
 			if (childDiscs & discs) != discs {
-				t.Errorf("Pieces were removed from board with board.GetChildren()\n")
-				t.FailNow()
+				t.Fatalf("Pieces were removed from board with board.GetChildren()\n")
 			}
 
 			if valid && !boardIsValid(&child) {
-				t.Errorf("Valid board:\n%s\n\nInvalid child:\n%s\n\n",
+				t.Fatalf("Valid board:\n%s\n\nInvalid child:\n%s\n\n",
 					board.asciiArtString(false), child.asciiArtString(false))
 			}
 
 		}
 
 		if len(got) != len(expected) {
-			t.Errorf("Expected %d children, got %d.\n", len(expected), len(got))
-			t.FailNow()
+			t.Fatalf("Expected %d children, got %d.\n", len(expected), len(got))
 		}
 
 		for _, g := range got {
 			if _, ok := expectedSet[g]; !ok {
-				t.Errorf("Children sets are unequal.\n")
-				t.FailNow()
+				t.Fatalf("Children sets are unequal.\n")
 			}
 		}
 
