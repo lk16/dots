@@ -191,14 +191,14 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 
 		query.Run(bot.resultChan)
 
-		if i == 0 {
-			bot.processResult(<-bot.resultChan, &alpha, &afterwards)
-		}
+		//if i == 0 {
+		bot.processResult(<-bot.resultChan, &alpha, &afterwards)
+		//}
 	}
 
-	for i := 1; i < len(children); i++ {
+	/*for i := 1; i < len(children); i++ {
 		bot.processResult(<-bot.resultChan, &alpha, &afterwards)
-	}
+	}*/
 
 	bot.writer.Write(bytes.NewBufferString("\n\n").Bytes())
 	return
