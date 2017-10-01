@@ -162,27 +162,140 @@ func moves(me, opp uint64) (movesSet uint64) {
 // DoMove does a move and returns the flipped discs
 func (board *Board) DoMove(index int) (flipped uint64) {
 
-	doMoveFuncs := []func() uint64{
-		board.doMove0, board.doMove1, board.doMove2, board.doMove3,
-		board.doMove4, board.doMove5, board.doMove6, board.doMove7,
-		board.doMove8, board.doMove9, board.doMove10, board.doMove11,
-		board.doMove12, board.doMove13, board.doMove14, board.doMove15,
-		board.doMove16, board.doMove17, board.doMove18, board.doMove19,
-		board.doMove20, board.doMove21, board.doMove22, board.doMove23,
-		board.doMove24, board.doMove25, board.doMove26, board.doMove27,
-		board.doMove28, board.doMove29, board.doMove30, board.doMove31,
-		board.doMove32, board.doMove33, board.doMove34, board.doMove35,
-		board.doMove36, board.doMove37, board.doMove38, board.doMove39,
-		board.doMove40, board.doMove41, board.doMove42, board.doMove43,
-		board.doMove44, board.doMove45, board.doMove46, board.doMove47,
-		board.doMove48, board.doMove49, board.doMove50, board.doMove51,
-		board.doMove52, board.doMove53, board.doMove54, board.doMove55,
-		board.doMove56, board.doMove57, board.doMove58, board.doMove59,
-		board.doMove60, board.doMove61, board.doMove62, board.doMove63}
+	switch index {
+	case 0:
+		flipped = board.doMove0()
+	case 1:
+		flipped = board.doMove1()
+	case 2:
+		flipped = board.doMove2()
+	case 3:
+		flipped = board.doMove3()
+	case 4:
+		flipped = board.doMove4()
+	case 5:
+		flipped = board.doMove5()
+	case 6:
+		flipped = board.doMove6()
+	case 7:
+		flipped = board.doMove7()
+	case 8:
+		flipped = board.doMove8()
+	case 9:
+		flipped = board.doMove9()
+	case 10:
+		flipped = board.doMove10()
+	case 11:
+		flipped = board.doMove11()
+	case 12:
+		flipped = board.doMove12()
+	case 13:
+		flipped = board.doMove13()
+	case 14:
+		flipped = board.doMove14()
+	case 15:
+		flipped = board.doMove15()
+	case 16:
+		flipped = board.doMove16()
+	case 17:
+		flipped = board.doMove17()
+	case 18:
+		flipped = board.doMove18()
+	case 19:
+		flipped = board.doMove19()
+	case 20:
+		flipped = board.doMove20()
+	case 21:
+		flipped = board.doMove21()
+	case 22:
+		flipped = board.doMove22()
+	case 23:
+		flipped = board.doMove23()
+	case 24:
+		flipped = board.doMove24()
+	case 25:
+		flipped = board.doMove25()
+	case 26:
+		flipped = board.doMove26()
+	case 27:
+		flipped = board.doMove27()
+	case 28:
+		flipped = board.doMove28()
+	case 29:
+		flipped = board.doMove29()
+	case 30:
+		flipped = board.doMove30()
+	case 31:
+		flipped = board.doMove31()
+	case 32:
+		flipped = board.doMove32()
+	case 33:
+		flipped = board.doMove33()
+	case 34:
+		flipped = board.doMove34()
+	case 35:
+		flipped = board.doMove35()
+	case 36:
+		flipped = board.doMove36()
+	case 37:
+		flipped = board.doMove37()
+	case 38:
+		flipped = board.doMove38()
+	case 39:
+		flipped = board.doMove39()
+	case 40:
+		flipped = board.doMove40()
+	case 41:
+		flipped = board.doMove41()
+	case 42:
+		flipped = board.doMove42()
+	case 43:
+		flipped = board.doMove43()
+	case 44:
+		flipped = board.doMove44()
+	case 45:
+		flipped = board.doMove45()
+	case 46:
+		flipped = board.doMove46()
+	case 47:
+		flipped = board.doMove47()
+	case 48:
+		flipped = board.doMove48()
+	case 49:
+		flipped = board.doMove49()
+	case 50:
+		flipped = board.doMove50()
+	case 51:
+		flipped = board.doMove51()
+	case 52:
+		flipped = board.doMove52()
+	case 53:
+		flipped = board.doMove53()
+	case 54:
+		flipped = board.doMove54()
+	case 55:
+		flipped = board.doMove55()
+	case 56:
+		flipped = board.doMove56()
+	case 57:
+		flipped = board.doMove57()
+	case 58:
+		flipped = board.doMove58()
+	case 59:
+		flipped = board.doMove59()
+	case 60:
+		flipped = board.doMove60()
+	case 61:
+		flipped = board.doMove61()
+	case 62:
+		flipped = board.doMove62()
+	case 63:
+		flipped = board.doMove63()
+	}
 
-	flipped = doMoveFuncs[index]()
+	moveBit := uint64(1 << uint(index))
 
-	tmp := board.me | flipped | uint64(1)<<uint(index)
+	tmp := board.me | flipped | moveBit
 
 	board.me = board.opp &^ tmp
 	board.opp = tmp
