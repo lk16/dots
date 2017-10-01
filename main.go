@@ -27,6 +27,8 @@ func main() {
 
 	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to file")
 
+	parallelSearch := flag.Bool("ps", true, "enable parallel search")
+
 	flag.Parse()
 
 	if *cpuprofile != "" {
@@ -42,8 +44,8 @@ func main() {
 
 	fe := frontend.Get(*frontendName)
 
-	whitePlayer := players.Get(*whiteName, *whiteLevel)
-	blackPlayer := players.Get(*blackName, *blackLevel)
+	whitePlayer := players.Get(*whiteName, *whiteLevel, *parallelSearch)
+	blackPlayer := players.Get(*blackName, *blackLevel, *parallelSearch)
 
 	controller := frontend.NewController(blackPlayer, whitePlayer, os.Stdout, fe)
 	controller.Run()

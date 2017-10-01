@@ -32,19 +32,22 @@ type Heuristic func(board.Board) int
 
 // BotHeuristic is a bot that uses a Heuristic for choosing its moves
 type BotHeuristic struct {
-	heuristic   Heuristic
-	searchDepth int
-	exactDepth  int
-	writer      io.Writer
-	resultChan  chan SearchResult
-	stats       SearchStats
-	startTime   time.Time
+	heuristic      Heuristic
+	searchDepth    int
+	exactDepth     int
+	writer         io.Writer
+	resultChan     chan SearchResult
+	stats          SearchStats
+	startTime      time.Time
+	parallelSearch bool
 }
 
 // NewBotHeuristic creates a new BotHeuristic
 func NewBotHeuristic(heuristic Heuristic,
-	searchDepth, exactDepth int, writer io.Writer) (bot *BotHeuristic) {
-	bot = &BotHeuristic{
+	searchDepth, exactDepth int, writer io.Writer,
+	parallelSearch bool) *BotHeuristic {
+
+	return &BotHeuristic{
 		heuristic:   heuristic,
 		searchDepth: searchDepth,
 		exactDepth:  exactDepth,
@@ -52,8 +55,8 @@ func NewBotHeuristic(heuristic Heuristic,
 		resultChan:  make(chan SearchResult, 32),
 		stats: SearchStats{
 			nodes:  0,
-			timeNs: 0}}
-	return
+			timeNs: 0},
+		parallelSearch: parallelSearch}
 }
 
 func fmtBig(n uint64) string {
@@ -191,14 +194,16 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 
 		query.Run(bot.resultChan)
 
-		//if i == 0 {
-		bot.processResult(<-bot.resultChan, &alpha, &afterwards)
-		//}
+		if i == 0 || !bot.parallelSearch {
+			bot.processResult(<-bot.resultChan, &alpha, &afterwards)
+		}
 	}
 
-	/*for i := 1; i < len(children); i++ {
-		bot.processResult(<-bot.resultChan, &alpha, &afterwards)
-	}*/
+	if bot.parallelSearch {
+		for i := 1; i < len(children); i++ {
+			bot.processResult(<-bot.resultChan, &alpha, &afterwards)
+		}
+	}
 
 	bot.writer.Write(bytes.NewBufferString("\n\n").Bytes())
 	return

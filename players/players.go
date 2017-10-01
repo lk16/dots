@@ -12,7 +12,7 @@ type Player interface {
 }
 
 // Get gets a player by name and sets the level if applicable
-func Get(name string, lvl int) Player {
+func Get(name string, lvl int, parallel bool) Player {
 
 	if name == "human" {
 		return nil
@@ -27,7 +27,7 @@ func Get(name string, lvl int) Player {
 	}
 
 	if name == "heur" {
-		return NewBotHeuristic(board.Squared, lvl, 2*lvl, os.Stdout)
+		return NewBotHeuristic(board.Squared, lvl, 2*lvl, os.Stdout, parallel)
 	}
 
 	panic("Invalid player name")
