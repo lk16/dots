@@ -271,10 +271,19 @@ func (board Board) Opp() uint64 {
 func (board *Board) doMoveToHigherBits(line uint64) uint64 {
 	b := (^line | board.opp) + 1
 	lineEnd := (b & -b) & board.me
-	if lineEnd == 0 {
+
+	// GOAL:
+	// lineEnd == 0 -> 	x =  1 =  1
+	// else -> 			x = ^0 = -1
+
+	x := ((lineEnd - 1) >> 63) - 1
+	//fmt.Printf("lineEnd:\n%s\n", bitsetASCIIArtString(lineEnd))
+	//fmt.Printf("x:\n%s\n", bitsetASCIIArtString(x))
+
+	/*if lineEnd == 0 {
 		return 0
-	}
-	return (lineEnd - 1) & board.opp & line
+	}*/
+	return x & (lineEnd - 1) & board.opp & line
 }
 
 // Flips discs on a Board, given a flipping line.
