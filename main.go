@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"dots/evolution"
 	"dots/frontend"
 	"dots/players"
 
@@ -29,7 +30,14 @@ func main() {
 
 	parallelSearch := flag.Bool("ps", true, "enable parallel search")
 
+	evolutionFlag := flag.Bool("evolution", false, "run evolutionary algorithm")
+
 	flag.Parse()
+
+	if *evolutionFlag {
+		evolution.Run()
+		return
+	}
 
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)
