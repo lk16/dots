@@ -236,5 +236,8 @@ func (evolution *Evolution) Load() {
 		return
 	}
 	json.NewDecoder(file).Decode(&evolution.participants)
-	fmt.Printf("Loaded state\n")
+	for i := range evolution.participants {
+		evolution.participants[i].rating = 1500
+	}
+	fmt.Printf("Loaded state\n\n")
 }
