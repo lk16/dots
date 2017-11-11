@@ -10,62 +10,80 @@ import (
 	"time"
 )
 
-type output struct {
+// State is a dummy
+type State struct {
 	Timestamp int64
 }
 
-func writeState(latest output) {
-	file, err := os.OpenFile("evolution.json", os.O_RDWR|os.O_CREATE, 0755)
-	if err != nil {
-		log.Fatal(err)
-	}
-	json.NewEncoder(file).Encode(latest)
+// Evolution runs an evolutionary algorithm
+type Evolution struct {
+	killChan   chan bool
+	resultChan chan State
+	state      State
+	filename   string
 }
 
-func readState() (state output, err error) {
-	file, err := os.Open("evolution.json")
-	if err != nil {
-		// TODO
-	}
-	json.NewDecoder(file).Decode(&state)
-	return
-}
+// NewEvolution creates a new Evolution
+func NewEvolution(filename string) (evolution *Evolution) {
+	evolution = &Evolution{
+		killChan:   make(chan bool),
+		resultChan: make(chan State),
+		filename:   filename}
 
-// Run runs evolutionary algorithm
-func Run() {
 	signals := make(chan os.Signal)
-	killChan := make(chan bool)
-	resultChan := make(chan output)
 
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
 		<-signals
-		killChan <- true
+		evolution.killChan <- true
 	}()
+
+	_ = evolution.Load()
+
+	return
+}
+
+// Run runs evolutionary algorithm
+func (evolution *Evolution) Run() {
 
 	work := func() {
 		time.Sleep(1 * time.Second)
-		resultChan <- output{Timestamp: time.Now().Unix()}
+		evolution.resultChan <- State{Timestamp: time.Now().Unix()}
 	}
-
-	state, err := readState()
-	if err != nil {
-		fmt.Printf("Could not load state: %s", err)
-	}
-	fmt.Printf("Loaded state: %d\n", state.Timestamp)
 
 	go work()
 
 	for {
 		select {
-		case <-killChan:
+		case <-evolution.killChan:
 			fmt.Printf("\nCleaning up\n")
-			writeState(state)
+			evolution.Save()
 			return
-		case state = <-resultChan:
-			fmt.Printf("Got result %d\n", state.Timestamp)
+		case evolution.state = <-evolution.resultChan:
+			fmt.Printf("Got result %d\n", evolution.state.Timestamp)
 			go work()
 		}
 	}
+}
+
+// Save saves the state of Evolution
+func (evolution *Evolution) Save() {
+	file, err := os.OpenFile(evolution.filename, os.O_RDWR|os.O_CREATE, 0755)
+	if err != nil {
+		log.Fatal(err)
+	}
+	json.NewEncoder(file).Encode(evolution.state)
+}
+
+// Load loads the state of Evolution
+func (evolution *Evolution) Load() (err error) {
+	file, err := os.Open(evolution.filename)
+	if err != nil {
+		fmt.Printf("Could not load state: %s", err)
+		return
+	}
+	json.NewDecoder(file).Decode(&evolution.state)
+	fmt.Printf("Loaded state: %d\n", evolution.state.Timestamp)
+	return
 }

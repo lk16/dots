@@ -30,12 +30,12 @@ func main() {
 
 	parallelSearch := flag.Bool("ps", true, "enable parallel search")
 
-	evolutionFlag := flag.Bool("evolution", false, "run evolutionary algorithm")
+	evolutionFileName := flag.String("evolution", "", "run evolutionary algorithm with savefile name as parameter")
 
 	flag.Parse()
 
-	if *evolutionFlag {
-		evolution.Run()
+	if *evolutionFileName != "" {
+		evolution.NewEvolution(*evolutionFileName).Run()
 		return
 	}
 
