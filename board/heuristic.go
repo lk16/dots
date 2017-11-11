@@ -26,7 +26,7 @@ const (
 func Negamax(board *Board, depth int) int {
 
 	if depth == 0 {
-		return Squared(*board)
+		return Squared(*board, struct{}{})
 	}
 
 	gen := NewGenerator(board, 0)
@@ -56,7 +56,7 @@ func Negamax(board *Board, depth int) int {
 func AlphaBeta(board *Board, alpha, beta, depth int) int {
 
 	if depth == 0 {
-		return Squared(*board)
+		return Squared(*board, struct{}{})
 	}
 
 	gen := NewGenerator(board, 0)
@@ -88,7 +88,7 @@ func AlphaBeta(board *Board, alpha, beta, depth int) int {
 
 // Squared is a heuristic taken from a similar project with that name
 // see http://github.com/lk16/squared
-func Squared(board Board) int {
+func Squared(board Board, params interface{}) int {
 	cornerMask := uint64(1<<0 | 1<<7 | 1<<56 | 1<<63)
 
 	meCorners := bits.OnesCount64(cornerMask & board.Me())

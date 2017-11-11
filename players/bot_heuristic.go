@@ -28,18 +28,20 @@ func clamp(x, low, high int) int {
 }
 
 // Heuristic is a function that estimates how promising a Board is.
-type Heuristic func(board.Board) int
+// The second parameter is for heuristic parameters
+type Heuristic func(board.Board, interface{}) int
 
 // BotHeuristic is a bot that uses a Heuristic for choosing its moves
 type BotHeuristic struct {
-	heuristic      Heuristic
-	searchDepth    int
-	exactDepth     int
-	writer         io.Writer
-	resultChan     chan SearchResult
-	stats          SearchStats
-	startTime      time.Time
-	parallelSearch bool
+	heuristic       Heuristic
+	heuristicParams interface{}
+	searchDepth     int
+	exactDepth      int
+	writer          io.Writer
+	resultChan      chan SearchResult
+	stats           SearchStats
+	startTime       time.Time
+	parallelSearch  bool
 }
 
 // NewBotHeuristic creates a new BotHeuristic
@@ -190,7 +192,8 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 			upperBound: beta,
 			depth:      depth,
 			guess:      0,
-			heuristic:  bot.heuristic}
+			heuristic:  bot.heuristic,
+			params:     bot.heuristicParams}
 
 		query.Run(bot.resultChan)
 

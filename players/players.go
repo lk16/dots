@@ -28,7 +28,7 @@ func Get(name string, lvl int, parallel bool) Player {
 	}
 
 	if name == "evolve" {
-		return NewBotEvolve(lvl, perfectDepth)
+		return NewBotEvolve(lvl, perfectDepth, Parameters{})
 	}
 
 	if name == "heur" {

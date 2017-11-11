@@ -22,7 +22,7 @@ func TestHeuristicSquared(t *testing.T) {
 
 	for _, test := range testCases {
 
-		got := Squared(*test.board)
+		got := Squared(*test.board, struct{}{})
 
 		if got != test.expected {
 			buff := new(bytes.Buffer)
@@ -38,7 +38,7 @@ func TestHeuristicSquared(t *testing.T) {
 func minimax(board Board, depth int, sign int) int {
 
 	if depth == 0 {
-		return sign * Squared(board)
+		return sign * Squared(board, struct{}{})
 	}
 
 	children := board.getChildren()

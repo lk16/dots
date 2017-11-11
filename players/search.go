@@ -12,6 +12,7 @@ type SearchQuery struct {
 	depth      int
 	guess      int
 	heuristic  Heuristic
+	params     interface{}
 }
 
 // SearchResult is a result of a SearchQuery
@@ -145,12 +146,16 @@ func (thread *SearchThread) checkTranspositionTable(alpha int) (cutOff int, ok b
 
 }
 
+func (thread *SearchThread) heuristic() int {
+	return thread.query.heuristic(thread.state.board, thread.query.params)
+}
+
 func (thread *SearchThread) doMtdf(alpha, depth int) (heur int) {
 
 	thread.stats.nodes++
 
 	if depth == 0 {
-		return mtdfPolish(thread.query.heuristic(thread.state.board), alpha)
+		return mtdfPolish(thread.heuristic(), alpha)
 	}
 
 	if depth >= 4 {
