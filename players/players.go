@@ -22,11 +22,16 @@ func Get(name string, lvl int, parallel bool) Player {
 		return NewBotRandom()
 	}
 
+	perfectDepth := 2 * lvl
+	if lvl > 8 {
+		perfectDepth = lvl + 8
+	}
+
+	if name == "evolve" {
+		return NewBotEvolve(lvl, perfectDepth)
+	}
+
 	if name == "heur" {
-		perfectDepth := 2 * lvl
-		if lvl > 8 {
-			perfectDepth = lvl + 8
-		}
 		return NewBotHeuristic(board.Squared, lvl, perfectDepth,
 			os.Stdout, parallel)
 	}
