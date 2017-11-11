@@ -13,7 +13,7 @@ const (
 
 	// ExactScoreFactor is the multiplication.
 	// This is used when a non exact search runs into an exact result
-	ExactScoreFactor = 1000
+	ExactScoreFactor = 1000000
 
 	// MaxHeuristic is the highest heuristic value possible
 	MaxHeuristic = ExactScoreFactor * MaxScore

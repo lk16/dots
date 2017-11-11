@@ -60,17 +60,19 @@ type Controller struct {
 	stateID  uint
 	redoMax  uint
 	frontend Frontend
+	xot      bool
 }
 
 // NewController returns a new Controller
 func NewController(black, white players.Player, writer io.Writer,
-	frontend Frontend) (control *Controller) {
+	frontend Frontend, xot bool) (control *Controller) {
 	control = &Controller{
 		players:  [2]players.Player{black, white},
 		frontend: frontend,
 		history:  make([]GameState, 100),
 		stateID:  0,
-		redoMax:  0}
+		redoMax:  0,
+		xot:      xot}
 	return
 }
 
@@ -114,8 +116,14 @@ func (control *Controller) canMove() bool {
 func (control *Controller) reset() {
 	control.stateID = 0
 	control.redoMax = 0
+
+	startBoard := *board.NewBoard()
+	if control.xot {
+		startBoard = board.Xot()
+	}
+
 	control.history[0] = GameState{
-		board: *board.NewBoard(),
+		board: startBoard,
 		turn:  0}
 	control.frontend.OnUpdate(control.GetState())
 }

@@ -32,6 +32,8 @@ func main() {
 
 	evolutionFileName := flag.String("evolution", "", "run evolutionary algorithm with savefile name as parameter")
 
+	enableXot := flag.Bool("xot", false, "enable xot")
+
 	flag.Parse()
 
 	if *evolutionFileName != "" {
@@ -55,6 +57,6 @@ func main() {
 	whitePlayer := players.Get(*whiteName, *whiteLevel, *parallelSearch)
 	blackPlayer := players.Get(*blackName, *blackLevel, *parallelSearch)
 
-	controller := frontend.NewController(blackPlayer, whitePlayer, os.Stdout, fe)
+	controller := frontend.NewController(blackPlayer, whitePlayer, os.Stdout, fe, *enableXot)
 	controller.Run()
 }
