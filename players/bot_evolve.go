@@ -15,7 +15,7 @@ type Parameters struct {
 // RandomParameters returns random parameters within given range
 func RandomParameters(min, max int) (params Parameters) {
 	for i := range params.PositionValue {
-		params.PositionValue[i] = min + (rand.Int() % (max - min))
+		params.PositionValue[i] = rand.Intn(max) - rand.Intn(-min)
 	}
 	return
 }

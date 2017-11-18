@@ -36,6 +36,8 @@ func main() {
 
 	flag.Parse()
 
+	rand.Seed(*seed)
+
 	if *evolutionFileName != "" {
 		evolution.NewEvolution(*evolutionFileName).Run()
 		return
@@ -49,8 +51,6 @@ func main() {
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
 	}
-
-	rand.Seed(*seed)
 
 	fe := frontend.Get(*frontendName)
 

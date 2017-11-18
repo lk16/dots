@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	maxParticipants = 40
+	maxParticipants = 20
 	startRating     = 1500
 	paramMax        = 10000
 )
@@ -41,7 +41,7 @@ func NewParticipantMutate(parent Participant) (offspring Participant) {
 	offspring = parent
 
 	for i := range offspring.Params.PositionValue {
-		if rand.Intn(8) == 0 {
+		if rand.Intn(2) == 0 {
 			offspring.Params.PositionValue[i] += rand.Intn(500) - rand.Intn(500)
 		}
 	}
@@ -72,8 +72,8 @@ func NewEvolution(filename string) (evolution *Evolution) {
 		killChan:     make(chan bool),
 		resultChan:   make(chan result),
 		filename:     filename,
-		searchDepth:  4,
-		exactDepth:   8,
+		searchDepth:  7,
+		exactDepth:   10,
 		participants: make(map[int]Participant, 0)}
 
 	signals := make(chan os.Signal)
@@ -177,11 +177,20 @@ func (evolution *Evolution) printStats() {
 	})
 
 	fmt.Printf("Rating\tGames\tWins\tLosses\tDraws\tWin Rate\tParams\n")
+	total := Participant{}
 	for _, p := range participantsCopy {
 		games := p.Draws + p.Wins + p.Losses
 		winRate := 100.0 * float64(p.Wins) / float64(games)
 		fmt.Printf("%d\t%d\t%d\t%d\t%d\t%2.2f%%\t%v\n", p.Rating, games, p.Wins, p.Losses, p.Draws, winRate, p.Params)
+		total.Draws += p.Draws
+		total.Losses += p.Losses
+		total.Rating += p.Rating
+		total.Wins += p.Wins
 	}
+	totalGames := total.Draws + total.Wins + total.Losses
+	totalWinRate := 100 * float64(total.Wins) / float64(totalGames)
+	fmt.Printf("---\n")
+	fmt.Printf("%d\t%d\t%d\t%d\t%d\t%2.2f%%\t%v\n", total.Rating, totalGames, total.Wins, total.Losses, total.Draws, totalWinRate, total.Params)
 	fmt.Printf("\n\n")
 }
 
@@ -278,11 +287,9 @@ func (evolution *Evolution) updateRating(r result) {
 	var ok bool
 
 	if whiteParticipant, ok = evolution.participants[r.whiteID]; !ok {
-		fmt.Printf("One of the participants doesn't exist anymore.\n")
 		return
 	}
 	if blackParticipant, ok = evolution.participants[r.blackID]; !ok {
-		fmt.Printf("One of the participants doesn't exist anymore.\n")
 		return
 	}
 
