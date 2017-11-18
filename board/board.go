@@ -335,8 +335,7 @@ func (board *Board) DoRandomMove() {
 	if len(children) == 0 {
 		return
 	}
-	childID := rand.Int() % len(children)
-	*board = children[childID]
+	*board = children[rand.Intn(len(children))]
 }
 
 // SwitchTurn effectively passes a turn
