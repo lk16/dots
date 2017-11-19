@@ -85,6 +85,71 @@ func RandomBoard(discs int) (board *Board) {
 	return
 }
 
+func (board Board) rotate(rotation int) (rotated Board) {
+
+	rotate := func(bitset uint64, rotation int) (result uint64) {
+		result = bitset
+		if rotation&1 != 0 {
+			result = (result&0x00000000FFFFFFFF)<<32 | (result&0xFFFFFFFF00000000)>>32
+			result = (result&0x0000FFFF0000FFFF)<<16 | (result&0xFFFF0000FFFF0000)>>16
+			result = (result&0x00FF00FF00FF00FF)<<8 | (result&0xFF00FF00FF00FF00)>>8
+		}
+		if rotation&2 != 0 {
+			result = (result&0x0F0F0F0F0F0F0F0F)<<4 | (result&0xF0F0F0F0F0F0F0F0)>>4
+			result = (result&0x3333333333333333)<<2 | (result&0xCCCCCCCCCCCCCCCC)>>2
+			result = (result&0x5555555555555555)<<1 | (result&0xAAAAAAAAAAAAAAAA)>>1
+		}
+		if rotation&4 != 0 {
+			var tmp uint64
+			k1 := uint64(0xaa00aa00aa00aa00)
+			k2 := uint64(0xcccc0000cccc0000)
+			k4 := uint64(0xf0f0f0f00f0f0f0f)
+			tmp = result ^ (result << 36)
+			result ^= k4 & (tmp ^ (result >> 36))
+			tmp = k2 & (result ^ (result << 18))
+			result ^= tmp ^ (tmp >> 18)
+			tmp = k1 & (result ^ (result << 9))
+			result ^= tmp ^ (tmp >> 9)
+			return result
+		}
+
+		return
+	}
+
+	rotated = board
+	rotated.me = rotate(rotated.me, rotation)
+	rotated.opp = rotate(rotated.opp, rotation)
+	return
+
+}
+
+// Normalize normalizes a board with regards to symmetry
+func (board *Board) Normalize() (rotation int) {
+	min := board.rotate(0)
+	rotation = 0
+
+	for r := 1; r < 8; r++ {
+		cur := board.rotate(r)
+		if cur.me < min.me {
+			min = cur
+			rotation = r
+		}
+		if cur.me == min.me {
+			if cur.opp < min.opp {
+				min = cur
+				rotation = r
+			}
+		}
+	}
+	*board = min
+	return
+}
+
+// Unnormalize undoes normalization using the return value of Normalize()
+func (board *Board) Unnormalize(rotation int) {
+	*board = board.rotate(rotation)
+}
+
 // ASCIIArt writes ascii-art of a Board to a writer
 func (board Board) ASCIIArt(writer io.Writer, SwapDiscColors bool) {
 

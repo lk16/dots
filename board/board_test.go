@@ -91,7 +91,7 @@ func genTestBoards() (ch chan Board) {
 		}
 
 		// random boards not necessarily reachable
-		for i := 0; i < 1000; i++ {
+		for i := 0; i < 100; i++ {
 			board := Board{
 				me:  rand.Uint64(),
 				opp: rand.Uint64()}
@@ -647,5 +647,35 @@ func TestBoardOpponentMoves(t *testing.T) {
 			t.Errorf("Expected %d, got %d", expected, got)
 		}
 
+	}
+}
+
+func TestBoardNormalize(t *testing.T) {
+	board := CustomBoard(2, 4)
+	normalized := board
+	normalized.Normalize()
+	for r := 0; r < 8; r++ {
+		rotated := board
+		rotated.rotate(r)
+		rotated.Normalize()
+		if rotated != normalized {
+			t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
+				normalized.asciiArtString(false), rotated.asciiArtString(false))
+		}
+	}
+}
+
+func TestBoardUnnormalize(t *testing.T) {
+	for r := 0; r < 8; r++ {
+		rotated := CustomBoard(2, 4)
+		rotated.rotate(r)
+		rotation := rotated.Normalize()
+		original := rotated
+		original.Unnormalize(rotation)
+
+		if rotated != original {
+			t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
+				rotated.asciiArtString(false), original.asciiArtString(false))
+		}
 	}
 }
