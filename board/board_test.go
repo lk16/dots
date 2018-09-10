@@ -104,13 +104,6 @@ func genTestBoards() (ch chan Board) {
 	return
 }
 
-// Fails if panic() is not called
-func assertPanic(t *testing.T) {
-	if r := recover(); r == nil {
-		t.Errorf("panic() was not called")
-	}
-}
-
 func TestBoardIsValid(t *testing.T) {
 
 	type testCase struct {

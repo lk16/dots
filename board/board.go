@@ -220,7 +220,7 @@ func moves(me, opp uint64) (movesSet uint64) {
 	movesSet |= movesPartial(me, mask, 9)
 	movesSet |= movesPartial(me, opp, 8)
 
-	movesSet &^= (me | opp)
+	movesSet &^= me | opp
 	return
 }
 
