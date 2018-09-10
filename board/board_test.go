@@ -639,36 +639,21 @@ func TestBoardOpponentMoves(t *testing.T) {
 		if expected != got {
 			t.Errorf("Expected %d, got %d", expected, got)
 		}
-
 	}
 }
 
 func TestBoardNormalize(t *testing.T) {
-	board := CustomBoard(2, 4)
-	normalized := board
-	normalized.Normalize()
-	for r := 0; r < 8; r++ {
-		rotated := board
-		rotated.rotate(r)
-		rotated.Normalize()
-		if rotated != normalized {
-			t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
-				normalized.asciiArtString(false), rotated.asciiArtString(false))
-		}
-	}
-}
+	for board := range genTestBoards() {
+		expected := board.rotate(0).Normalize()
 
-func TestBoardUnnormalize(t *testing.T) {
-	for r := 0; r < 8; r++ {
-		rotated := CustomBoard(2, 4)
-		rotated.rotate(r)
-		rotation := rotated.Normalize()
-		original := rotated
-		original.Unnormalize(rotation)
+		for r := 1; r < 8; r++ {
+			got := board.rotate(r).Normalize()
 
-		if rotated != original {
-			t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
-				rotated.asciiArtString(false), original.asciiArtString(false))
+			if expected != got {
+				t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
+					expected.asciiArtString(false), got.asciiArtString(false))
+				t.FailNow()
+			}
 		}
 	}
 }

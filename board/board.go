@@ -123,31 +123,30 @@ func (board Board) rotate(rotation int) (rotated Board) {
 
 }
 
-// Normalize normalizes a board with regards to symmetry
-func (board *Board) Normalize() (rotation int) {
-	min := board.rotate(0)
-	rotation = 0
+// Normalize returns a normalized board with regards to symmetry
+func (board Board) Normalize() Board {
+
+	less := func(lhs, rhs Board) bool {
+		if lhs.me < rhs.me {
+			return true
+		}
+		if lhs.me == rhs.me && lhs.opp < rhs.opp {
+			return true
+		}
+		return false
+	}
+
+
+	normalized := board.rotate(0)
 
 	for r := 1; r < 8; r++ {
 		cur := board.rotate(r)
-		if cur.me < min.me {
-			min = cur
-			rotation = r
-		}
-		if cur.me == min.me {
-			if cur.opp < min.opp {
-				min = cur
-				rotation = r
-			}
+		if less(cur, normalized) {
+			normalized = cur
 		}
 	}
-	*board = min
-	return
-}
 
-// Unnormalize undoes normalization using the return value of Normalize()
-func (board *Board) Unnormalize(rotation int) {
-	*board = board.rotate(rotation)
+	return normalized
 }
 
 // ASCIIArt writes ascii-art of a Board to a writer
