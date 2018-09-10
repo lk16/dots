@@ -82,10 +82,10 @@ func TestNegaMax(t *testing.T) {
 
 	for board := range genTestBoards() {
 		for depth := 1; depth <= 3; depth++ {
-			copy := board
+			boardCopy := board
 			negamaxHeur := Negamax(&board, 3)
 
-			if copy != board {
+			if boardCopy != board {
 				t.Error("negamax modified the board")
 			}
 
@@ -109,10 +109,10 @@ func TestAlphaBeta(t *testing.T) {
 
 	for board := range genTestBoards() {
 		for depth := 1; depth <= 3; depth++ {
-			copy := board
+			boardCopy := board
 			alphaBetaHeur := AlphaBeta(&board, MinHeuristic, MaxHeuristic, 3)
 
-			if copy != board {
+			if boardCopy != board {
 				t.Error("alphabeta modified the board")
 			}
 

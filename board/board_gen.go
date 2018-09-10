@@ -46,7 +46,7 @@ func NewGenerator(board *Board, lookAhead int) ChildGenerator {
 		return unsortedGen
 	}
 
-	sortedChildren := []sortedBoard{}
+	var sortedChildren []sortedBoard
 
 	for _, child := range board.GetChildren() {
 		sortedChild := sortedBoard{

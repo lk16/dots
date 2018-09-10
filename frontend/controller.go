@@ -65,6 +65,7 @@ type Controller struct {
 // NewController returns a new Controller
 func NewController(black, white players.Player, writer io.Writer,
 	frontend Frontend) (control *Controller) {
+	_ = writer
 	control = &Controller{
 		players:  [2]players.Player{black, white},
 		frontend: frontend,
@@ -121,8 +122,8 @@ func (control *Controller) reset() {
 }
 
 func (control *Controller) gameRunning() bool {
-	board := control.GetState().board
-	return board.Moves() != 0 || board.OpponentMoves() != 0
+	currentBoard := control.GetState().board
+	return currentBoard.Moves() != 0 || currentBoard.OpponentMoves() != 0
 }
 
 // Undo undoes the last move

@@ -82,7 +82,7 @@ func (thread *SearchThread) Run(ch chan SearchResult) {
 	}
 
 	// prevent odd results for exact search
-	f -= (f % step)
+	f -= f % step
 
 	f = clamp(f, low, high)
 

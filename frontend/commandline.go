@@ -41,26 +41,28 @@ func (cli *CommandLine) OnUpdate(state GameState) {
 func (cli *CommandLine) OnGameEnd(state GameState) {
 	cli.asciiArt(state)
 
-	board := state.board
+	var whiteCount, blackCount int
+
 	if state.turn == 1 {
-		board.SwitchTurn()
+		whiteCount = bits.OnesCount64(state.board.Me())
+		blackCount = bits.OnesCount64(state.board.Opp())
+	} else {
+		whiteCount = bits.OnesCount64(state.board.Opp())
+		blackCount = bits.OnesCount64(state.board.Me())
 	}
 
-	whiteCount := bits.OnesCount64(board.Opp())
-	blackCount := bits.OnesCount64(board.Me())
-
-	var str string
+	var message string
 
 	if whiteCount > blackCount {
-		str = fmt.Sprintf("White wins: %d-%d\n", whiteCount, blackCount)
+		message = fmt.Sprintf("White wins: %d-%d\n", whiteCount, blackCount)
 	} else if whiteCount < blackCount {
-		str = fmt.Sprintf("Black wins: %d-%d\n", blackCount, whiteCount)
+		message = fmt.Sprintf("Black wins: %d-%d\n", blackCount, whiteCount)
 	} else {
-		str = fmt.Sprintf("It's a draw: %d-%d\n", whiteCount, whiteCount)
+		message = fmt.Sprintf("It's a draw: %d-%d\n", whiteCount, whiteCount)
 	}
 
-	bytes := bytes.NewBufferString(str).Bytes()
-	cli.writer.Write(bytes)
+	messageBytes := bytes.NewBufferString(message).Bytes()
+	cli.writer.Write(messageBytes)
 }
 
 // OnHumanMove reads a human move from os.Stdin
