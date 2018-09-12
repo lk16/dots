@@ -3,7 +3,7 @@ package frontend
 import (
 	"io"
 
-	"dots/board"
+	"dots/othello"
 	"dots/players"
 )
 
@@ -29,7 +29,7 @@ const (
 
 // GameState is a Board combined with the color of the player to move
 type GameState struct {
-	board board.Board
+	board othello.Board
 	turn  int
 }
 
@@ -116,7 +116,7 @@ func (control *Controller) reset() {
 	control.stateID = 0
 	control.redoMax = 0
 	control.history[0] = GameState{
-		board: *board.NewBoard(),
+		board: *othello.NewBoard(),
 		turn:  0}
 	control.frontend.OnUpdate(control.GetState())
 }

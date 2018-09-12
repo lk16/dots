@@ -1,4 +1,4 @@
-package board
+package othello
 
 import (
 	"bytes"
@@ -23,12 +23,12 @@ func boardIsValid(board *Board) bool {
 		return false
 	}
 
-	// no indication board is invalid
+	// no indication othello is invalid
 	return true
 }
 
 // Helper for this testing file
-// Returns a string written by board.AsciiArt()
+// Returns a string written by othello.AsciiArt()
 func (board Board) asciiArtString(swapDiscColors bool) (output string) {
 	buffer := new(bytes.Buffer)
 	board.ASCIIArt(buffer, swapDiscColors)
@@ -36,7 +36,7 @@ func (board Board) asciiArtString(swapDiscColors bool) (output string) {
 	return
 }
 
-// Test board generator
+// Test othello generator
 func genTestBoards() (ch chan Board) {
 	ch = make(chan Board)
 	go func() {
@@ -60,7 +60,7 @@ func genTestBoards() (ch chan Board) {
 						// for each distance
 						for d := 1; d <= 6; d++ {
 
-							// check if me can still flip within board boundaries
+							// check if me can still flip within othello boundaries
 							py := y + (d+1)*dy
 							px := x + (d+1)*dx
 
@@ -137,7 +137,7 @@ func TestBoardIsValid(t *testing.T) {
 		got := boardIsValid(&board)
 
 		if expected != got {
-			t.Errorf("Expected %t, got %t for board\n%s\n\n",
+			t.Errorf("Expected %t, got %t for othello\n%s\n\n",
 				expected, got, board.asciiArtString(false))
 		}
 	}
@@ -156,7 +156,7 @@ func TestRandomBoard(t *testing.T) {
 		}
 
 		if !boardIsValid(board) {
-			t.Fatalf("Invalid board:\n%s\n\n", board.asciiArtString(false))
+			t.Fatalf("Invalid othello:\n%s\n\n", board.asciiArtString(false))
 		}
 	}
 
@@ -180,7 +180,7 @@ func TestBoardCustom(t *testing.T) {
 	board := CustomBoard(me, opp)
 
 	if board.me != me || board.opp != opp {
-		t.Errorf("Custom board failed\n")
+		t.Errorf("Custom othello failed\n")
 	}
 
 }
@@ -228,7 +228,7 @@ func TestBoardDoMove(t *testing.T) {
 		moves := board.Moves()
 		for i := uint(0); i < 64; i++ {
 			if moves&(uint64(1)<<i) == 0 {
-				// board.DoMove() should not be called for invalid moves
+				// othello.DoMove() should not be called for invalid moves
 				continue
 			}
 
@@ -241,11 +241,11 @@ func TestBoardDoMove(t *testing.T) {
 			gotBoard := clone
 
 			if (gotReturn != expectedReturn) || (gotBoard != expectedBoard) {
-				t.Errorf("Doing move %c%d on board\n%s\n", 'a'+i%8, (i/8)+1,
+				t.Errorf("Doing move %c%d on othello\n%s\n", 'a'+i%8, (i/8)+1,
 					board.asciiArtString(false))
 				t.Errorf("Expected return val:\n%s\n\nGot:\n%s\n\n",
 					bitsetASCIIArtString(expectedReturn), bitsetASCIIArtString(gotReturn))
-				t.Errorf("Expected board:\n%s\n\nGot:\n%s\n\n",
+				t.Errorf("Expected othello:\n%s\n\nGot:\n%s\n\n",
 					expectedBoard.asciiArtString(false), gotBoard.asciiArtString(false))
 				t.FailNow()
 			}
@@ -280,7 +280,7 @@ func TestBoardDoMoveN(t *testing.T) {
 		moves := board.Moves()
 		for i := uint(0); i < 64; i++ {
 			if moves&(uint64(1)<<i) == 0 {
-				// board.DoMove() should not be called for invalid moves
+				// othello.DoMove() should not be called for invalid moves
 				continue
 			}
 
@@ -296,7 +296,7 @@ func TestBoardDoMoveN(t *testing.T) {
 			}
 
 			if expected != got {
-				t.Errorf("Doing move %c%d on board\n%s\n", 'a'+i%8, (i/8)+1,
+				t.Errorf("Doing move %c%d on othello\n%s\n", 'a'+i%8, (i/8)+1,
 					board.asciiArtString(false))
 				t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
 					bitsetASCIIArtString(expected), bitsetASCIIArtString(got))
@@ -326,7 +326,7 @@ func TestBoardMoves(t *testing.T) {
 
 		got := clone.Moves()
 		if expected != got {
-			t.Errorf("For board\n%s", board.asciiArtString(false))
+			t.Errorf("For othello\n%s", board.asciiArtString(false))
 			t.Fatalf("Expected:\n%s\n\nGot:\n%s\n\n",
 				bitsetASCIIArtString(expected), bitsetASCIIArtString(got))
 		}
@@ -373,11 +373,11 @@ func TestBoardGetChildren(t *testing.T) {
 			childDiscs := child.me | child.opp
 
 			if (childDiscs & discs) != discs {
-				t.Fatalf("Pieces were removed from board with board.GetChildren()\n")
+				t.Fatalf("Pieces were removed from othello with othello.GetChildren()\n")
 			}
 
 			if valid && !boardIsValid(&child) {
-				t.Fatalf("Valid board:\n%s\n\nInvalid child:\n%s\n\n",
+				t.Fatalf("Valid othello:\n%s\n\nInvalid child:\n%s\n\n",
 					board.asciiArtString(false), child.asciiArtString(false))
 			}
 
@@ -479,7 +479,7 @@ func TestBoardDoRandomMove(t *testing.T) {
 		}
 
 		if boardIsValid(&board) && !boardIsValid(&clone) {
-			t.Errorf("Found board:\n%s\n\nWith invalid child:\n%s\n\n",
+			t.Errorf("Found othello:\n%s\n\nWith invalid child:\n%s\n\n",
 				board.asciiArtString(false), clone.asciiArtString(false))
 		}
 	}
@@ -607,7 +607,7 @@ func TestBoardOpp(t *testing.T) {
 
 func TestBoardNewBoard(t *testing.T) {
 
-	// center of the start board:
+	// center of the start othello:
 	// W B
 	// B W
 
@@ -623,7 +623,7 @@ func TestBoardNewBoard(t *testing.T) {
 	}
 
 	if !boardIsValid(&got) {
-		t.Errorf("Start board is invalid:\n%s\n\n", got.asciiArtString(false))
+		t.Errorf("Start othello is invalid:\n%s\n\n", got.asciiArtString(false))
 	}
 }
 

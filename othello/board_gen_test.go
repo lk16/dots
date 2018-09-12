@@ -1,4 +1,4 @@
-package board
+package othello
 
 import (
 	"bytes"
@@ -79,14 +79,14 @@ func TestBoardChildGenHasMoves(t *testing.T) {
 		board := NewBoard()
 		gen := NewGenerator(board, depth)
 		if !gen.HasMoves() {
-			t.Errorf("Expected initial board has moves")
+			t.Errorf("Expected initial othello has moves")
 		}
 
 		board = RandomBoard(64)
 		gen = NewGenerator(board, depth)
 
 		if gen.HasMoves() {
-			t.Errorf("Expected full board does not have moves")
+			t.Errorf("Expected full othello does not have moves")
 		}
 	}
 }

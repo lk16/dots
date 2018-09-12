@@ -3,16 +3,26 @@
 Othello game with AI
 
 ### Install
-```go get -tags gtk_3_18 github.com/lk16/dots```
+```
+go get -tags gtk_3_18 github.com/lk16/dots
+```
 
 ### Test
-```go test -tags gtk_3_18 dots/... ```
+```
+go test -tags gtk_3_18 dots/...
+```
+
+### Linter
+
+```
+gometalinter --enable-all --disable=goimports --disable=gofmt dots/...
+```
 
 ### TODO
 - [ ] move heuristic to bot_heuristic
 - [ ] create package and interface for tree search algorithms
 - [ ] unit test tree search using ffo test set
-- [ ] rename board package to othello
+- [ ] linting
 - [ ] remove most single char identifiers
 - [ ] xot openings
 - [ ] parallel search with hash table in separate goroutine

@@ -1,4 +1,4 @@
-package board
+package othello
 
 import (
 	"math/bits"

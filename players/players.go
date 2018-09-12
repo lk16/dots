@@ -3,12 +3,12 @@ package players
 import (
 	"os"
 
-	"dots/board"
+	"dots/othello"
 )
 
 // Player is an interface for all structs that can play othello
 type Player interface {
-	DoMove(board.Board) board.Board
+	DoMove(othello.Board) othello.Board
 }
 
 // Get gets a player by name and sets the level if applicable
@@ -27,7 +27,7 @@ func Get(name string, lvl int, parallel bool) Player {
 		if lvl > 8 {
 			perfectDepth = lvl + 8
 		}
-		return NewBotHeuristic(board.Squared, lvl, perfectDepth,
+		return NewBotHeuristic(Squared, lvl, perfectDepth,
 			os.Stdout, parallel)
 	}
 

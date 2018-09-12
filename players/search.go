@@ -1,12 +1,12 @@
 package players
 
 import (
-	"dots/board"
+	"dots/othello"
 )
 
 // SearchQuery is a query for searching the best child of a Board
 type SearchQuery struct {
-	board      board.Board
+	board      othello.Board
 	lowerBound int
 	upperBound int
 	depth      int
@@ -35,8 +35,8 @@ type tptValue struct {
 
 // SearchState is the state of a SearchQuery
 type SearchState struct {
-	board              board.Board
-	transpositionTable map[board.Board]tptValue
+	board              othello.Board
+	transpositionTable map[othello.Board]tptValue
 }
 
 // SearchThread contains all thread data for a SearchQuery
@@ -53,7 +53,7 @@ func (query *SearchQuery) Run(ch chan SearchResult) {
 		query: query,
 		state: &SearchState{
 			board:              query.board,
-			transpositionTable: make(map[board.Board]tptValue, 50000)},
+			transpositionTable: make(map[othello.Board]tptValue, 50000)},
 		stats: &SearchStats{
 			nodes:  0,
 			timeNs: 0}}
@@ -115,8 +115,8 @@ func (thread *SearchThread) updateTranspositionTable(heur, alpha int) {
 
 	if !ok {
 		entry = tptValue{
-			low:  board.MinHeuristic,
-			high: board.MaxHeuristic}
+			low:  othello.MinHeuristic,
+			high: othello.MaxHeuristic}
 	}
 
 	if heur == alpha {
@@ -159,7 +159,7 @@ func (thread *SearchThread) doMtdf(alpha, depth int) (heur int) {
 		}
 	}
 
-	gen := board.NewGenerator(&thread.state.board, 0)
+	gen := othello.NewGenerator(&thread.state.board, 0)
 
 	if !gen.HasMoves() {
 
@@ -171,7 +171,7 @@ func (thread *SearchThread) doMtdf(alpha, depth int) (heur int) {
 			return heur
 		}
 
-		heur = mtdfPolish(board.ExactScoreFactor*
+		heur = mtdfPolish(othello.ExactScoreFactor*
 			thread.state.board.ExactScore(), alpha)
 		thread.updateTranspositionTable(heur, alpha)
 		return heur
@@ -197,7 +197,7 @@ func (thread *SearchThread) doMtdfExact(alpha int) (heur int) {
 
 	thread.stats.nodes++
 
-	gen := board.NewGenerator(&thread.state.board, 0)
+	gen := othello.NewGenerator(&thread.state.board, 0)
 
 	if gen.HasMoves() {
 		heur = alpha

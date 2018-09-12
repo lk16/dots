@@ -2,3 +2,5 @@ coverage.out
 dots
 *.test
 .idea/*
+pgn/
+

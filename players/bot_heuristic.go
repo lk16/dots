@@ -4,10 +4,27 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"math/bits"
 	"time"
 
-	"dots/board"
+	"dots/othello"
 )
+
+// Squared is a heuristic taken from a similar project with that name
+// see http://github.com/lk16/squared
+func Squared(board othello.Board) int {
+	cornerMask := uint64(1<<0 | 1<<7 | 1<<56 | 1<<63)
+
+	meCorners := bits.OnesCount64(cornerMask & board.Me())
+	oppCorners := bits.OnesCount64(cornerMask & board.Opp())
+	cornerDiff := meCorners - oppCorners
+
+	meMoves := bits.OnesCount64(board.Moves())
+	oppMoves := bits.OnesCount64(board.OpponentMoves())
+	moveDiff := meMoves - oppMoves
+
+	return (3 * cornerDiff) + moveDiff
+}
 
 func max(x, y int) int {
 	if x > y {
@@ -28,7 +45,7 @@ func clamp(x, low, high int) int {
 }
 
 // Heuristic is a function that estimates how promising a Board is.
-type Heuristic func(board.Board) int
+type Heuristic func(othello.Board) int
 
 // BotHeuristic is a bot that uses a Heuristic for choosing its moves
 type BotHeuristic struct {
@@ -120,7 +137,7 @@ func (bot *BotHeuristic) logChildEvaluation(heur, alpha int,
 }
 
 func (bot *BotHeuristic) processResult(result SearchResult, alpha *int,
-	afterwards *board.Board) {
+	afterwards *othello.Board) {
 
 	childStats := result.stats
 	bot.stats.nodes += childStats.nodes
@@ -136,7 +153,7 @@ func (bot *BotHeuristic) processResult(result SearchResult, alpha *int,
 }
 
 // DoMove does a move
-func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
+func (bot *BotHeuristic) DoMove(b othello.Board) (afterwards othello.Board) {
 
 	children := b.GetChildren()
 
@@ -144,7 +161,7 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 		return b
 	}
 
-	// prevent returning empty board when bot cannot prevent losing all discs
+	// prevent returning empty othello when bot cannot prevent losing all discs
 	afterwards = children[0]
 
 	if len(children) == 1 {
@@ -157,8 +174,8 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 	var depth int
 
 	if b.CountEmpties() <= bot.exactDepth {
-		alpha = board.MinScore
-		beta = board.MaxScore
+		alpha = othello.MinScore
+		beta = othello.MaxScore
 		depth = b.CountEmpties()
 	} else {
 		depth = bot.searchDepth
@@ -180,7 +197,7 @@ func (bot *BotHeuristic) DoMove(b board.Board) (afterwards board.Board) {
 	bot.stats.timeNs = 0
 
 	child := b
-	gen := board.NewGenerator(&child, 1)
+	gen := othello.NewGenerator(&child, 1)
 
 	for i := 0; gen.Next(); i++ {
 

@@ -1,7 +1,7 @@
 package players
 
 import (
-	"dots/board"
+	"dots/othello"
 	"testing"
 )
 
@@ -11,7 +11,7 @@ func TestBotRandomDoMove(t *testing.T) {
 	for discs := 4; discs <= 64; discs++ {
 		for i := 0; i < 10; i++ {
 
-			board := board.RandomBoard(discs)
+			board := othello.RandomBoard(discs)
 
 			if board.Moves() == 0 {
 				continue

@@ -1,14 +1,14 @@
 package frontend
 
 import (
-	"dots/board"
+	"dots/othello"
 )
 
 // Frontend is an interface for frontends of Controller
 type Frontend interface {
 	OnUpdate(state GameState)
 	OnGameEnd(state GameState)
-	OnHumanMove(state GameState) board.Board
+	OnHumanMove(state GameState) othello.Board
 }
 
 // Get gets a Frontend by name

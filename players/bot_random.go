@@ -1,7 +1,7 @@
 package players
 
 import (
-	"dots/board"
+	"dots/othello"
 )
 
 // BotRandom is a bot that does random moves
@@ -13,7 +13,7 @@ func NewBotRandom() *BotRandom {
 }
 
 // DoMove does a random move
-func (bot *BotRandom) DoMove(board board.Board) board.Board {
+func (bot *BotRandom) DoMove(board othello.Board) othello.Board {
 	board.DoRandomMove()
 	return board
 }

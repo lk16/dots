@@ -1,4 +1,4 @@
-package board
+package othello
 
 import (
 	"bytes"
@@ -32,7 +32,7 @@ func bitsetASCIIArtString(bs uint64) (output string) {
 	return
 }
 
-// Board represents the state of an othello board game.
+// Board represents the state of an othello othello game.
 // It does not keep track which discs are white or black.
 // Instead it keeps track which discs are owned by the player to move.
 type Board struct {
@@ -123,7 +123,7 @@ func (board Board) rotate(rotation int) (rotated Board) {
 
 }
 
-// Normalize returns a normalized board with regards to symmetry
+// Normalize returns a normalized othello with regards to symmetry
 func (board Board) Normalize() Board {
 
 	less := func(lhs, rhs Board) bool {

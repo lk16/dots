@@ -8,7 +8,7 @@ import (
 	"math/bits"
 	"os"
 
-	"dots/board"
+	"dots/othello"
 )
 
 // CommandLine is used for command line interaction
@@ -66,7 +66,7 @@ func (cli *CommandLine) OnGameEnd(state GameState) {
 }
 
 // OnHumanMove reads a human move from os.Stdin
-func (cli *CommandLine) OnHumanMove(state GameState) (afterwards board.Board) {
+func (cli *CommandLine) OnHumanMove(state GameState) (afterwards othello.Board) {
 	moves := state.board.Moves()
 
 	scanner := bufio.NewScanner(os.Stdin)

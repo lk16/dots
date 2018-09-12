@@ -5,7 +5,7 @@ import (
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 
-	"dots/board"
+	"dots/othello"
 )
 
 // GtkFrontend is a frontend for GTK
@@ -101,7 +101,7 @@ func NewkGtkFrontend() Frontend {
 	}
 
 	gtkf.updateFields(GameState{
-		board: *board.NewBoard(),
+		board: *othello.NewBoard(),
 		turn:  0})
 
 	gtkf.window = mainWindow
@@ -139,7 +139,7 @@ func (gtkf *GtkFrontend) OnGameEnd(state GameState) {
 }
 
 // OnHumanMove waits for a human to move
-func (gtkf *GtkFrontend) OnHumanMove(state GameState) (afterwards board.Board) {
+func (gtkf *GtkFrontend) OnHumanMove(state GameState) (afterwards othello.Board) {
 	moves := state.board.Moves()
 	for {
 		fieldID := <-gtkf.humanMove
