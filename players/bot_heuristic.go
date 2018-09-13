@@ -2,29 +2,14 @@ package players
 
 import (
 	"bytes"
+	"dots/treesearch"
 	"fmt"
 	"io"
-	"math/bits"
 	"time"
 
 	"dots/othello"
 )
 
-// Squared is a heuristic taken from a similar project with that name
-// see http://github.com/lk16/squared
-func Squared(board othello.Board) int {
-	cornerMask := uint64(1<<0 | 1<<7 | 1<<56 | 1<<63)
-
-	meCorners := bits.OnesCount64(cornerMask & board.Me())
-	oppCorners := bits.OnesCount64(cornerMask & board.Opp())
-	cornerDiff := meCorners - oppCorners
-
-	meMoves := bits.OnesCount64(board.Moves())
-	oppMoves := bits.OnesCount64(board.OpponentMoves())
-	moveDiff := meMoves - oppMoves
-
-	return (3 * cornerDiff) + moveDiff
-}
 
 func max(x, y int) int {
 	if x > y {
@@ -174,8 +159,8 @@ func (bot *BotHeuristic) DoMove(b othello.Board) (afterwards othello.Board) {
 	var depth int
 
 	if b.CountEmpties() <= bot.exactDepth {
-		alpha = othello.MinScore
-		beta = othello.MaxScore
+		alpha = treesearch.MinScore
+		beta = treesearch.MaxScore
 		depth = b.CountEmpties()
 	} else {
 		depth = bot.searchDepth

@@ -36,14 +36,12 @@ type SortedChildGenerator struct {
 // NewGenerator returns a child generator for a parent Board
 func NewGenerator(board *Board, lookAhead int) ChildGenerator {
 
-	unsortedGen := &UnsortedChildGenerator{
-		movesLeft:   board.Moves(),
-		lastMove:    0,
-		lastFlipped: 0,
-		child:       board}
-
 	if lookAhead == 0 {
-		return unsortedGen
+		return &UnsortedChildGenerator{
+			movesLeft:   board.Moves(),
+			lastMove:    0,
+			lastFlipped: 0,
+			child:       board}
 	}
 
 	var sortedChildren []sortedBoard
@@ -51,7 +49,7 @@ func NewGenerator(board *Board, lookAhead int) ChildGenerator {
 	for _, child := range board.GetChildren() {
 		sortedChild := sortedBoard{
 			board: child,
-			heur:  -Negamax(&child, lookAhead)}
+			heur:  bits.OnesCount64(board.Moves()) }
 		sortedChildren = append(sortedChildren, sortedChild)
 	}
 

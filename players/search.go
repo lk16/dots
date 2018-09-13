@@ -2,6 +2,7 @@ package players
 
 import (
 	"dots/othello"
+	"dots/treesearch"
 )
 
 // SearchQuery is a query for searching the best child of a Board
@@ -115,8 +116,8 @@ func (thread *SearchThread) updateTranspositionTable(heur, alpha int) {
 
 	if !ok {
 		entry = tptValue{
-			low:  othello.MinHeuristic,
-			high: othello.MaxHeuristic}
+			low:  treesearch.MinHeuristic,
+			high: treesearch.MaxHeuristic}
 	}
 
 	if heur == alpha {
@@ -171,7 +172,7 @@ func (thread *SearchThread) doMtdf(alpha, depth int) (heur int) {
 			return heur
 		}
 
-		heur = mtdfPolish(othello.ExactScoreFactor*
+		heur = mtdfPolish(treesearch.ExactScoreFactor*
 			thread.state.board.ExactScore(), alpha)
 		thread.updateTranspositionTable(heur, alpha)
 		return heur

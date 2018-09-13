@@ -1,8 +1,8 @@
 package treesearch
 
 import (
+	"dots/heuristics"
 	"dots/othello"
-	"dots/players"
 )
 
 type AlphaBeta struct {
@@ -28,7 +28,7 @@ func (alphabeta *AlphaBeta) ExactSearch(board othello.Board) int {
 func (alphabeta *AlphaBeta) search(board *othello.Board, alpha, beta, depth int) int {
 
 	if depth == 0 {
-		return players.Squared(*board)
+		return heuristics.Squared(*board)
 	}
 
 	gen := othello.NewGenerator(board, 0)

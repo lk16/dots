@@ -1,6 +1,7 @@
 package players
 
 import (
+	"dots/heuristics"
 	"os"
 
 	"dots/othello"
@@ -27,7 +28,7 @@ func Get(name string, lvl int, parallel bool) Player {
 		if lvl > 8 {
 			perfectDepth = lvl + 8
 		}
-		return NewBotHeuristic(Squared, lvl, perfectDepth,
+		return NewBotHeuristic(heuristics.Squared, lvl, perfectDepth,
 			os.Stdout, parallel)
 	}
 

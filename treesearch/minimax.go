@@ -1,8 +1,8 @@
 package treesearch
 
 import (
+	"dots/heuristics"
 	"dots/othello"
-	"dots/players"
 )
 
 type MiniMax struct {
@@ -24,7 +24,7 @@ func (minimax *MiniMax) ExactSearch() int {
 func (minimax *MiniMax) search(board othello.Board, depth int, sign int) int {
 
 	if depth == 0 {
-		return sign * players.Squared(board)
+		return sign * heuristics.Squared(board)
 	}
 
 	children := board.GetChildren()

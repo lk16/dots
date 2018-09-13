@@ -1,8 +1,8 @@
 package treesearch
 
 import (
+	"dots/heuristics"
 	"dots/othello"
-	"dots/players"
 )
 
 type NegaMax struct {
@@ -25,7 +25,7 @@ func (negamax *NegaMax) ExactSearch(board othello.Board) int {
 func (negamax *NegaMax) search(board *othello.Board, depth int) int {
 
 	if depth == 0 {
-		return players.Squared(*board)
+		return heuristics.Squared(*board)
 	}
 
 	gen := othello.NewGenerator(board, 0)
