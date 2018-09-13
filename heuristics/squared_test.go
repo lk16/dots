@@ -1,10 +1,10 @@
-package players
+package heuristics
 
 import (
 	"bytes"
+	"dots/othello"
 	"testing"
 
-	"dots/othello"
 )
 
 func TestSquared(t *testing.T) {

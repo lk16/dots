@@ -1,5 +1,7 @@
 package treesearch
 
+import "dots/othello"
+
 const (
 	// MaxScore is the highest game result score possible
 	MaxScore = 64
@@ -19,6 +21,7 @@ const (
 )
 
 type Interface interface {
-	Search(depth int) int
-	ExactSearch() int
+	Name() string
+	Search(board othello.Board, depth int) int
+	ExactSearch(board othello.Board) int
 }

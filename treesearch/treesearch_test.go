@@ -2,60 +2,55 @@ package treesearch
 
 import (
 "bytes"
-"testing"
+	"dots/othello"
+	"fmt"
+	"testing"
 )
 
+func TestTreeSearch(t *testing.T) {
 
-func TestNegaMax(t *testing.T) {
-	if testing.Short() {
-		t.SkipNow()
-	}
+	for depth := 0; depth <= 4; depth ++ {
 
-	for board := range genTestBoards() {
-		for depth := 1; depth <= 3; depth++ {
-			boardCopy := board
-			negamaxHeur := Negamax(&board, 3)
+		algos := []Interface{
+			NewMinimax(),
+			NewNegaMax(),
+			NewAlphaBeta(MinHeuristic, MaxHeuristic)}
 
-			if boardCopy != board {
-				t.Error("negamax modified the othello")
-			}
 
-			minimaxHeur := minimax(board, 3, 1)
+		for discs := 4; discs <= 64; discs++ {
+			for i := 0 ; i <= 10; i++ {
 
-			if negamaxHeur != minimaxHeur {
-				var buff bytes.Buffer
-				board.ASCIIArt(&buff, false)
+				board := othello.RandomBoard(discs)
 
-				t.Errorf("minimax=%d, negamx=%d for othello\n\n%s\n",
-					minimaxHeur, negamaxHeur, buff.String())
-			}
-		}
-	}
-}
+				results := make(map[string]int, len(algos))
 
-func TestAlphaBeta(t *testing.T) {
-	if testing.Short() {
-		t.SkipNow()
-	}
+				for _, algo := range algos {
+					boardCopy := *board
+					results[algo.Name()] = algo.Search(*board, depth)
 
-	for board := range genTestBoards() {
-		for depth := 1; depth <= 3; depth++ {
-			boardCopy := board
-			alphaBetaHeur := AlphaBeta(&board, MinHeuristic, MaxHeuristic, 3)
+					if *board != boardCopy {
+						t.Errorf("Algotithm '%s' modified the input board.", algo.Name())
+						t.FailNow()
+					}
+				}
 
-			if boardCopy != board {
-				t.Error("alphabeta modified the othello")
-			}
+				for _, algo := range algos {
+					if results[algo.Name()] != results[algos[0].Name()] {
+						msg := "Found inconsistent tree search results:\n"
+						for _, algo := range algos {
+							msg += fmt.Sprintf("%s: %d\n",algo.Name(), results[algo.Name()])
+						}
+						var buff bytes.Buffer
+						board.ASCIIArt(&buff, false)
+						msg += fmt.Sprintf("for this board at depth %d:\n\n%s", depth, buff.String())
+						t.Error(msg)
+						t.FailNow()
+					}
+				}
 
-			minimaxHeur := minimax(board, 3, 1)
 
-			if alphaBetaHeur != minimaxHeur {
-				var buff bytes.Buffer
-				board.ASCIIArt(&buff, false)
-
-				t.Errorf("minimax=%d, alphabeta=%d for othello\n\n%s\n",
-					minimaxHeur, alphaBetaHeur, buff.String())
 			}
 		}
 	}
+
 }

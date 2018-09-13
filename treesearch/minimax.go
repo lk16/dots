@@ -6,19 +6,22 @@ import (
 )
 
 type MiniMax struct {
-	board othello.Board
 }
 
 func NewMinimax() *MiniMax {
 	return &MiniMax{}
 }
 
-func (minimax *MiniMax) Search(depth int) int {
-	return minimax.search(minimax.board, depth, 1)
+func (minimax *MiniMax) Name() string {
+	return "minimax"
 }
 
-func (minimax *MiniMax) ExactSearch() int {
-	return minimax.search(minimax.board, 60, 1)
+func (minimax *MiniMax) Search(board othello.Board, depth int) int {
+	return minimax.search(board, depth, 1)
+}
+
+func (minimax *MiniMax) ExactSearch(board othello.Board) int {
+	return minimax.search(board, 60, 1)
 }
 
 func (minimax *MiniMax) search(board othello.Board, depth int, sign int) int {

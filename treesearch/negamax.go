@@ -9,17 +9,20 @@ type NegaMax struct {
 	board othello.Board
 }
 
-func NewNegaMax(board othello.Board) *NegaMax {
-	return &NegaMax{
-		board: board}
+func NewNegaMax() *NegaMax {
+	return &NegaMax{}
 }
 
-func (negamax *NegaMax) Search(depth int) int {
-	return negamax.search(&negamax.board, depth)
+func (negamax *NegaMax) Name() string {
+	return "negamax"
+}
+
+func (negamax *NegaMax) Search(board othello.Board, depth int) int {
+	return negamax.search(&board, depth)
 }
 
 func (negamax *NegaMax) ExactSearch(board othello.Board) int {
-	return negamax.search(&negamax.board, 60)
+	return negamax.search(&board, 60)
 }
 
 func (negamax *NegaMax) search(board *othello.Board, depth int) int {
