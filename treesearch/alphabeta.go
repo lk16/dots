@@ -6,14 +6,13 @@ import (
 )
 
 type AlphaBeta struct {
-	board       othello.Board
 	alpha, beta int
 }
 
 func NewAlphaBeta(alpha, beta int) *AlphaBeta {
 	return &AlphaBeta{
 		alpha: alpha,
-		beta: beta}
+		beta:  beta}
 }
 
 func (alphabeta *AlphaBeta) Name() string {
@@ -21,7 +20,7 @@ func (alphabeta *AlphaBeta) Name() string {
 }
 
 func (alphabeta *AlphaBeta) Search(board othello.Board, depth int) int {
-	return alphabeta.search(&board, depth, alphabeta.alpha, alphabeta.beta)
+	return alphabeta.search(&board, alphabeta.alpha, alphabeta.beta, depth)
 }
 
 func (alphabeta *AlphaBeta) ExactSearch(board othello.Board) int {

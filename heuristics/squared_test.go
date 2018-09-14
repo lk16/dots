@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"dots/othello"
 	"testing"
-
 )
 
 func TestSquared(t *testing.T) {

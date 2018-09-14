@@ -136,7 +136,6 @@ func (board Board) Normalize() Board {
 		return false
 	}
 
-
 	normalized := board.rotate(0)
 
 	for r := 1; r < 8; r++ {

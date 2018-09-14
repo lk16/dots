@@ -1,7 +1,7 @@
 package treesearch
 
 import (
-"bytes"
+	"bytes"
 	"dots/othello"
 	"fmt"
 	"testing"
@@ -9,16 +9,15 @@ import (
 
 func TestTreeSearch(t *testing.T) {
 
-	for depth := 0; depth <= 4; depth ++ {
+	for depth := 0; depth <= 4; depth++ {
 
 		algos := []Interface{
 			NewMinimax(),
 			NewNegaMax(),
 			NewAlphaBeta(MinHeuristic, MaxHeuristic)}
 
-
 		for discs := 4; discs <= 64; discs++ {
-			for i := 0 ; i <= 10; i++ {
+			for i := 0; i <= 10; i++ {
 
 				board := othello.RandomBoard(discs)
 
@@ -26,7 +25,7 @@ func TestTreeSearch(t *testing.T) {
 
 				for _, algo := range algos {
 					boardCopy := *board
-					results[algo.Name()] = algo.Search(*board, depth)
+					results[algo.Name()] = algo.Search(boardCopy, depth)
 
 					if *board != boardCopy {
 						t.Errorf("Algotithm '%s' modified the input board.", algo.Name())
@@ -38,7 +37,7 @@ func TestTreeSearch(t *testing.T) {
 					if results[algo.Name()] != results[algos[0].Name()] {
 						msg := "Found inconsistent tree search results:\n"
 						for _, algo := range algos {
-							msg += fmt.Sprintf("%s: %d\n",algo.Name(), results[algo.Name()])
+							msg += fmt.Sprintf("%s: %d\n", algo.Name(), results[algo.Name()])
 						}
 						var buff bytes.Buffer
 						board.ASCIIArt(&buff, false)
@@ -47,7 +46,6 @@ func TestTreeSearch(t *testing.T) {
 						t.FailNow()
 					}
 				}
-
 
 			}
 		}

@@ -49,7 +49,7 @@ func NewGenerator(board *Board, lookAhead int) ChildGenerator {
 	for _, child := range board.GetChildren() {
 		sortedChild := sortedBoard{
 			board: child,
-			heur:  bits.OnesCount64(board.Moves()) }
+			heur:  bits.OnesCount64(board.Moves())}
 		sortedChildren = append(sortedChildren, sortedChild)
 	}
 
