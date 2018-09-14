@@ -14,7 +14,8 @@ func TestTreeSearch(t *testing.T) {
 		algos := []Interface{
 			NewMinimax(),
 			NewNegaMax(),
-			NewAlphaBeta(MinHeuristic, MaxHeuristic)}
+			NewAlphaBeta(MinHeuristic, MaxHeuristic),
+			NewMtdf(MinHeuristic, MaxHeuristic)}
 
 		for discs := 4; discs <= 64; discs++ {
 			for i := 0; i <= 10; i++ {
@@ -39,7 +40,6 @@ func TestTreeSearch(t *testing.T) {
 						t.FailNow()
 					}
 				}
-
 			}
 		}
 	}
