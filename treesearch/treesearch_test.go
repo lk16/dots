@@ -24,15 +24,8 @@ func TestTreeSearch(t *testing.T) {
 				results := make(map[string]int, len(algos))
 
 				for _, algo := range algos {
-					boardCopy := *board
-					results[algo.Name()] = algo.Search(boardCopy, depth)
-
-					if *board != boardCopy {
-						t.Errorf("Algotithm '%s' modified the input board.", algo.Name())
-						t.FailNow()
-					}
+					results[algo.Name()] = algo.Search(*board, depth)
 				}
-
 				for _, algo := range algos {
 					if results[algo.Name()] != results[algos[0].Name()] {
 						msg := "Found inconsistent tree search results:\n"
@@ -50,5 +43,4 @@ func TestTreeSearch(t *testing.T) {
 			}
 		}
 	}
-
 }

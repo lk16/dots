@@ -19,7 +19,6 @@ gometalinter --enable-all --disable=goimports --disable=gofmt dots/...
 ```
 
 ### TODO
-- [ ] move heuristic to bot_heuristic
 - [ ] create package and interface for tree search algorithms
 - [ ] unit test tree search using ffo test set
 - [ ] linting

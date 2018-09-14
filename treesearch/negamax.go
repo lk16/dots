@@ -7,6 +7,7 @@ import (
 
 type NegaMax struct {
 	board othello.Board
+	depth int
 }
 
 func NewNegaMax() *NegaMax {
@@ -18,35 +19,39 @@ func (negamax *NegaMax) Name() string {
 }
 
 func (negamax *NegaMax) Search(board othello.Board, depth int) int {
-	return negamax.search(&board, depth)
+	negamax.board = board
+	negamax.depth = depth
+	return negamax.search()
 }
 
 func (negamax *NegaMax) ExactSearch(board othello.Board) int {
-	return negamax.search(&board, 60)
+	return negamax.Search(board, 60)
 }
 
-func (negamax *NegaMax) search(board *othello.Board, depth int) int {
+func (negamax *NegaMax) search() int {
 
-	if depth == 0 {
-		return heuristics.Squared(*board)
+	if negamax.depth == 0 {
+		return heuristics.Squared(negamax.board)
 	}
 
-	gen := othello.NewGenerator(board, 0)
+	gen := othello.NewGenerator(&negamax.board, 0)
 
 	if !gen.HasMoves() {
-		if board.OpponentMoves() == 0 {
-			return ExactScoreFactor * board.ExactScore()
+		if negamax.board.OpponentMoves() == 0 {
+			return ExactScoreFactor * negamax.board.ExactScore()
 		}
 
-		board.SwitchTurn()
-		heur := -negamax.search(board, depth)
-		board.SwitchTurn()
+		negamax.board.SwitchTurn()
+		heur := -negamax.search()
+		negamax.board.SwitchTurn()
 		return heur
 	}
 
 	heur := MinHeuristic
 	for gen.Next() {
-		childHeur := -negamax.search(board, depth-1)
+		negamax.depth--
+		childHeur := -negamax.search()
+		negamax.depth++
 		if childHeur > heur {
 			heur = childHeur
 		}

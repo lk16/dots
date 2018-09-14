@@ -6,7 +6,10 @@ import (
 )
 
 type AlphaBeta struct {
-	alpha, beta int
+	board othello.Board
+	depth int
+	alpha int
+	beta  int
 }
 
 func NewAlphaBeta(alpha, beta int) *AlphaBeta {
@@ -20,35 +23,39 @@ func (alphabeta *AlphaBeta) Name() string {
 }
 
 func (alphabeta *AlphaBeta) Search(board othello.Board, depth int) int {
-	return alphabeta.search(&board, alphabeta.alpha, alphabeta.beta, depth)
+	alphabeta.board = board
+	alphabeta.depth = depth
+	return alphabeta.search(alphabeta.alpha, alphabeta.beta)
 }
 
 func (alphabeta *AlphaBeta) ExactSearch(board othello.Board) int {
-	return alphabeta.search(&board, 60, alphabeta.alpha, alphabeta.beta)
+	return alphabeta.Search(board, 60)
 }
 
-func (alphabeta *AlphaBeta) search(board *othello.Board, alpha, beta, depth int) int {
+func (alphabeta *AlphaBeta) search(alpha, beta int) int {
 
-	if depth == 0 {
-		return heuristics.Squared(*board)
+	if alphabeta.depth == 0 {
+		return heuristics.Squared(alphabeta.board)
 	}
 
-	gen := othello.NewGenerator(board, 0)
+	gen := othello.NewGenerator(&alphabeta.board, 0)
 
 	if !gen.HasMoves() {
-		if board.OpponentMoves() == 0 {
-			return ExactScoreFactor * board.ExactScore()
+		if alphabeta.board.OpponentMoves() == 0 {
+			return ExactScoreFactor * alphabeta.board.ExactScore()
 		}
 
-		board.SwitchTurn()
-		heur := -alphabeta.search(board, -beta, -alpha, depth)
-		board.SwitchTurn()
+		alphabeta.board.SwitchTurn()
+		heur := -alphabeta.search(-beta, -alpha)
+		alphabeta.board.SwitchTurn()
 		return heur
 	}
 
 	heur := alpha
 	for gen.Next() {
-		childHeur := -alphabeta.search(board, -beta, -alpha, depth-1)
+		alphabeta.depth--
+		childHeur := -alphabeta.search(-beta, -alpha)
+		alphabeta.depth++
 		if childHeur >= beta {
 			gen.RestoreParent()
 			return beta

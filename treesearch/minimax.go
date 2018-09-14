@@ -6,6 +6,9 @@ import (
 )
 
 type MiniMax struct {
+	board othello.Board
+	depth int
+	sign  int
 }
 
 func NewMinimax() *MiniMax {
@@ -17,49 +20,62 @@ func (minimax *MiniMax) Name() string {
 }
 
 func (minimax *MiniMax) Search(board othello.Board, depth int) int {
-	return minimax.search(board, depth, 1)
+	minimax.board = board
+	minimax.depth = depth
+	minimax.sign = 1
+	return minimax.search()
 }
 
 func (minimax *MiniMax) ExactSearch(board othello.Board) int {
-	return minimax.search(board, 60, 1)
+	return minimax.Search(board, 60)
 }
 
-func (minimax *MiniMax) search(board othello.Board, depth int, sign int) int {
+func (minimax *MiniMax) search() int {
 
-	if depth == 0 {
-		return sign * heuristics.Squared(board)
+	if minimax.depth == 0 {
+		return minimax.sign * heuristics.Squared(minimax.board)
 	}
 
-	children := board.GetChildren()
+	gen := othello.NewGenerator(&minimax.board, 0)
 
-	if len(children) == 0 {
-		if board.OpponentMoves() == 0 {
-			return sign * ExactScoreFactor * board.ExactScore()
+	if !gen.HasMoves() {
+		if minimax.board.OpponentMoves() == 0 {
+			return minimax.sign * ExactScoreFactor * minimax.board.ExactScore()
 		}
 
-		child := board
-		child.SwitchTurn()
-		return minimax.search(child, depth, -sign)
+		minimax.board.SwitchTurn()
+		minimax.sign = -minimax.sign
+		heur := minimax.search()
+		minimax.sign = -minimax.sign
+		minimax.board.SwitchTurn()
+		return heur
 	}
 
-	if sign == 1 {
-		best := MinHeuristic
-		for _, child := range children {
-			heur := minimax.search(child, depth-1, -sign)
-			if heur > best {
-				best = heur
+	if minimax.sign == 1 {
+		heur := MinHeuristic
+		for gen.Next() {
+			minimax.depth--
+			minimax.sign = -minimax.sign
+			childHeur := minimax.search()
+			minimax.sign = -minimax.sign
+			minimax.depth++
+			if childHeur > heur {
+				heur = childHeur
 			}
 		}
-		return best
+		return heur
 	}
 
-	best := MaxHeuristic
-	for _, child := range children {
-		heur := minimax.search(child, depth-1, -sign)
-		if heur < best {
-			best = heur
+	heur := MaxHeuristic
+	for gen.Next() {
+		minimax.depth--
+		minimax.sign = -minimax.sign
+		childHeur := minimax.search()
+		minimax.sign = -minimax.sign
+		minimax.depth++
+		if childHeur < heur {
+			heur = childHeur
 		}
 	}
-
-	return best
+	return heur
 }
