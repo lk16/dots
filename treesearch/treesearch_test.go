@@ -10,35 +10,52 @@ import (
 func TestTreeSearch(t *testing.T) {
 
 	for depth := 0; depth <= 4; depth++ {
-
-		algos := []Interface{
-			NewMinimax(),
-			NewNegaMax(),
-			NewAlphaBeta(MinHeuristic, MaxHeuristic),
-			NewMtdf(MinHeuristic, MaxHeuristic)}
-
 		for discs := 4; discs <= 64; discs++ {
 			for i := 0; i <= 10; i++ {
 
+				algos := []Interface{
+					NewMinimax(),
+					NewNegaMax(),
+					NewAlphaBeta(MinHeuristic, MaxHeuristic),
+					NewMtdf(MinHeuristic, MaxHeuristic)}
 				board := othello.RandomBoard(discs)
 
 				results := make(map[string]int, len(algos))
 
 				for _, algo := range algos {
-					results[algo.Name()] = algo.Search(*board, depth)
-				}
-				for _, algo := range algos {
-					if results[algo.Name()] != results[algos[0].Name()] {
-						msg := "Found inconsistent tree search results:\n"
-						for _, algo := range algos {
-							msg += fmt.Sprintf("%s: %d\n", algo.Name(), results[algo.Name()])
-						}
-						var buff bytes.Buffer
-						board.ASCIIArt(&buff, false)
-						msg += fmt.Sprintf("for this board at depth %d:\n\n%s", depth, buff.String())
-						t.Error(msg)
-						t.FailNow()
+					if (algo.Name() == "minimax" || algo.Name() == "negamax") && depth >= 4 {
+						continue
 					}
+
+					result := algo.Search(*board, depth)
+
+					if result <= -200 || result >= 200 {
+						// skip exact search
+						break
+					}
+					results[algo.Name()] = result
+				}
+
+				resultsSet := make(map[int]struct{}, len(algos))
+
+				for _, result := range results {
+					resultsSet[result] = struct{}{}
+				}
+
+				if len(resultsSet) > 1 {
+					msg := "Found inconsistent tree search results:\n"
+					for _, algo := range algos {
+						if result, ok := results[algo.Name()]; ok {
+							msg += fmt.Sprintf("%s: %d\n", algo.Name(), result)
+						} else {
+							msg += fmt.Sprintf("%s: <skipped>\n", algo.Name())
+						}
+					}
+					var buff bytes.Buffer
+					board.ASCIIArt(&buff, false)
+					msg += fmt.Sprintf("for this board at depth %d:\n\n%s", depth, buff.String())
+					t.Error(msg)
+					t.FailNow()
 				}
 			}
 		}

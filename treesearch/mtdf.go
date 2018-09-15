@@ -12,7 +12,7 @@ type Mtdf struct {
 	depth int
 }
 
-func NewMtdf(high, low int) *Mtdf {
+func NewMtdf(low, high int) *Mtdf {
 	return &Mtdf{
 		high: high,
 		low:  low}
@@ -55,7 +55,7 @@ func (mtdf *Mtdf) slideWindow() int {
 	}
 
 	for mtdf.high-mtdf.low >= step {
-		var bound = -mtdf.search(-(f + 1))
+		var bound = mtdf.search(f)
 
 		if f == bound {
 			f -= step
