@@ -14,8 +14,7 @@ func TestTreeSearch(t *testing.T) {
 			NewMinimax(),
 			NewNegaMax(),
 			NewAlphaBeta(MinHeuristic, MaxHeuristic),
-			NewMtdf(MinHeuristic, MaxHeuristic),
-			NewMtdfHashTable(MinHeuristic, MaxHeuristic)}
+			NewMtdf(MinHeuristic, MaxHeuristic)}
 		board := othello.RandomBoard(discs)
 
 		results := make(map[string]int, len(algos))
@@ -67,5 +66,23 @@ func TestTreeSearch(t *testing.T) {
 
 	for i := 0; i < 20; i++ {
 		internal(t, 8, 6)
+	}
+}
+
+func Benchmark8Deep(b *testing.B) {
+
+	algos := []Interface{
+		NewMinimax(),
+		NewNegaMax(),
+		NewAlphaBeta(MinHeuristic, MaxHeuristic),
+		NewMtdf(MinHeuristic, MaxHeuristic)}
+
+	for _, algo := range algos {
+		b.Run(algo.Name(), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				algo.Search(*othello.NewBoard(), 8)
+			}
+
+		})
 	}
 }

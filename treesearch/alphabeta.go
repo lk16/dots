@@ -25,7 +25,7 @@ func (alphabeta *AlphaBeta) Name() string {
 func (alphabeta *AlphaBeta) Search(board othello.Board, depth int) int {
 	alphabeta.board = board
 	alphabeta.depth = depth
-	return alphabeta.search(alphabeta.alpha, alphabeta.beta)
+	return -alphabeta.search(alphabeta.beta, alphabeta.alpha)
 }
 
 func (alphabeta *AlphaBeta) ExactSearch(board othello.Board) int {

@@ -144,18 +144,16 @@ func (control *Controller) Redo() {
 
 // Run is the main loop of the Controller
 func (control *Controller) Run() {
-	for {
-		control.reset()
-		for control.gameRunning() {
+	control.reset()
+	for control.gameRunning() {
 
-			if control.canMove() {
-				control.doMove()
-			} else {
-				control.skipTurn()
-			}
-			control.frontend.OnUpdate(control.GetState())
-
+		if control.canMove() {
+			control.doMove()
+		} else {
+			control.skipTurn()
 		}
-		control.frontend.OnGameEnd(control.GetState())
+		control.frontend.OnUpdate(control.GetState())
+
 	}
+	control.frontend.OnGameEnd(control.GetState())
 }

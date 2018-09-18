@@ -5,11 +5,7 @@ import (
 	"dots/othello"
 )
 
-type MiniMax struct {
-	board othello.Board
-	depth int
-	sign  int
-}
+type MiniMax struct{}
 
 func NewMinimax() *MiniMax {
 	return &MiniMax{}
@@ -20,62 +16,52 @@ func (minimax *MiniMax) Name() string {
 }
 
 func (minimax *MiniMax) Search(board othello.Board, depth int) int {
-	minimax.board = board
-	minimax.depth = depth
-	minimax.sign = 1
-	return minimax.search()
+	return -minimax.search(board, depth, true)
 }
 
 func (minimax *MiniMax) ExactSearch(board othello.Board) int {
 	return minimax.Search(board, 60)
 }
 
-func (minimax *MiniMax) search() int {
+func (minimax *MiniMax) search(board othello.Board, depth int, maxPlayer bool) int {
 
-	if minimax.depth == 0 {
-		return minimax.sign * heuristics.Squared(minimax.board)
-	}
-
-	gen := othello.NewGenerator(&minimax.board, 0)
-
-	if !gen.HasMoves() {
-		if minimax.board.OpponentMoves() == 0 {
-			return minimax.sign * ExactScoreFactor * minimax.board.ExactScore()
+	if depth == 0 {
+		heur := heuristics.Squared(board)
+		if !maxPlayer {
+			heur = -heur
 		}
-
-		minimax.board.SwitchTurn()
-		minimax.sign = -minimax.sign
-		heur := minimax.search()
-		minimax.sign = -minimax.sign
-		minimax.board.SwitchTurn()
 		return heur
 	}
 
-	if minimax.sign == 1 {
+	child := board
+	gen := othello.NewGenerator(&child, 0)
+
+	if !gen.HasMoves() {
+		if board.OpponentMoves() == 0 {
+			return ExactScoreFactor * board.ExactScore()
+		}
+
+		child.SwitchTurn()
+		return minimax.search(child, depth, !maxPlayer)
+	}
+
+	if maxPlayer {
 		heur := MinHeuristic
 		for gen.Next() {
-			minimax.depth--
-			minimax.sign = -minimax.sign
-			childHeur := minimax.search()
-			minimax.sign = -minimax.sign
-			minimax.depth++
+			childHeur := minimax.search(child, depth-1, !maxPlayer)
 			if childHeur > heur {
 				heur = childHeur
 			}
 		}
 		return heur
-	}
-
-	heur := MaxHeuristic
-	for gen.Next() {
-		minimax.depth--
-		minimax.sign = -minimax.sign
-		childHeur := minimax.search()
-		minimax.sign = -minimax.sign
-		minimax.depth++
-		if childHeur < heur {
-			heur = childHeur
+	} else {
+		heur := MaxHeuristic
+		for gen.Next() {
+			childHeur := minimax.search(child, depth-1, !maxPlayer)
+			if childHeur < heur {
+				heur = childHeur
+			}
 		}
+		return heur
 	}
-	return heur
 }
