@@ -56,7 +56,7 @@ func TestTreeSearch(t *testing.T) {
 		}
 	}
 
-	for depth := 0; depth <= 4; depth++ {
+	for depth := 1; depth <= 4; depth++ {
 		for discs := 4; discs <= 64; discs++ {
 			for i := 0; i <= 5; i++ {
 				internal(t, discs, depth)

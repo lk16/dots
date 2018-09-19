@@ -40,13 +40,15 @@ func (mtdf *Mtdf) ExactSearch(board othello.Board) int {
 
 func (mtdf *Mtdf) slideWindow() int {
 
-	f := heuristics.Squared(mtdf.board)
+	var f int
 
 	var step int
 	if mtdf.board.CountEmpties() > mtdf.depth {
+		f = heuristics.Squared(mtdf.board)
 		step = 1
 	} else {
-		step = 2
+		f = 0
+		step = 2 * ExactScoreFactor
 	}
 
 	// prevent odd results for exact search
@@ -70,7 +72,6 @@ func (mtdf *Mtdf) slideWindow() int {
 			f += step
 			mtdf.low = bound
 		}
-
 	}
 
 	return mtdf.high
