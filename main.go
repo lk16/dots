@@ -29,6 +29,8 @@ func main() {
 
 	parallelSearch := flag.Bool("ps", true, "enable parallel search")
 
+	useXot := flag.Bool("xot", false, "use random xot board")
+
 	flag.Parse()
 
 	if *cpuprofile != "" {
@@ -47,6 +49,6 @@ func main() {
 	whitePlayer := players.Get(*whiteName, *whiteLevel, *parallelSearch)
 	blackPlayer := players.Get(*blackName, *blackLevel, *parallelSearch)
 
-	controller := frontend.NewController(blackPlayer, whitePlayer, os.Stdout, fe)
+	controller := frontend.NewController(blackPlayer, whitePlayer, os.Stdout, fe, useXot)
 	controller.Run()
 }

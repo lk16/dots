@@ -22,7 +22,7 @@ gometalinter --enable-all --disable=goimports --disable=gofmt dots/...
 - [ ] create benchmarks like https://campoy.cat/blog/justforfunc-28-benchmarks/
 - [ ] unit test tree search using ffo test set
 - [ ] linting
-- [ ] xot openings
+- [ ] loop flag
 - [ ] parallel search with hash table in separate goroutine
 - [ ] better cli arguments
 - [ ] better cli help strings

@@ -60,18 +60,20 @@ type Controller struct {
 	stateID  uint
 	redoMax  uint
 	frontend Frontend
+	useXot   bool
 }
 
 // NewController returns a new Controller
 func NewController(black, white players.Player, writer io.Writer,
-	frontend Frontend) (control *Controller) {
+	frontend Frontend, useXot *bool) (control *Controller) {
 	_ = writer
 	control = &Controller{
 		players:  [2]players.Player{black, white},
 		frontend: frontend,
 		history:  make([]GameState, 100),
 		stateID:  0,
-		redoMax:  0}
+		redoMax:  0,
+		useXot:   *useXot}
 	return
 }
 
@@ -115,8 +117,16 @@ func (control *Controller) canMove() bool {
 func (control *Controller) reset() {
 	control.stateID = 0
 	control.redoMax = 0
+
+	var firstBoard othello.Board
+	if control.useXot {
+		firstBoard = othello.NewXotBoard()
+	} else {
+		firstBoard = *othello.NewBoard()
+	}
+
 	control.history[0] = GameState{
-		board: *othello.NewBoard(),
+		board: firstBoard,
 		turn:  0}
 	control.frontend.OnUpdate(control.GetState())
 }
