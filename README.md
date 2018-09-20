@@ -19,11 +19,9 @@ gometalinter --enable-all --disable=goimports --disable=gofmt dots/...
 ```
 
 ### TODO
-- [ ] create package and interface for tree search algorithms
 - [ ] create benchmarks like https://campoy.cat/blog/justforfunc-28-benchmarks/
 - [ ] unit test tree search using ffo test set
 - [ ] linting
-- [ ] remove most single char identifiers
 - [ ] xot openings
 - [ ] parallel search with hash table in separate goroutine
 - [ ] better cli arguments
