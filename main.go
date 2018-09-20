@@ -31,6 +31,8 @@ func main() {
 
 	useXot := flag.Bool("xot", false, "use random xot board")
 
+	loop := flag.Bool("loop", false, "start new game when previous game is over")
+
 	flag.Parse()
 
 	if *cpuprofile != "" {
@@ -49,6 +51,6 @@ func main() {
 	whitePlayer := players.Get(*whiteName, *whiteLevel, *parallelSearch)
 	blackPlayer := players.Get(*blackName, *blackLevel, *parallelSearch)
 
-	controller := frontend.NewController(blackPlayer, whitePlayer, os.Stdout, fe, useXot)
+	controller := frontend.NewController(blackPlayer, whitePlayer, os.Stdout, fe, *useXot, *loop)
 	controller.Run()
 }

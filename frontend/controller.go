@@ -61,11 +61,12 @@ type Controller struct {
 	redoMax  uint
 	frontend Frontend
 	useXot   bool
+	loop     bool
 }
 
 // NewController returns a new Controller
 func NewController(black, white players.Player, writer io.Writer,
-	frontend Frontend, useXot *bool) (control *Controller) {
+	frontend Frontend, useXot, loop bool) (control *Controller) {
 	_ = writer
 	control = &Controller{
 		players:  [2]players.Player{black, white},
@@ -73,7 +74,8 @@ func NewController(black, white players.Player, writer io.Writer,
 		history:  make([]GameState, 100),
 		stateID:  0,
 		redoMax:  0,
-		useXot:   *useXot}
+		useXot:   useXot,
+		loop:     loop}
 	return
 }
 
@@ -154,16 +156,22 @@ func (control *Controller) Redo() {
 
 // Run is the main loop of the Controller
 func (control *Controller) Run() {
-	control.reset()
-	for control.gameRunning() {
+	for {
+		control.reset()
+		for control.gameRunning() {
 
-		if control.canMove() {
-			control.doMove()
-		} else {
-			control.skipTurn()
+			if control.canMove() {
+				control.doMove()
+			} else {
+				control.skipTurn()
+			}
+			control.frontend.OnUpdate(control.GetState())
+
 		}
-		control.frontend.OnUpdate(control.GetState())
+		control.frontend.OnGameEnd(control.GetState())
 
+		if !control.loop {
+			break
+		}
 	}
-	control.frontend.OnGameEnd(control.GetState())
 }

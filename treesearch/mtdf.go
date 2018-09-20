@@ -3,7 +3,6 @@ package treesearch
 import (
 	"dots/heuristics"
 	"dots/othello"
-	"log"
 )
 
 type hashtableKey struct {
@@ -38,12 +37,6 @@ func (mtdf *Mtdf) Search(board othello.Board, depth int) int {
 	mtdf.board = board
 	mtdf.depth = depth
 	mtdf.hashtable = make(map[hashtableKey]bounds, 100000)
-	defer func() {
-		if len(mtdf.hashtable) == 0 {
-			return
-		}
-		log.Printf("hashtable size = %d\n", len(mtdf.hashtable))
-	}()
 	return mtdf.slideWindow()
 }
 
