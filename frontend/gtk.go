@@ -4,6 +4,7 @@ import (
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
+	"math/bits"
 
 	"dots/othello"
 )
@@ -133,6 +134,21 @@ func (gtkf *GtkFrontend) OnUpdate(state GameState) {
 // OnGameEnd updates the Gtk user interface on game end
 func (gtkf *GtkFrontend) OnGameEnd(state GameState) {
 	gtkf.state <- state
+
+	// click to show who won
+	<-gtkf.humanMove
+
+	// show who won
+	blackCount := bits.OnesCount64(state.board.Me())
+	whiteCount := bits.OnesCount64(state.board.Opp())
+
+	if state.turn == White {
+		blackCount, whiteCount = whiteCount, blackCount
+	}
+
+	gtkf.state <- GameState{
+		board: *othello.CustomBoard(((1<<uint(blackCount))-1)<<uint(64-blackCount), (1<<uint(whiteCount))-1),
+		turn:  Black}
 
 	// click for new game
 	<-gtkf.humanMove
