@@ -121,7 +121,14 @@ func ws(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		board.DoMove(wsMessage.Data.Cell)
-		updatedState := newState(*board, 1-wsMessage.Data.State.Turn)
+
+		nextTurn := 1 - wsMessage.Data.State.Turn
+		if board.Moves() == 0 {
+			nextTurn = wsMessage.Data.State.Turn
+			board.SwitchTurn()
+		}
+
+		updatedState := newState(*board, nextTurn)
 
 		messageOut, err := json.Marshal(updatedState)
 		err = c.WriteMessage(mt, messageOut)
