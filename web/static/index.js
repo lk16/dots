@@ -14,11 +14,11 @@ update_fields = function() {
         let image = "";
 
         if(state.white.includes(i)){
-            image = "white.png";
+            image = "white.svg";
         } else if(state.black.includes(i)){
-            image = "black.png";
+            image = "black.svg";
         } else {
-            image = "empty.png";
+            image = "empty.svg";
         }
 
         $("#board img").eq(i).attr("src", "static/" + image);
@@ -34,7 +34,7 @@ $(function(){
         }
     }
 
-    $('#board td').append('<img src="static/empty.png" />');
+    $('#board td').append('<img src="static/empty.svg" />');
 
     update_fields();
 
