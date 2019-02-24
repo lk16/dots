@@ -1,5 +1,30 @@
 let ws;
 
+let state = {
+    "white": [27, 36],
+    "black": [28, 35],
+    "turn": 0
+};
+
+update_fields = function() {
+    for(let i=0; i<64; i++){
+        let y = Math.floor(i/8);
+        let x = i%8;
+
+        let image = "";
+
+        if(state.white.includes(i)){
+            image = "white.png";
+        } else if(state.black.includes(i)){
+            image = "black.png";
+        } else {
+            image = "empty.png";
+        }
+
+        $("#board img").eq(i).attr("src", "static/" + image);
+    }
+};
+
 $(function(){
     for(let y=0; y<8;y++){
         let row = $("<tr></tr>");
@@ -10,6 +35,8 @@ $(function(){
     }
 
     $('#board td').append('<img src="static/empty.png" />');
+
+    update_fields();
 
     if (ws) {
         return false;
@@ -24,6 +51,8 @@ $(function(){
     };
     ws.onmessage = function(evt) {
         console.log("RESPONSE: " + evt.data);
+        state = JSON.parse(evt.data);
+        update_fields();
     };
     ws.onerror = function(evt) {
         console.log("ERROR: " + evt.data);
@@ -35,7 +64,15 @@ $(document).on("click", "#board td", function () {
     let y = $(this).parent().index();
     let x = $(this).index();
     let cell_id = 8*y + x;
-    console.log(cell_id);
-    ws.send(JSON.stringify({'event': 'click', 'data': {'cell': cell_id}}));
+
+    let ws_message = {
+        'event': 'click',
+        'data': {
+            'cell': cell_id,
+            'state': state
+        }
+    };
+
+    ws.send(JSON.stringify(ws_message));
     return false;
 });
