@@ -1,6 +1,7 @@
 package main
 
 import (
+	"dots/web"
 	"flag"
 	"math/rand"
 	"os"
@@ -33,7 +34,14 @@ func main() {
 
 	loop := flag.Bool("loop", false, "start new game when previous game is over")
 
+	webFlag := flag.Bool("web", false, "run dots webserver")
+
 	flag.Parse()
+
+	if *webFlag {
+		web.Main()
+		return
+	}
 
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)

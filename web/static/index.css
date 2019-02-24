@@ -3,16 +3,12 @@
     border: none;
     border-spacing: 0;
     border: 0;
+    width: 800px;
+    height: 800px;
 }
 
 #board td {
-    width: 100px;
-    height: 100px;
     padding: 0;
-}
-
-#board tr {
-    stroke-width: 0;
 }
 
 #board img {
