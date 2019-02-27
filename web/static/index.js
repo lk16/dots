@@ -66,6 +66,15 @@ $(document).on("click", "#board td", function () {
     let x = $(this).index();
     let cell_id = 8*y + x;
 
+    if(state.turn == 0 && $("select[name='black-player']").find(":selected").val() != 'human'){
+        return false;
+    }
+
+    if(state.turn == 1 && $("select[name='white-player']").find(":selected").val() != 'human'){
+        return false;
+    }
+
+
     let ws_message = {
         'event': 'click',
         'click': {
