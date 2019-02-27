@@ -12,13 +12,7 @@ import (
 
 var upgrader = websocket.Upgrader{}
 
-type state struct {
-	White []int `json:"white"`
-	Black []int `json:"black"`
-	Turn  int   `json:"turn"`
-}
-
-func newState(board othello.Board, turn int) state {
+func newState(board othello.Board, turn int) boardState {
 
 	me := make([]int, 0)
 	opp := make([]int, 0)
@@ -33,19 +27,19 @@ func newState(board othello.Board, turn int) state {
 	}
 
 	if turn == 0 {
-		return state{
+		return boardState{
 			Black: me,
 			White: opp,
 			Turn:  0}
 	}
 
-	return state{
+	return boardState{
 		White: me,
 		Black: opp,
 		Turn:  1}
 }
 
-func (s *state) getBoard() (*othello.Board, error) {
+func (s *boardState) getBoard() (*othello.Board, error) {
 
 	white := uint64(0)
 	black := uint64(0)
@@ -78,14 +72,47 @@ func (s *state) getBoard() (*othello.Board, error) {
 	}
 }
 
-type clickData struct {
-	Cell  int   `json:"cell"`
-	State state `json:"state"`
+func handleClickEvent(click *clickEvent) (*wsMessage, error) {
+
+	if click == nil {
+		return nil, fmt.Errorf("click is nil")
+	}
+
+	board, err := click.State.getBoard()
+	if err != nil {
+		return nil, err
+	}
+
+	if click.Cell < 0 || click.Cell >= 64 {
+		return nil, fmt.Errorf("invalid Cell value %d", click.Cell)
+	}
+
+	if board.Moves()&uint64(1<<uint(click.Cell)) == 0 {
+		return nil, fmt.Errorf("invalid move %d", click.Cell)
+	}
+
+	board.DoMove(click.Cell)
+	nextTurn := 1 - click.State.Turn
+	if board.Moves() == 0 {
+		nextTurn = click.State.Turn
+		board.SwitchTurn()
+	}
+
+	reply := &wsMessage{
+		Event: "click_reply",
+		ClickReply: &clickReply{
+			NewState: newState(*board, nextTurn)}}
+
+	return reply, nil
 }
 
-type wsMessage struct {
-	Event string    `json:"event"`
-	Data  clickData `json:"data"`
+func handleMessage(message wsMessage) (*wsMessage, error) {
+	switch message.Event {
+	case "click":
+		return handleClickEvent(message.Click)
+	default:
+		return nil, fmt.Errorf("unhandled message of event %s", message.Event)
+	}
 }
 
 func ws(w http.ResponseWriter, r *http.Request) {
@@ -96,42 +123,24 @@ func ws(w http.ResponseWriter, r *http.Request) {
 	}
 	defer c.Close()
 	for {
-		mt, message, err := c.ReadMessage()
+		messageType, rawMessage, err := c.ReadMessage()
 		if err != nil {
 			log.Printf("read error: %s", err)
 			break
 		}
-		var wsMessage wsMessage
-		err = json.Unmarshal(message, &wsMessage)
+		var message wsMessage
+		err = json.Unmarshal(rawMessage, &message)
 		if err != nil {
 			log.Printf("json decode error: %s", err)
 			continue
 		}
-		board, err := wsMessage.Data.State.getBoard()
+		reply, err := handleMessage(message)
 		if err != nil {
-			log.Printf("error constructing board: %s", err)
+			log.Printf("message handling error: %s", err)
 			continue
 		}
-		if wsMessage.Data.Cell < 0 || wsMessage.Data.Cell >= 64 {
-			log.Printf("invalid Cell value %d", wsMessage.Data.Cell)
-			continue
-		}
-		if board.Moves()&uint64(1<<uint(wsMessage.Data.Cell)) == 0 {
-			log.Printf("invalid move %d", wsMessage.Data.Cell)
-			continue
-		}
-		board.DoMove(wsMessage.Data.Cell)
-
-		nextTurn := 1 - wsMessage.Data.State.Turn
-		if board.Moves() == 0 {
-			nextTurn = wsMessage.Data.State.Turn
-			board.SwitchTurn()
-		}
-
-		updatedState := newState(*board, nextTurn)
-
-		messageOut, err := json.Marshal(updatedState)
-		err = c.WriteMessage(mt, messageOut)
+		rawReply, err := json.Marshal(reply)
+		err = c.WriteMessage(messageType, rawReply)
 		if err != nil {
 			log.Printf("write rror: %s", err)
 			continue
@@ -139,7 +148,7 @@ func ws(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func root(w http.ResponseWriter, r *http.Request) {
+func root(w http.ResponseWriter, _ *http.Request) {
 	buff, err := ioutil.ReadFile("web/index.html")
 	if err != nil {
 		log.Printf("error opening file: %s", err)
@@ -152,5 +161,7 @@ func Main() {
 	http.HandleFunc("/", root)
 	http.HandleFunc("/ws", ws)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
-	log.Fatal(http.ListenAndServe("localhost:8080", nil))
+	addr := "localhost:8080"
+	log.Printf("Server running at %s", addr)
+	log.Fatal(http.ListenAndServe(addr, nil))
 }

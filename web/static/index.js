@@ -8,9 +8,6 @@ let state = {
 
 update_fields = function() {
     for(let i=0; i<64; i++){
-        let y = Math.floor(i/8);
-        let x = i%8;
-
         let image = "";
 
         if(state.white.includes(i)){
@@ -51,7 +48,11 @@ $(function(){
     };
     ws.onmessage = function(evt) {
         console.log("RESPONSE: " + evt.data);
-        state = JSON.parse(evt.data);
+        message = JSON.parse(evt.data);
+        switch(message.event){
+            case "click_reply":
+                state = message.click_reply.state
+        }
         update_fields();
     };
     ws.onerror = function(evt) {
@@ -67,7 +68,7 @@ $(document).on("click", "#board td", function () {
 
     let ws_message = {
         'event': 'click',
-        'data': {
+        'click': {
             'cell': cell_id,
             'state': state
         }
