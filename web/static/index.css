@@ -1,4 +1,42 @@
+.buttons {
+    height: 30px;
+    text-align: center;
+    vertical-align: center;
+    display: inline-block;
+}
+
+.buttons select {
+    height: 100%;
+    border: 0;
+}
+
+.form-wrapper img {
+    margin: auto;
+    height: 30px;
+    border: 0;
+    padding: 0;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.content {
+    text-align: center;
+}
+
+.buttons button {
+    height: 100%;
+}
+
+.form-wrapper {
+    height: 30px;
+    width: 500px;
+    display: inline-block;
+    text-align: center;
+}
+
+
 #board {
+    padding: 5px;
     margin: auto;
     border: none;
     border-spacing: 0;
