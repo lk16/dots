@@ -1,43 +1,35 @@
-let ws;
+update_fields = function(board) {
 
-let state = {
-    "white": [27, 36],
-    "black": [28, 35],
-    "turn": 0
-};
-
-update_fields = function() {
-
-    let valid_moves = get_valid_moves(state);
+    let valid_moves = get_valid_moves(board);
 
     for(let i=0; i<64; i++){
-        let image = "";
+        let image = '';
 
-        if(state.white.includes(i)){
-            image = "white.svg";
-        } else if(state.black.includes(i)){
-            image = "black.svg";
+        if(board.white.includes(i)){
+            image = 'white.svg';
+        } else if(board.black.includes(i)){
+            image = 'black.svg';
         } else if(valid_moves.includes(i)){
-            if(state.turn === 0){
-                image = "move_black.svg";
+            if(board.turn === 0){
+                image = 'move_black.svg';
             }  else {
-                image = "move_white.svg";
+                image = 'move_white.svg';
             }
         } else {
-            image = "empty.svg";
+            image = 'empty.svg';
         }
 
-        $("#board img").eq(i).attr("src", "static/" + image);
+        $('#board img').eq(i).attr('src', 'static/' + image);
     }
 };
 
-get_flippable_discs = function(state, move) {
-    let me = state.white;
-    let opp = state.black;
+get_flippable_discs = function(board, move) {
+    let me = board.white;
+    let opp = board.black;
 
-    if(state.turn === 0){
-        me = state.black;
-        opp = state.white;
+    if(board.turn === 0){
+        me = board.black;
+        opp = board.white;
     }
 
     if(me.includes(move) || opp.includes(move)){
@@ -99,10 +91,10 @@ get_flippable_discs = function(state, move) {
     return flippable;
 };
 
-get_valid_moves = function(state){
+get_valid_moves = function(board){
     let valid_moves = [];
     for(let move=0; move<64; move++){
-        let flippable = get_flippable_discs(state, move);
+        let flippable = get_flippable_discs(board, move);
         if(flippable.length > 0){
             valid_moves.push(move);
         }
@@ -111,114 +103,156 @@ get_valid_moves = function(state){
 };
 
 request_bot_move = function(){
+
+    console.log('state', state);
+
+    if((state.board.turn === 0 && state.players.black === 'human') ||
+        (state.board.turn === 1 && state.players.white === 'human')){
+
+        return;
+    }
+
     let message = {
         'event': 'bot_move',
         'bot_move': {
-            'state': state
+            'state': state.board
         }
     };
 
     ws.send(JSON.stringify(message))
 };
 
+let ws;
+
+let start_board = {
+    'white': [27, 36],
+    'black': [28, 35],
+    'turn': 0
+};
+
+let state = {
+    'board': {},
+    'players': {
+        'white': 'human',
+        'black': 'human'
+    }
+};
+
 $(function(){
     for(let y=0; y<8;y++){
-        let row = $("<tr></tr>");
-        $("#board").append(row);
+        let row = $('<tr></tr>');
+        $('#board').append(row);
         for (let x=0; x<8; x++){
-            $(row, "tr").append("<td></td>");
+            $(row, 'tr').append('<td></td>');
         }
     }
 
     $('#board td').append('<img src="static/empty.svg" />');
 
-    update_fields();
+    // deep copy
+    state.board = JSON.parse(JSON.stringify(start_board));
+
+    update_fields(state.board);
 
     if (ws) {
         return false;
     }
     ws = new WebSocket('ws://localhost:8080/ws');
+
     ws.onopen = function(evt) {
-        console.log("OPEN");
+        console.log('OPEN');
     };
+
     ws.onclose = function(evt) {
-        console.log("CLOSE");
+        console.log('CLOSE');
         ws = null;
     };
+
     ws.onmessage = function(evt) {
-        console.log("RESPONSE: " + evt.data);
+        console.log('RESPONSE: ' + evt.data);
         let message = JSON.parse(evt.data);
         switch(message.event){
-            case "bot_move_reply":
-                state = message.bot_move_reply.state;
-                update_fields();
-                if(get_valid_moves(state).length === 0){
-                    state.turn = 1-state.turn;
-                    if(get_valid_moves(state).length !== 0){
-                        setTimeout(request_bot_move(), 250);
+            case 'bot_move_reply':
+                state.board = message.bot_move_reply.state;
+                update_fields(state.board);
+                if(get_valid_moves(state.board).length === 0){
+                    state.board.turn = 1-state.board.turn;
+                    if(get_valid_moves(state.board).length !== 0){
+                        request_bot_move();
                     }
+                } else {
+                    request_bot_move();
                 }
         }
     };
     ws.onerror = function(evt) {
-        console.log("ERROR: " + evt.data);
+        console.log('ERROR: ' + evt.data);
     };
     return false;
 });
 
-$(document).on("click", "#board td", function () {
+$(document).on('mousedown', '#board td', function () {
     let y = $(this).parent().index();
     let x = $(this).index();
     let cell_id = 8*y + x;
 
-    if(state.turn === 0 && $("select[name='black_player']").find(":selected").val() !== 'human'){
+    if(state.board.turn === 0 && state.players.black !== 'human'){
         return false;
     }
 
-    if(state.turn === 1 && $("select[name='white_player']").find(":selected").val() !== 'human'){
+    if(state.board.turn === 1 && state.players.white !== 'human'){
         return false;
     }
 
-    let flipped = get_flippable_discs(state, cell_id);
+    let flipped = get_flippable_discs(state.board, cell_id);
 
     if(flipped.length === 0){
         return false;
     }
 
-    if(state.turn === 0){
-        state.black.push(cell_id, ...flipped);
-        state.white = state.white.filter(x => !flipped.includes(x));
+    if(state.board.turn === 0){
+        state.board.black.push(cell_id, ...flipped);
+        state.board.white = state.board.white.filter(x => !flipped.includes(x));
     } else {
-        state.white.push(cell_id, ...flipped);
-        state.black = state.black.filter(x => !flipped.includes(x));
+        state.board.white.push(cell_id, ...flipped);
+        state.board.black = state.board.black.filter(x => !flipped.includes(x));
     }
-    state.turn = 1-state.turn;
+    state.board.turn = 1-state.board.turn;
 
-    if(get_valid_moves(state).length === 0){
-        state.turn = 1-state.turn;
+    if(get_valid_moves(state.board).length === 0){
+        state.board.turn = 1-state.board.turn;
     }
 
-    update_fields();
-
-    if((state.turn === 0 && $("select[name='black_player']").find(":selected").val() !== 'human') ||
-        (state.turn === 1 && $("select[name='white_player']").find(":selected").val() !== 'human')){
-
-        request_bot_move();
-    }
+    update_fields(state.board);
+    request_bot_move();
 
     return false;
 });
 
-$(document).on("change", "select", function() {
+$(document).on('change', 'select', function() {
     let selected = $(this).val();
     let name = $(this).attr('name');
 
-    if(selected === "human") {
-        return false;
+    switch(name){
+        case 'white_player':
+            state.players.white = selected;
+            break;
+        case 'black_player':
+            state.players.black = selected;
+            break;
+        default:
+            console.log('Unhandled name: ', name);
+            return false;
     }
-    console.log(name, state.turn);
 
-    if((name === 'black_player' && state.turn === 0) || (name === "white_player" && state.turn === 1)){
-        request_bot_move();
-    }
+    request_bot_move();
+});
+
+$(document).on('click', 'button', function(){
+
+    // deep copy
+    state.board = JSON.parse(JSON.stringify(start_board));
+
+    update_fields(state.board);
+    request_bot_move();
 });

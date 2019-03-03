@@ -88,7 +88,7 @@ func handleBotMoveEvent(botMoveEvent *botMoveEvent) (*wsMessage, error) {
 		return nil, fmt.Errorf("no moves available")
 	}
 
-	bot := players.NewBotHeuristic(ioutil.Discard, 6, 12)
+	bot := players.NewBotHeuristic(ioutil.Discard, 8, 16)
 	bestMove := bot.DoMove(*board)
 
 	nextTurn := 1 - botMoveEvent.State.Turn
@@ -123,10 +123,17 @@ func ws(w http.ResponseWriter, r *http.Request) {
 	defer c.Close()
 	for {
 		messageType, rawMessage, err := c.ReadMessage()
+
 		if err != nil {
-			log.Printf("read error: %s", err)
+			switch err.(type) {
+			case *websocket.CloseError:
+				// don't print error
+			default:
+				log.Printf("Unexpected read error %T: %s", err, err)
+			}
 			break
 		}
+
 		var message wsMessage
 		err = json.Unmarshal(rawMessage, &message)
 		if err != nil {
