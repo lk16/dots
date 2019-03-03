@@ -7,6 +7,9 @@ let state = {
 };
 
 update_fields = function() {
+
+    let valid_moves = get_valid_moves(state);
+
     for(let i=0; i<64; i++){
         let image = "";
 
@@ -14,6 +17,12 @@ update_fields = function() {
             image = "white.svg";
         } else if(state.black.includes(i)){
             image = "black.svg";
+        } else if(valid_moves.includes(i)){
+            if(state.turn === 0){
+                image = "move_black.svg";
+            }  else {
+                image = "move_white.svg";
+            }
         } else {
             image = "empty.svg";
         }
@@ -21,6 +30,86 @@ update_fields = function() {
         $("#board img").eq(i).attr("src", "static/" + image);
     }
 };
+
+get_flippable_discs = function(state, move) {
+    let me = state.white;
+    let opp = state.black;
+
+    if(state.turn === 0){
+        me = state.black;
+        opp = state.white;
+    }
+
+    if(me.includes(move) || opp.includes(move)){
+        return [];
+    }
+
+    let move_x = move % 8;
+    let move_y = Math.floor(move / 8);
+
+
+    let flippable = [];
+
+    for(let dy=-1; dy<=1; dy++){
+        for(let dx=-1;dx<=1;dx++){
+            if(dx===0 && dy===0){
+                continue;
+            }
+
+            let dir_flippable = [];
+
+            let d = 1;
+            let p, px, py;
+
+            while(true){
+                px = move_x + (d * dx);
+                py = move_y + (d * dy);
+                p = (8 * py) + px;
+
+                if(px<0 || px>=8 || py<0 || py>=8){
+                    break;
+                }
+
+                if(!opp.includes(p)){
+                    break;
+                }
+
+                dir_flippable.push(p);
+                d++;
+            }
+
+            if(d===1) {
+                continue;
+            }
+
+            px = move_x + (d * dx);
+            py = move_y + (d * dy);
+            p = (8 * py) + px;
+
+            if(px<0 || px>=8 || py<0 || py>=8){
+                continue;
+            }
+
+            if(me.includes(p)){
+                flippable.push(...dir_flippable);
+            }
+        }
+    }
+
+    return flippable;
+};
+
+get_valid_moves = function(state){
+    let valid_moves = [];
+    for(let move=0; move<64; move++){
+        let flippable = get_flippable_discs(state, move);
+        if(flippable.length > 0){
+            valid_moves.push(move);
+        }
+    }
+    return valid_moves;
+};
+
 
 $(function(){
     for(let y=0; y<8;y++){
@@ -48,7 +137,7 @@ $(function(){
     };
     ws.onmessage = function(evt) {
         console.log("RESPONSE: " + evt.data);
-        message = JSON.parse(evt.data);
+        let message = JSON.parse(evt.data);
         switch(message.event){
             case "click_reply":
                 state = message.click_reply.state
@@ -66,23 +155,33 @@ $(document).on("click", "#board td", function () {
     let x = $(this).index();
     let cell_id = 8*y + x;
 
-    if(state.turn == 0 && $("select[name='black-player']").find(":selected").val() != 'human'){
+    if(state.turn === 0 && $("select[name='black-player']").find(":selected").val() !== 'human'){
         return false;
     }
 
-    if(state.turn == 1 && $("select[name='white-player']").find(":selected").val() != 'human'){
+    if(state.turn === 1 && $("select[name='white-player']").find(":selected").val() !== 'human'){
         return false;
     }
 
+    let flipped = get_flippable_discs(state, cell_id);
 
-    let ws_message = {
-        'event': 'click',
-        'click': {
-            'cell': cell_id,
-            'state': state
-        }
-    };
+    if(flipped.length === 0){
+        return false;
+    }
 
-    ws.send(JSON.stringify(ws_message));
+    if(state.turn === 0){
+        state.black.push(cell_id, ...flipped);
+        state.white = state.white.filter(x => !flipped.includes(x));
+    } else {
+        state.white.push(cell_id, ...flipped);
+        state.black = state.black.filter(x => !flipped.includes(x));
+    }
+    state.turn = 1-state.turn;
+
+    if(get_valid_moves(state).length === 0){
+        state.turn = 1-state.turn;
+    }
+
+    update_fields();
     return false;
 });
