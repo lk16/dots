@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"dots/othello"
 	"dots/treesearch"
+	"fmt"
 	"io"
-	"log"
 )
 
 // Heuristic is a function that estimates how promising a Board is.
@@ -72,7 +72,8 @@ func (bot *BotHeuristic) DoMove(board othello.Board) (afterwards othello.Board) 
 			heur = search.Search(child, depth)
 		}
 
-		log.Printf("Child %2d/%2d: %d\n", i+1, len(children), heur)
+		buff := bytes.NewBufferString(fmt.Sprintf("Child %2d/%2d: %d\n", i+1, len(children), heur))
+		bot.writer.Write(buff.Bytes())
 
 		if heur > alpha {
 			alpha = heur

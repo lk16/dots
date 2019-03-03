@@ -110,6 +110,16 @@ get_valid_moves = function(state){
     return valid_moves;
 };
 
+request_bot_move = function(){
+    let message = {
+        'event': 'bot_move',
+        'bot_move': {
+            'state': state
+        }
+    };
+
+    ws.send(JSON.stringify(message))
+};
 
 $(function(){
     for(let y=0; y<8;y++){
@@ -139,10 +149,16 @@ $(function(){
         console.log("RESPONSE: " + evt.data);
         let message = JSON.parse(evt.data);
         switch(message.event){
-            case "click_reply":
-                state = message.click_reply.state
+            case "bot_move_reply":
+                state = message.bot_move_reply.state;
+                update_fields();
+                if(get_valid_moves(state).length === 0){
+                    state.turn = 1-state.turn;
+                    if(get_valid_moves(state).length !== 0){
+                        setTimeout(request_bot_move(), 250);
+                    }
+                }
         }
-        update_fields();
     };
     ws.onerror = function(evt) {
         console.log("ERROR: " + evt.data);
@@ -155,11 +171,11 @@ $(document).on("click", "#board td", function () {
     let x = $(this).index();
     let cell_id = 8*y + x;
 
-    if(state.turn === 0 && $("select[name='black-player']").find(":selected").val() !== 'human'){
+    if(state.turn === 0 && $("select[name='black_player']").find(":selected").val() !== 'human'){
         return false;
     }
 
-    if(state.turn === 1 && $("select[name='white-player']").find(":selected").val() !== 'human'){
+    if(state.turn === 1 && $("select[name='white_player']").find(":selected").val() !== 'human'){
         return false;
     }
 
@@ -183,5 +199,26 @@ $(document).on("click", "#board td", function () {
     }
 
     update_fields();
+
+    if((state.turn === 0 && $("select[name='black_player']").find(":selected").val() !== 'human') ||
+        (state.turn === 1 && $("select[name='white_player']").find(":selected").val() !== 'human')){
+
+        request_bot_move();
+    }
+
     return false;
+});
+
+$(document).on("change", "select", function() {
+    let selected = $(this).val();
+    let name = $(this).attr('name');
+
+    if(selected === "human") {
+        return false;
+    }
+    console.log(name, state.turn);
+
+    if((name === 'black_player' && state.turn === 0) || (name === "white_player" && state.turn === 1)){
+        request_bot_move();
+    }
 });

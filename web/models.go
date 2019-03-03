@@ -7,16 +7,15 @@ type boardState struct {
 }
 
 type wsMessage struct {
-	Event      string      `json:"event"`
-	Click      *clickEvent `json:"click"`
-	ClickReply *clickReply `json:"click_reply"`
+	Event        string        `json:"event"`
+	BotMove      *botMoveEvent `json:"bot_move"`
+	BotMoveReply *botMoveReply `json:"bot_move_reply"`
 }
 
-type clickEvent struct {
-	Cell  int        `json:"cell"`
+type botMoveEvent struct {
 	State boardState `json:"state"`
 }
 
-type clickReply struct {
-	NewState boardState `json:"state"`
+type botMoveReply struct {
+	State boardState `json:"state"`
 }

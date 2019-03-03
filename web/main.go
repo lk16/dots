@@ -2,6 +2,7 @@ package web
 
 import (
 	"dots/othello"
+	"dots/players"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
@@ -72,44 +73,42 @@ func (s *boardState) getBoard() (*othello.Board, error) {
 	}
 }
 
-func handleClickEvent(click *clickEvent) (*wsMessage, error) {
+func handleBotMoveEvent(botMoveEvent *botMoveEvent) (*wsMessage, error) {
 
-	if click == nil {
-		return nil, fmt.Errorf("click is nil")
+	if botMoveEvent == nil {
+		return nil, fmt.Errorf("botMoveEvent is nil")
 	}
 
-	board, err := click.State.getBoard()
+	board, err := botMoveEvent.State.getBoard()
 	if err != nil {
 		return nil, err
 	}
 
-	if click.Cell < 0 || click.Cell >= 64 {
-		return nil, fmt.Errorf("invalid Cell value %d", click.Cell)
-	}
-
-	if board.Moves()&uint64(1<<uint(click.Cell)) == 0 {
-		return nil, fmt.Errorf("invalid move %d", click.Cell)
-	}
-
-	board.DoMove(click.Cell)
-	nextTurn := 1 - click.State.Turn
 	if board.Moves() == 0 {
-		nextTurn = click.State.Turn
+		return nil, fmt.Errorf("no moves available")
+	}
+
+	bot := players.NewBotHeuristic(ioutil.Discard, 6, 12)
+	bestMove := bot.DoMove(*board)
+
+	nextTurn := 1 - botMoveEvent.State.Turn
+	if board.Moves() == 0 {
+		nextTurn = botMoveEvent.State.Turn
 		board.SwitchTurn()
 	}
 
 	reply := &wsMessage{
-		Event: "click_reply",
-		ClickReply: &clickReply{
-			NewState: newState(*board, nextTurn)}}
+		Event: "bot_move_reply",
+		BotMoveReply: &botMoveReply{
+			State: newState(bestMove, nextTurn)}}
 
 	return reply, nil
 }
 
 func handleMessage(message wsMessage) (*wsMessage, error) {
 	switch message.Event {
-	case "click":
-		return handleClickEvent(message.Click)
+	case "bot_move":
+		return handleBotMoveEvent(message.BotMove)
 	default:
 		return nil, fmt.Errorf("unhandled message of event %s", message.Event)
 	}
