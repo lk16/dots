@@ -102,24 +102,39 @@ get_valid_moves = function(board){
     return valid_moves;
 };
 
-request_bot_move = function(){
-
-    console.log('state', state);
-
-    if((state.board.turn === 0 && state.players.black === 'human') ||
-        (state.board.turn === 1 && state.players.white === 'human')){
-
-        return;
+get_player_to_move = function(state) {
+    if(state.board.turn === 0){
+      return state.players.black;
     }
+    return state.players.white;
+};
 
-    let message = {
-        'event': 'bot_move',
-        'bot_move': {
-            'state': state.board
-        }
-    };
+request_ws_move = function(){
 
-    ws.send(JSON.stringify(message))
+    let message;
+
+    switch(get_player_to_move(state)){
+        case 'human':
+            break;
+        case 'bot':
+            message = {
+                'event': 'bot_move',
+                'bot_move': {
+                    'state': state.board
+                }
+            };
+            ws.send(JSON.stringify(message));
+            break;
+        case 'analyzer':
+            message = {
+                'event': 'analyze_move',
+                'analyze_move': {
+                    'state': state.board
+                }
+            };
+            ws.send(JSON.stringify(message));
+            break;
+    }
 };
 
 let ws;
@@ -159,13 +174,8 @@ $(function(){
     }
     ws = new WebSocket('ws://localhost:8080/ws');
 
-    ws.onopen = function(evt) {
-        console.log('OPEN');
-    };
-
     ws.onclose = function(evt) {
-        console.log('CLOSE');
-        ws = null;
+        // TODO try to reconnect
     };
 
     ws.onmessage = function(evt) {
@@ -178,11 +188,15 @@ $(function(){
                 if(get_valid_moves(state.board).length === 0){
                     state.board.turn = 1-state.board.turn;
                     if(get_valid_moves(state.board).length !== 0){
-                        request_bot_move();
+                        request_ws_move();
                     }
                 } else {
-                    request_bot_move();
+                    request_ws_move();
                 }
+            case 'analyze_move_reply':
+                let move = message.analyze_move_reply.move;
+                let heuristic = message.analyze_move_reply.heuristic;
+                $('#board img').eq(move).attr('src', window.location.origin + '/svg/?text=' + heuristic);
         }
     };
     ws.onerror = function(evt) {
@@ -196,11 +210,7 @@ $(document).on('mousedown', '#board td', function () {
     let x = $(this).index();
     let cell_id = 8*y + x;
 
-    if(state.board.turn === 0 && state.players.black !== 'human'){
-        return false;
-    }
-
-    if(state.board.turn === 1 && state.players.white !== 'human'){
+    if(get_player_to_move(state) === 'bot'){
         return false;
     }
 
@@ -224,7 +234,7 @@ $(document).on('mousedown', '#board td', function () {
     }
 
     update_fields(state.board);
-    request_bot_move();
+    request_ws_move();
 
     return false;
 });
@@ -245,7 +255,7 @@ $(document).on('change', 'select', function() {
             return false;
     }
 
-    request_bot_move();
+    request_ws_move();
 });
 
 $(document).on('click', 'button', function(){
@@ -254,5 +264,5 @@ $(document).on('click', 'button', function(){
     state.board = JSON.parse(JSON.stringify(start_board));
 
     update_fields(state.board);
-    request_bot_move();
+    request_ws_move();
 });

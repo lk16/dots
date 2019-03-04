@@ -3,12 +3,15 @@ package web
 import (
 	"dots/othello"
 	"dots/players"
+	"dots/treesearch"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"io/ioutil"
 	"log"
+	"math/bits"
 	"net/http"
+	"sort"
 )
 
 var upgrader = websocket.Upgrader{}
@@ -73,7 +76,85 @@ func (s *boardState) getBoard() (*othello.Board, error) {
 	}
 }
 
-func handleBotMoveEvent(botMoveEvent *botMoveEvent) (*wsMessage, error) {
+func analyze(board othello.Board, quitCh <-chan struct{}, analyzeCh chan<- analyzeMoveReply) {
+
+	type analyzedChild struct {
+		child    othello.Board
+		analysis analyzeMoveReply
+	}
+
+	children := board.GetChildren()
+	analyzedChildren := make([]analyzedChild, len(children))
+
+	for i := range analyzedChildren {
+
+		move := bits.TrailingZeros64(board.Me() | board.Opp() ^ (children[i].Me() | children[i].Opp()))
+
+		analyzedChildren[i] = analyzedChild{
+			child: children[i],
+			analysis: analyzeMoveReply{
+				Depth:     0,
+				Heuristic: 0,
+				Move:      move}}
+	}
+
+	depth := 4
+
+	for {
+		sort.Slice(analyzedChildren, func(i, j int) bool {
+			return analyzedChildren[i].analysis.Heuristic > analyzedChildren[j].analysis.Heuristic
+		})
+
+		for i := range analyzedChildren {
+
+			bot := treesearch.NewMtdf(treesearch.MinHeuristic, treesearch.MaxHeuristic)
+
+			analysis := analyzeMoveReply{
+				Depth:     depth,
+				Move:      analyzedChildren[i].analysis.Move,
+				Heuristic: bot.Search(analyzedChildren[i].child, depth)}
+
+			analyzeCh <- analysis
+			analyzedChildren[i].analysis = analysis
+		}
+
+		depth++
+	}
+}
+
+func handleAnalyzeMoveEvent(analyzeMoveEvent *analyzeMove, ws *websocket.Conn) (*wsMessage, error) {
+	if analyzeMoveEvent == nil {
+		return nil, fmt.Errorf("analyzeMoveEvent is nil")
+	}
+
+	board, err := analyzeMoveEvent.State.getBoard()
+	if err != nil {
+		return nil, err
+	}
+
+	analyzeCh := make(chan analyzeMoveReply)
+	go analyze(*board, nil, analyzeCh)
+
+	go func() {
+		for analysis := range analyzeCh {
+
+			rawMessage := &wsMessage{
+				Event:            "analyze_move_reply",
+				AnalyzeMoveReply: &analysis}
+
+			rawReply, err := json.Marshal(rawMessage)
+			err = ws.WriteMessage(websocket.TextMessage, rawReply)
+			if err != nil {
+				log.Printf("write error: %s", err)
+				continue
+			}
+		}
+	}()
+
+	return nil, nil
+}
+
+func handleBotMoveEvent(botMoveEvent *botMoveEvent, _ *websocket.Conn) (*wsMessage, error) {
 
 	if botMoveEvent == nil {
 		return nil, fmt.Errorf("botMoveEvent is nil")
@@ -105,24 +186,26 @@ func handleBotMoveEvent(botMoveEvent *botMoveEvent) (*wsMessage, error) {
 	return reply, nil
 }
 
-func handleMessage(message wsMessage) (*wsMessage, error) {
+func handleMessage(message wsMessage, ws *websocket.Conn) (*wsMessage, error) {
 	switch message.Event {
 	case "bot_move":
-		return handleBotMoveEvent(message.BotMove)
+		return handleBotMoveEvent(message.BotMove, ws)
+	case "analyze_move":
+		return handleAnalyzeMoveEvent(message.AnalyzeMove, ws)
 	default:
 		return nil, fmt.Errorf("unhandled message of event %s", message.Event)
 	}
 }
 
 func ws(w http.ResponseWriter, r *http.Request) {
-	c, err := upgrader.Upgrade(w, r, nil)
+	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("upgrade error: %s", err)
 		return
 	}
-	defer c.Close()
+	defer ws.Close()
 	for {
-		messageType, rawMessage, err := c.ReadMessage()
+		messageType, rawMessage, err := ws.ReadMessage()
 
 		if err != nil {
 			switch err.(type) {
@@ -140,13 +223,16 @@ func ws(w http.ResponseWriter, r *http.Request) {
 			log.Printf("json decode error: %s", err)
 			continue
 		}
-		reply, err := handleMessage(message)
+		reply, err := handleMessage(message, ws)
 		if err != nil {
 			log.Printf("message handling error: %s", err)
 			continue
 		}
+		if reply == nil {
+			continue
+		}
 		rawReply, err := json.Marshal(reply)
-		err = c.WriteMessage(messageType, rawReply)
+		err = ws.WriteMessage(messageType, rawReply)
 		if err != nil {
 			log.Printf("write rror: %s", err)
 			continue
@@ -165,7 +251,7 @@ func root(w http.ResponseWriter, _ *http.Request) {
 
 func svgGenerator(w http.ResponseWriter, r *http.Request) {
 	svgTemplate := `<?xml version="1.0" encoding="UTF-8" ?>
-<svg width="64" height="64" xmlns="http://www.w3.org/2000/svg">
+<svg width="64" height="64" xmlns="http://www.w3.org/2000/svg">	
   <rect x="0" y="0" width="64" height="64" fill="green" stroke-width="1" stroke="black" />
   <text text-anchor="middle" dominant-baseline="central" font-family="Arial" font-size="25" x="32" y="32">%s</text>
 </svg>`
