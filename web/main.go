@@ -163,10 +163,30 @@ func root(w http.ResponseWriter, _ *http.Request) {
 	w.Write(buff)
 }
 
+func svgGenerator(w http.ResponseWriter, r *http.Request) {
+	svgTemplate := `<?xml version="1.0" encoding="UTF-8" ?>
+<svg width="64" height="64" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="64" height="64" fill="green" stroke-width="1" stroke="black" />
+  <text text-anchor="middle" dominant-baseline="central" font-family="Arial" font-size="25" x="32" y="32">%s</text>
+</svg>`
+
+	query := r.URL.Query()
+
+	text := ""
+	if textParam, ok := query["text"]; ok {
+		text = textParam[0]
+	}
+	svg := fmt.Sprintf(svgTemplate, text)
+
+	w.Header().Set("Content-Type", "image/svg+xml")
+	w.Write([]byte(svg))
+}
+
 func Main() {
-	http.HandleFunc("/", root)
 	http.HandleFunc("/ws", ws)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
+	http.HandleFunc("/svg/", svgGenerator)
+	http.HandleFunc("/", root)
 	addr := "localhost:8080"
 	log.Printf("Server running at %s", addr)
 	log.Fatal(http.ListenAndServe(addr, nil))
