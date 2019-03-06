@@ -31,3 +31,7 @@ type analyzeMoveReply struct {
 	Depth     int `json:"depth"`
 	Heuristic int `json:"heuristic"`
 }
+
+type analyzeStop struct {
+	State boardState `json:"state"`
+}

@@ -137,6 +137,22 @@ request_ws_move = function(){
     }
 };
 
+request_analysis_stop = function(){
+
+    if(get_player_to_move(state) !== "analyzer"){
+        return;
+    }
+
+    let message = {
+        'event': 'analyze_stop',
+        'analyze_stop': {
+            state: state.board
+        }
+    };
+
+    ws.send(JSON.stringify(message));
+};
+
 let ws;
 
 let start_board = {
@@ -220,6 +236,8 @@ $(document).on('mousedown', '#board td', function () {
         return false;
     }
 
+    request_analysis_stop();
+
     if(state.board.turn === 0){
         state.board.black.push(cell_id, ...flipped);
         state.board.white = state.board.white.filter(x => !flipped.includes(x));
@@ -255,6 +273,7 @@ $(document).on('change', 'select', function() {
             return false;
     }
 
+    request_analysis_stop();
     request_ws_move();
 });
 
@@ -263,6 +282,7 @@ $(document).on('click', 'button', function(){
     // deep copy
     state.board = JSON.parse(JSON.stringify(start_board));
 
+    request_analysis_stop();
     update_fields(state.board);
     request_ws_move();
 });
