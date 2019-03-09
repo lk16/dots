@@ -71,7 +71,7 @@ func (mws *moveWebSocket) loop() {
 	}
 }
 
-func analyze(board othello.Board, quitCh <-chan struct{}, analyzeCh chan<- analyzeMoveReply) {
+func (mws *moveWebSocket) analyze(board othello.Board, turn int, quitCh <-chan struct{}) {
 
 	type analyzedChild struct {
 		child    othello.Board
@@ -80,6 +80,7 @@ func analyze(board othello.Board, quitCh <-chan struct{}, analyzeCh chan<- analy
 
 	children := board.GetChildren()
 	analyzedChildren := make([]analyzedChild, len(children))
+	evaluated := newState(board, turn)
 
 	for i := range analyzedChildren {
 
@@ -88,6 +89,7 @@ func analyze(board othello.Board, quitCh <-chan struct{}, analyzeCh chan<- analy
 		analyzedChildren[i] = analyzedChild{
 			child: children[i],
 			analysis: analyzeMoveReply{
+				Board:     evaluated,
 				Depth:     0,
 				Heuristic: 0,
 				Move:      move}}
@@ -105,6 +107,7 @@ func analyze(board othello.Board, quitCh <-chan struct{}, analyzeCh chan<- analy
 			bot := treesearch.NewMtdf(treesearch.MinHeuristic, treesearch.MaxHeuristic)
 
 			analysis := analyzeMoveReply{
+				Board:     evaluated,
 				Depth:     depth,
 				Move:      analyzedChildren[i].analysis.Move,
 				Heuristic: bot.Search(analyzedChildren[i].child, depth)}
@@ -115,7 +118,17 @@ func analyze(board othello.Board, quitCh <-chan struct{}, analyzeCh chan<- analy
 			default:
 			}
 
-			analyzeCh <- analysis
+			message := &wsMessage{
+				Event:            "analyze_move_reply",
+				AnalyzeMoveReply: &analysis}
+
+			rawReply, err := json.Marshal(message)
+			err = mws.ws.WriteMessage(websocket.TextMessage, rawReply)
+			if err != nil {
+				log.Printf("write error: %s", err)
+				continue
+			}
+
 			analyzedChildren[i].analysis = analysis
 		}
 
@@ -123,36 +136,21 @@ func analyze(board othello.Board, quitCh <-chan struct{}, analyzeCh chan<- analy
 	}
 }
 
-func (mws *moveWebSocket) handleAnalyzeMoveEvent(analyzeMoveEvent *analyzeMove) (err error) {
+func (mws *moveWebSocket) handleAnalyzeMoveEvent(analyzeMoveEvent *analyzeMoveEvent) (err error) {
 	if analyzeMoveEvent == nil {
 		return fmt.Errorf("analyzeMoveEvent is nil")
 	}
 
-	board, err := analyzeMoveEvent.State.getBoard()
+	board, turn, err := analyzeMoveEvent.State.getBoard()
 	if err != nil {
 		return err
 	}
 
-	analyzeCh := make(chan analyzeMoveReply)
+	// TODO kill any other mws.analyze() running here
+
 	mws.analyzeQuitCh = make(chan struct{})
 
-	go analyze(*board, mws.analyzeQuitCh, analyzeCh)
-
-	go func() {
-		for analysis := range analyzeCh {
-
-			rawMessage := &wsMessage{
-				Event:            "analyze_move_reply",
-				AnalyzeMoveReply: &analysis}
-
-			rawReply, err := json.Marshal(rawMessage)
-			err = mws.ws.WriteMessage(websocket.TextMessage, rawReply)
-			if err != nil {
-				log.Printf("write error: %s", err)
-				continue
-			}
-		}
-	}()
+	go mws.analyze(*board, turn, mws.analyzeQuitCh)
 
 	return nil
 }
@@ -163,7 +161,7 @@ func (mws *moveWebSocket) handleBotMoveEvent(botMoveEvent *botMoveEvent) (*wsMes
 		return nil, fmt.Errorf("botMoveEvent is nil")
 	}
 
-	board, err := botMoveEvent.State.getBoard()
+	board, _, err := botMoveEvent.State.getBoard()
 	if err != nil {
 		return nil, err
 	}
@@ -189,6 +187,21 @@ func (mws *moveWebSocket) handleBotMoveEvent(botMoveEvent *botMoveEvent) (*wsMes
 	return reply, nil
 }
 
+func (mws *moveWebSocket) handleAnalyzeStopEvent(analyzeStopEvent *analyzeStopEvent) error {
+
+	if analyzeStopEvent == nil {
+		return fmt.Errorf("analyzeStopEvent is nil")
+	}
+
+	go func() {
+		if mws.analyzeQuitCh != nil {
+			mws.analyzeQuitCh <- struct{}{}
+		}
+	}()
+
+	return nil
+}
+
 func (mws *moveWebSocket) handleMessage(message wsMessage) (*wsMessage, error) {
 	switch message.Event {
 	case "bot_move":
@@ -196,10 +209,7 @@ func (mws *moveWebSocket) handleMessage(message wsMessage) (*wsMessage, error) {
 	case "analyze_move":
 		return nil, mws.handleAnalyzeMoveEvent(message.AnalyzeMove)
 	case "analyze_stop":
-		if mws.analyzeQuitCh != nil {
-			mws.analyzeQuitCh <- struct{}{}
-		}
-		return nil, nil
+		return nil, mws.handleAnalyzeStopEvent(message.AnalyzeStop)
 	default:
 		return nil, fmt.Errorf("unhandled message of event %s", message.Event)
 	}

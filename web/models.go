@@ -10,8 +10,9 @@ type wsMessage struct {
 	Event            string            `json:"event"`
 	BotMove          *botMoveEvent     `json:"bot_move"`
 	BotMoveReply     *botMoveReply     `json:"bot_move_reply"`
-	AnalyzeMove      *analyzeMove      `json:"analyze_move"`
+	AnalyzeMove      *analyzeMoveEvent `json:"analyze_move"`
 	AnalyzeMoveReply *analyzeMoveReply `json:"analyze_move_reply"`
+	AnalyzeStop      *analyzeStopEvent `json:"analyze_stop"`
 }
 
 type botMoveEvent struct {
@@ -22,16 +23,17 @@ type botMoveReply struct {
 	State boardState `json:"state"`
 }
 
-type analyzeMove struct {
+type analyzeMoveEvent struct {
 	State boardState `json:"state"`
 }
 
 type analyzeMoveReply struct {
-	Move      int `json:"move"`
-	Depth     int `json:"depth"`
-	Heuristic int `json:"heuristic"`
+	Board     boardState `json:"board"`
+	Move      int        `json:"move"`
+	Depth     int        `json:"depth"`
+	Heuristic int        `json:"heuristic"`
 }
 
-type analyzeStop struct {
+type analyzeStopEvent struct {
 	State boardState `json:"state"`
 }

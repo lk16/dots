@@ -41,36 +41,36 @@ func newState(board othello.Board, turn int) boardState {
 		Turn:  1}
 }
 
-func (s *boardState) getBoard() (*othello.Board, error) {
+func (s *boardState) getBoard() (*othello.Board, int, error) {
 
 	white := uint64(0)
 	black := uint64(0)
 
 	for _, w := range s.White {
 		if w < 0 || w >= 64 {
-			return nil, fmt.Errorf("invalid white field value %d", w)
+			return nil, 0, fmt.Errorf("invalid white field value %d", w)
 		}
 		white |= uint64(1 << uint(w))
 	}
 
 	for _, b := range s.Black {
 		if b < 0 || b >= 64 {
-			return nil, fmt.Errorf("invalid black field value %d", b)
+			return nil, 0, fmt.Errorf("invalid black field value %d", b)
 		}
 		black |= uint64(1 << uint(b))
 	}
 
 	if white&black != 0 {
-		return nil, fmt.Errorf("white (%+v) and black (%+v) overlap", white, black)
+		return nil, 0, fmt.Errorf("white (%+v) and black (%+v) overlap", white, black)
 	}
 
 	switch s.Turn {
 	case 0:
-		return othello.CustomBoard(black, white), nil
+		return othello.CustomBoard(black, white), s.Turn, nil
 	case 1:
-		return othello.CustomBoard(white, black), nil
+		return othello.CustomBoard(white, black), s.Turn, nil
 	default:
-		return nil, fmt.Errorf("invalid turn value %d", s.Turn)
+		return nil, 0, fmt.Errorf("invalid turn value %d", s.Turn)
 	}
 }
 

@@ -1,4 +1,4 @@
-update_fields = function(board) {
+function update_fields(board) {
 
     let valid_moves = get_valid_moves(board);
 
@@ -24,9 +24,9 @@ update_fields = function(board) {
 
     $('.white_disc_count').attr('src', 'svg/field/?disc=white&text=' + board.white.length);
     $('.black_disc_count').attr('src', 'svg/field/?disc=black&text=' + board.black.length);
-};
+}
 
-get_flippable_discs = function(board, move) {
+function get_flippable_discs(board, move) {
     let me = board.white;
     let opp = board.black;
 
@@ -92,9 +92,9 @@ get_flippable_discs = function(board, move) {
     }
 
     return flippable;
-};
+}
 
-get_valid_moves = function(board){
+function get_valid_moves(board){
     let valid_moves = [];
     for(let move=0; move<64; move++){
         let flippable = get_flippable_discs(board, move);
@@ -103,16 +103,16 @@ get_valid_moves = function(board){
         }
     }
     return valid_moves;
-};
+}
 
-get_player_to_move = function(state) {
+function get_player_to_move(state) {
     if(state.board.turn === 0){
       return state.players.black;
     }
     return state.players.white;
-};
+}
 
-request_ws_move = function(){
+function request_ws_move(){
 
     let message;
 
@@ -138,9 +138,9 @@ request_ws_move = function(){
             ws.send(JSON.stringify(message));
             break;
     }
-};
+}
 
-request_analysis_stop = function(){
+function request_analysis_stop(){
 
     if(get_player_to_move(state) !== "analyzer"){
         return;
@@ -154,7 +154,28 @@ request_analysis_stop = function(){
     };
 
     ws.send(JSON.stringify(message));
-};
+}
+
+function arraysEqual(a, b) {
+
+    if (a === b) {
+        return true;
+    }
+
+    if (a == null || b == null || a.length !== b.length) {
+        return false;
+    }
+
+    for (let i = 0; i < a.length; ++i) {
+        if(!(
+            a.includes(b[i]) &&
+            b.includes(a[i])
+        )){
+            return false;
+        }
+    }
+    return true;
+}
 
 let ws;
 
@@ -214,6 +235,15 @@ $(function(){
                 }
                 break;
             case 'analyze_move_reply':
+                if(!(
+                    arraysEqual(state.board.white, message.analyze_move_reply.board.white) &&
+                    arraysEqual(state.board.black, message.analyze_move_reply.board.black) &&
+                    state.turn === message.turn)){
+
+                    console.warn("Received outdated analyze_move_reply message:", message);
+                    break;
+                }
+
                 let move = message.analyze_move_reply.move;
                 let heuristic = message.analyze_move_reply.heuristic;
                 $('#board img').eq(move).attr('src', window.location.origin + '/svg/field/?text=' + heuristic);
