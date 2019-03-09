@@ -20,12 +20,13 @@ gometalinter --enable-all --disable=goimports --disable=gofmt dots/...
 
 ### TODO
 - [ ] web front end
-    - [ ] proper SVG generating endpoint
     - [ ] fix analyzer bugs
     - [ ] add xot
     - [ ] add undo option
 
 - [ ] cleaning
+    - [ ] remove gtk front-end
+    - [ ] use import github.com/lk16/dots everywhere
     - [ ] use project lay-out like https://github.com/golang-standards/project-layout
     - [ ] linting
 

@@ -6,20 +6,20 @@ update_fields = function(board) {
         let image = '';
 
         if(board.white.includes(i)){
-            image = 'white.svg';
+            image = 'svg/field/?disc=white';
         } else if(board.black.includes(i)){
-            image = 'black.svg';
+            image = 'svg/field/?disc=black';
         } else if(valid_moves.includes(i)){
             if(board.turn === 0){
-                image = 'move_black.svg';
+                image = 'svg/field/?move=black';
             }  else {
-                image = 'move_white.svg';
+                image = 'svg/field/?move=white';
             }
         } else {
-            image = 'empty.svg';
+            image = 'svg/field';
         }
 
-        $('#board img').eq(i).attr('src', 'static/' + image);
+        $('#board img').eq(i).attr('src', image);
     }
 
     $('.white_disc_count').attr('src', 'svg/field/?disc=white&text=' + board.white.length);
@@ -181,7 +181,7 @@ $(function(){
         }
     }
 
-    $('#board td').append('<img src="static/empty.svg" />');
+    $('#board td').append('<img src="svg/field/" />');
 
     // deep copy
     state.board = JSON.parse(JSON.stringify(start_board));

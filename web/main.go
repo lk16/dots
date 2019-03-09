@@ -101,11 +101,12 @@ func svgField(w http.ResponseWriter, r *http.Request) {
 
 	text := query.Get("text")
 	textInt, err := strconv.Atoi(text)
-	if err != nil {
+	if text != "" && err != nil {
 		text = "???"
 	}
 
 	disc := query.Get("disc")
+	move := query.Get("move")
 
 	canvas := svg.New(w)
 	canvas.Start(size, size)
@@ -135,7 +136,26 @@ func svgField(w http.ResponseWriter, r *http.Request) {
 		canvas.Circle(size/2, size/2, 25, "fill='black'")
 	}
 
+	switch move {
+	case "white":
+		canvas.Circle(size/2, size/2, 6, "fill='white'")
+	case "black":
+		canvas.Circle(size/2, size/2, 6, "fill='black'")
+	}
+
 	canvas.Text(size/2, size/2, text, textStyleAttrs...)
+	canvas.End()
+}
+
+func svgIcon(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "image/svg+xml")
+	size := 64
+
+	canvas := svg.New(w)
+	canvas.Start(size, size)
+	canvas.Rect(0, 0, size, size, "fill='green' stroke-width='1' stroke='black'")
+	canvas.Circle(3*size/10, size/2, size/5, "fill='white'")
+	canvas.Circle(7*size/10, size/2, size/5, "fill='black'")
 	canvas.End()
 }
 
@@ -143,6 +163,7 @@ func Main() {
 	http.HandleFunc("/ws", ws)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
 	http.HandleFunc("/svg/field/", svgField)
+	http.HandleFunc("/svg/icon/", svgIcon)
 	http.HandleFunc("/", root)
 	addr := "localhost:8080"
 	log.Printf("Server running at %s", addr)
