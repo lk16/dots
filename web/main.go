@@ -2,11 +2,13 @@ package web
 
 import (
 	"dots/othello"
+	"dots/treesearch"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 var upgrader = websocket.Upgrader{}
@@ -93,7 +95,7 @@ func svgGenerator(w http.ResponseWriter, r *http.Request) {
 	svgTemplate := `<?xml version="1.0" encoding="UTF-8" ?>
 <svg width="64" height="64" xmlns="http://www.w3.org/2000/svg">	
   <rect x="0" y="0" width="64" height="64" fill="green" stroke-width="1" stroke="black" />
-  <text text-anchor="middle" dominant-baseline="central" font-family="Arial" font-size="25" x="32" y="32">%s</text>
+  <text text-anchor="middle" dominant-baseline="central" %s font-family="Arial" font-size="%d" x="32" y="32">%s</text>
 </svg>`
 
 	query := r.URL.Query()
@@ -102,9 +104,20 @@ func svgGenerator(w http.ResponseWriter, r *http.Request) {
 	if textParam, ok := query["text"]; ok {
 		text = textParam[0]
 	}
-	svg := fmt.Sprintf(svgTemplate, text)
 
 	w.Header().Set("Content-Type", "image/svg+xml")
+
+	textInt, err := strconv.Atoi(text)
+
+	var svg string
+	if err != nil {
+		svg = fmt.Sprintf(svgTemplate, "", 25, "???")
+	} else if textInt%treesearch.ExactScoreFactor == 0 && textInt != 0 {
+		svg = fmt.Sprintf(svgTemplate, "font-weight=\"bold\"", 38, fmt.Sprintf("%d", textInt/treesearch.ExactScoreFactor))
+	} else {
+		svg = fmt.Sprintf(svgTemplate, "", 25, text)
+	}
+
 	w.Write([]byte(svg))
 }
 
