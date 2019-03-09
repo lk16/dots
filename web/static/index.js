@@ -21,6 +21,9 @@ update_fields = function(board) {
 
         $('#board img').eq(i).attr('src', 'static/' + image);
     }
+
+    $('.white_disc_count').attr('src', 'svg/field/?disc=white&text=' + board.white.length);
+    $('.black_disc_count').attr('src', 'svg/field/?disc=black&text=' + board.black.length);
 };
 
 get_flippable_discs = function(board, move) {
@@ -209,10 +212,12 @@ $(function(){
                 } else {
                     request_ws_move();
                 }
+                break;
             case 'analyze_move_reply':
                 let move = message.analyze_move_reply.move;
                 let heuristic = message.analyze_move_reply.heuristic;
-                $('#board img').eq(move).attr('src', window.location.origin + '/svg/?text=' + heuristic);
+                $('#board img').eq(move).attr('src', window.location.origin + '/svg/field/?text=' + heuristic);
+                break;
         }
     };
     ws.onerror = function(evt) {

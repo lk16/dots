@@ -4,6 +4,7 @@ import (
 	"dots/othello"
 	"dots/treesearch"
 	"fmt"
+	"github.com/ajstarks/svgo"
 	"github.com/gorilla/websocket"
 	"io/ioutil"
 	"log"
@@ -91,40 +92,57 @@ func root(w http.ResponseWriter, _ *http.Request) {
 	w.Write(buff)
 }
 
-func svgGenerator(w http.ResponseWriter, r *http.Request) {
-	svgTemplate := `<?xml version="1.0" encoding="UTF-8" ?>
-<svg width="64" height="64" xmlns="http://www.w3.org/2000/svg">	
-  <rect x="0" y="0" width="64" height="64" fill="green" stroke-width="1" stroke="black" />
-  <text text-anchor="middle" dominant-baseline="central" %s font-family="Arial" font-size="%d" x="32" y="32">%s</text>
-</svg>`
+func svgField(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "image/svg+xml")
+	size := 64
 
 	query := r.URL.Query()
 
-	text := ""
-	if textParam, ok := query["text"]; ok {
-		text = textParam[0]
-	}
-
-	w.Header().Set("Content-Type", "image/svg+xml")
-
+	text := query.Get("text")
 	textInt, err := strconv.Atoi(text)
-
-	var svg string
 	if err != nil {
-		svg = fmt.Sprintf(svgTemplate, "", 25, "???")
-	} else if textInt%treesearch.ExactScoreFactor == 0 && textInt != 0 {
-		svg = fmt.Sprintf(svgTemplate, "font-weight=\"bold\"", 38, fmt.Sprintf("%d", textInt/treesearch.ExactScoreFactor))
-	} else {
-		svg = fmt.Sprintf(svgTemplate, "", 25, text)
+		text = "???"
 	}
 
-	w.Write([]byte(svg))
+	disc := query.Get("disc")
+
+	canvas := svg.New(w)
+	canvas.Start(size, size)
+	canvas.Rect(0, 0, size, size, "fill='green' stroke-width='1' stroke='black'")
+
+	textStyleAttrs := []string{
+		"text-anchor='middle'",
+		"dominant-baseline='central'",
+		"font-family='Arial'"}
+
+	if textInt%treesearch.ExactScoreFactor == 0 && textInt != 0 {
+		text = fmt.Sprintf("%d", textInt/treesearch.ExactScoreFactor)
+		textStyleAttrs = append(textStyleAttrs, []string{
+			"font-size='40'",
+			"font-weight='bold'"}...)
+	} else {
+		textStyleAttrs = append(textStyleAttrs, "font-size='25'")
+		if disc == "black" {
+			textStyleAttrs = append(textStyleAttrs, "fill='white'")
+		}
+	}
+
+	switch disc {
+	case "white":
+		canvas.Circle(size/2, size/2, 25, "fill='white'")
+	case "black":
+		canvas.Circle(size/2, size/2, 25, "fill='black'")
+	}
+
+	canvas.Text(size/2, size/2, text, textStyleAttrs...)
+	canvas.End()
 }
 
 func Main() {
 	http.HandleFunc("/ws", ws)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
-	http.HandleFunc("/svg/", svgGenerator)
+	http.HandleFunc("/svg/field/", svgField)
 	http.HandleFunc("/", root)
 	addr := "localhost:8080"
 	log.Printf("Server running at %s", addr)
