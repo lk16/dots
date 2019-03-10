@@ -90,16 +90,12 @@ func (mws *moveWebSocket) loop() {
 			log.Printf("json decode error: %s", err)
 			continue
 		}
+
 		log.Printf("mws received %s", message.Event)
-		reply, err := mws.handleMessage(message)
+
+		err = mws.handleMessage(message)
 		if err != nil {
 			log.Printf("message handling error: %s", err)
-			continue
-		}
-
-		err = mws.send(reply)
-		if err != nil {
-			log.Printf("websocket send error: %s", err)
 			continue
 		}
 	}
@@ -191,38 +187,46 @@ func (mws *moveWebSocket) handleAnalyzeMoveEvent(analyzeMoveEvent *analyzeMoveEv
 	return nil
 }
 
-func (mws *moveWebSocket) handleBotMoveEvent(botMoveEvent *botMoveEvent) (*wsMessage, error) {
+func (mws *moveWebSocket) handleBotMoveEvent(botMoveEvent *botMoveEvent) error {
 
 	if botMoveEvent == nil {
-		return nil, fmt.Errorf("botMoveEvent is nil")
+		return fmt.Errorf("botMoveEvent is nil")
 	}
 
 	board, _, err := botMoveEvent.State.getBoard()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if board.Moves() == 0 {
-		return nil, fmt.Errorf("no moves available")
+		return fmt.Errorf("no moves available")
 	}
 
 	mws.killAnalysis()
 
-	bot := players.NewBotHeuristic(ioutil.Discard, 8, 16)
-	bestMove := bot.DoMove(*board)
+	turn := botMoveEvent.State.Turn
+	go mws.sendBotMoveReply(*board, turn)
 
-	nextTurn := 1 - botMoveEvent.State.Turn
+	return nil
+}
+
+func (mws *moveWebSocket) sendBotMoveReply(board othello.Board, turn int) {
+	bot := players.NewBotHeuristic(ioutil.Discard, 8, 16)
+	bestMove := bot.DoMove(board)
+
+	nextTurn := 1 - turn
 	if board.Moves() == 0 {
-		nextTurn = botMoveEvent.State.Turn
+		nextTurn = turn
 		board.SwitchTurn()
 	}
 
-	reply := &wsMessage{
+	message := &wsMessage{
 		Event: "bot_move_reply",
 		BotMoveReply: &botMoveReply{
 			State: newState(bestMove, nextTurn)}}
 
-	return reply, nil
+	mws.send(message)
+
 }
 
 func (mws *moveWebSocket) handleAnalyzeStopEvent(_ *analyzeStopEvent) error {
@@ -247,17 +251,17 @@ func (mws *moveWebSocket) handleGetXotEvent() error {
 	return nil
 }
 
-func (mws *moveWebSocket) handleMessage(message wsMessage) (*wsMessage, error) {
+func (mws *moveWebSocket) handleMessage(message wsMessage) error {
 	switch message.Event {
 	case "bot_move":
 		return mws.handleBotMoveEvent(message.BotMove)
 	case "analyze_move":
-		return nil, mws.handleAnalyzeMoveEvent(message.AnalyzeMove)
+		return mws.handleAnalyzeMoveEvent(message.AnalyzeMove)
 	case "analyze_stop":
-		return nil, mws.handleAnalyzeStopEvent(message.AnalyzeStop)
+		return mws.handleAnalyzeStopEvent(message.AnalyzeStop)
 	case "get_xot":
-		return nil, mws.handleGetXotEvent()
+		return mws.handleGetXotEvent()
 	default:
-		return nil, fmt.Errorf("unhandled message of event %s", message.Event)
+		return fmt.Errorf("unhandled message of event %s", message.Event)
 	}
 }

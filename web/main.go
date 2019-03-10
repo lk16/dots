@@ -124,6 +124,9 @@ func svgField(w http.ResponseWriter, r *http.Request) {
 		textStyleAttrs = append(textStyleAttrs, []string{
 			"font-size='40'",
 			"font-weight='bold'"}...)
+		if textColor == "white" {
+			textStyleAttrs = append(textStyleAttrs, "fill='white'")
+		}
 	} else {
 		textStyleAttrs = append(textStyleAttrs, "font-size='25'")
 		if disc == "black" || textColor == "white" {

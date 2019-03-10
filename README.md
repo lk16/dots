@@ -21,7 +21,6 @@ gometalinter --enable-all --disable=goimports --disable=gofmt dots/...
 ### TODO
 - [ ] web front end
     - [ ] add undo option
-    - [ ] make bot_move reply asynchronously
     - [ ] use css ids instead of class where appropriate
     - [ ] make every wsMessage have two fields: event and data
     - [ ] generalize ws message handling
