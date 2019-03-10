@@ -18,7 +18,7 @@ import (
 type moveWebSocket struct {
 	ws            *websocket.Conn
 	analyzeQuitCh chan struct{}
-	lock          sync.Mutex
+	writeLock     sync.Mutex
 }
 
 func newMoveWebSocket(w http.ResponseWriter, r *http.Request) (*moveWebSocket, error) {
@@ -41,8 +41,8 @@ func (mws *moveWebSocket) send(message *wsMessage) error {
 		return nil
 	}
 
-	mws.lock.Lock()
-	defer mws.lock.Unlock()
+	mws.writeLock.Lock()
+	defer mws.writeLock.Unlock()
 
 	rawMessage, err := json.Marshal(message)
 	if err != nil {
@@ -140,8 +140,11 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int, quitCh <-chan s
 
 			err := mws.send(message)
 			if err != nil {
-				log.Printf("websocket write error: %s", err)
-				continue
+				if err != websocket.ErrCloseSent {
+					log.Printf("Unexpected write error %T: %s", err, err)
+
+				}
+				return
 			}
 
 			analyzedChildren[i].analysis = analysis

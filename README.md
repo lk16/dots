@@ -21,7 +21,8 @@ gometalinter --enable-all --disable=goimports --disable=gofmt dots/...
 ### TODO
 - [ ] web front end
     - [ ] fix analyzer bugs
-        - [ ] kill search go-routines faster / outdated analyze_move_reply message
+        - [ ] prevent outdated analyze_move_reply message
+        - [ ] make analyze_move imply analyze_stop for running analysis
     - [ ] add xot
     - [ ] add undo option
     - [ ] show heuristic for white player in white
@@ -34,6 +35,7 @@ gometalinter --enable-all --disable=goimports --disable=gofmt dots/...
     - [ ] linting
 
 - [ ] bot
+    - [ ] allow faster killing of analysis go-routines
     - [ ] fix pending bugs from treesearch
         - [ ] unit test tree search using ffo test set
     - [ ] optimize analysis algorithm
