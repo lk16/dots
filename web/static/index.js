@@ -243,7 +243,14 @@ $(function(){
 
                 let move = message.analyze_move_reply.move;
                 let heuristic = message.analyze_move_reply.heuristic;
-                $('#board img').eq(move).attr('src', window.location.origin + '/svg/field/?text=' + heuristic);
+
+                let img_url = window.location.origin + '/svg/field/?text=' + heuristic;
+                console.log(state.board.turn);
+                if(state.board.turn === 1){
+                    img_url += "&textcolor=white"
+                }
+
+                $('#board img').eq(move).attr('src', img_url);
                 break;
             case 'get_xot_reply':
                 state.board = message.get_xot_reply.state;

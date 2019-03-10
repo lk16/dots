@@ -108,6 +108,7 @@ func svgField(w http.ResponseWriter, r *http.Request) {
 
 	disc := query.Get("disc")
 	move := query.Get("move")
+	textColor := query.Get("textcolor")
 
 	canvas := svg.New(w)
 	canvas.Start(size, size)
@@ -125,7 +126,7 @@ func svgField(w http.ResponseWriter, r *http.Request) {
 			"font-weight='bold'"}...)
 	} else {
 		textStyleAttrs = append(textStyleAttrs, "font-size='25'")
-		if disc == "black" {
+		if disc == "black" || textColor == "white" {
 			textStyleAttrs = append(textStyleAttrs, "fill='white'")
 		}
 	}

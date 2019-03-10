@@ -20,13 +20,12 @@ gometalinter --enable-all --disable=goimports --disable=gofmt dots/...
 
 ### TODO
 - [ ] web front end
-    - [ ] add xot
     - [ ] add undo option
     - [ ] make bot_move reply asynchronously
-    - [ ] show heuristic for white player in white
     - [ ] use css ids instead of class where appropriate
     - [ ] make every wsMessage have two fields: event and data
     - [ ] generalize ws message handling
+    - [ ] fix bug: last few moves don't show analysis in browser
     - [ ] reconnect websocket periodically if server goes down
 
 
