@@ -21,6 +21,7 @@ gometalinter --enable-all --disable=goimports --disable=gofmt dots/...
 ### TODO
 - [ ] web front end
     - [ ] fix analyzer bugs
+        - [ ] kill search go-routines faster / outdated analyze_move_reply message
     - [ ] add xot
     - [ ] add undo option
     - [ ] show heuristic for white player in white

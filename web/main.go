@@ -78,6 +78,7 @@ func ws(w http.ResponseWriter, r *http.Request) {
 	mws, err := newMoveWebSocket(w, r)
 	if err != nil {
 		log.Printf("error creating MoveWebSocket: %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	mws.loop()

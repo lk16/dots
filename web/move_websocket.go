@@ -12,11 +12,13 @@ import (
 	"math/bits"
 	"net/http"
 	"sort"
+	"sync"
 )
 
 type moveWebSocket struct {
 	ws            *websocket.Conn
 	analyzeQuitCh chan struct{}
+	lock          sync.Mutex
 }
 
 func newMoveWebSocket(w http.ResponseWriter, r *http.Request) (*moveWebSocket, error) {
@@ -33,10 +35,27 @@ func newMoveWebSocket(w http.ResponseWriter, r *http.Request) (*moveWebSocket, e
 	return mws, nil
 }
 
+func (mws *moveWebSocket) send(message *wsMessage) error {
+
+	if message == nil {
+		return nil
+	}
+
+	mws.lock.Lock()
+	defer mws.lock.Unlock()
+
+	rawMessage, err := json.Marshal(message)
+	if err != nil {
+		return fmt.Errorf("JSON ecoding error: %s", err)
+	}
+
+	return mws.ws.WriteMessage(websocket.TextMessage, rawMessage)
+}
+
 func (mws *moveWebSocket) loop() {
 	defer mws.ws.Close()
 	for {
-		messageType, rawMessage, err := mws.ws.ReadMessage()
+		_, rawMessage, err := mws.ws.ReadMessage()
 		if err != nil {
 			switch err.(type) {
 			case *websocket.CloseError:
@@ -59,13 +78,10 @@ func (mws *moveWebSocket) loop() {
 			log.Printf("message handling error: %s", err)
 			continue
 		}
-		if reply == nil {
-			continue
-		}
-		rawReply, err := json.Marshal(reply)
-		err = mws.ws.WriteMessage(messageType, rawReply)
+
+		err = mws.send(reply)
 		if err != nil {
-			log.Printf("write rror: %s", err)
+			log.Printf("websocket send error: %s", err)
 			continue
 		}
 	}
@@ -122,10 +138,9 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int, quitCh <-chan s
 				Event:            "analyze_move_reply",
 				AnalyzeMoveReply: &analysis}
 
-			rawReply, err := json.Marshal(message)
-			err = mws.ws.WriteMessage(websocket.TextMessage, rawReply)
+			err := mws.send(message)
 			if err != nil {
-				log.Printf("write error: %s", err)
+				log.Printf("websocket write error: %s", err)
 				continue
 			}
 
