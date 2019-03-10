@@ -20,11 +20,9 @@ gometalinter --enable-all --disable=goimports --disable=gofmt dots/...
 
 ### TODO
 - [ ] web front end
-    - [ ] fix analyzer bugs
-        - [ ] prevent outdated analyze_move_reply message
-        - [ ] make analyze_move imply analyze_stop for running analysis
     - [ ] add xot
     - [ ] add undo option
+    - [ ] make bot_move reply asynchronously
     - [ ] show heuristic for white player in white
 
 - [ ] cleaning

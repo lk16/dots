@@ -34,6 +34,4 @@ type analyzeMoveReply struct {
 	Heuristic int        `json:"heuristic"`
 }
 
-type analyzeStopEvent struct {
-	State boardState `json:"state"`
-}
+type analyzeStopEvent struct{}

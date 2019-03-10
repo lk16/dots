@@ -16,9 +16,11 @@ import (
 )
 
 type moveWebSocket struct {
-	ws            *websocket.Conn
-	analyzeQuitCh chan struct{}
-	writeLock     sync.Mutex
+	ws                *websocket.Conn
+	writeLock         sync.Mutex
+	analyzeQuitCh     chan struct{}
+	analyzedBoard     othello.Board
+	analyzedBoardLock sync.Mutex
 }
 
 func newMoveWebSocket(w http.ResponseWriter, r *http.Request) (*moveWebSocket, error) {
@@ -33,6 +35,22 @@ func newMoveWebSocket(w http.ResponseWriter, r *http.Request) (*moveWebSocket, e
 		ws: ws}
 
 	return mws, nil
+}
+
+func (mws *moveWebSocket) getAnalyzedBoard() othello.Board {
+	mws.analyzedBoardLock.Lock()
+	defer mws.analyzedBoardLock.Unlock()
+	return mws.analyzedBoard
+}
+
+func (mws *moveWebSocket) setAnalyzedBoard(board othello.Board) {
+	mws.analyzedBoardLock.Lock()
+	defer mws.analyzedBoardLock.Unlock()
+	mws.analyzedBoard = board
+}
+
+func (mws *moveWebSocket) killAnalysis() {
+	mws.setAnalyzedBoard(othello.Board{})
 }
 
 func (mws *moveWebSocket) send(message *wsMessage) error {
@@ -68,11 +86,11 @@ func (mws *moveWebSocket) loop() {
 
 		var message wsMessage
 		err = json.Unmarshal(rawMessage, &message)
-		log.Printf("%+v", message)
 		if err != nil {
 			log.Printf("json decode error: %s", err)
 			continue
 		}
+		log.Printf("mws received %s", message.Event)
 		reply, err := mws.handleMessage(message)
 		if err != nil {
 			log.Printf("message handling error: %s", err)
@@ -87,7 +105,7 @@ func (mws *moveWebSocket) loop() {
 	}
 }
 
-func (mws *moveWebSocket) analyze(board othello.Board, turn int, quitCh <-chan struct{}) {
+func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 
 	type analyzedChild struct {
 		child    othello.Board
@@ -122,21 +140,23 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int, quitCh <-chan s
 
 			bot := treesearch.NewMtdf(treesearch.MinHeuristic, treesearch.MaxHeuristic)
 
+			if mws.getAnalyzedBoard() != board {
+				return
+			}
+
 			analysis := analyzeMoveReply{
 				Board:     evaluated,
 				Depth:     depth,
 				Move:      analyzedChildren[i].analysis.Move,
 				Heuristic: bot.Search(analyzedChildren[i].child, depth)}
 
-			select {
-			case <-quitCh:
-				return
-			default:
-			}
-
 			message := &wsMessage{
 				Event:            "analyze_move_reply",
 				AnalyzeMoveReply: &analysis}
+
+			if mws.getAnalyzedBoard() != board {
+				return
+			}
 
 			err := mws.send(message)
 			if err != nil {
@@ -155,6 +175,7 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int, quitCh <-chan s
 }
 
 func (mws *moveWebSocket) handleAnalyzeMoveEvent(analyzeMoveEvent *analyzeMoveEvent) (err error) {
+
 	if analyzeMoveEvent == nil {
 		return fmt.Errorf("analyzeMoveEvent is nil")
 	}
@@ -164,11 +185,8 @@ func (mws *moveWebSocket) handleAnalyzeMoveEvent(analyzeMoveEvent *analyzeMoveEv
 		return err
 	}
 
-	// TODO kill any other mws.analyze() running here
-
-	mws.analyzeQuitCh = make(chan struct{})
-
-	go mws.analyze(*board, turn, mws.analyzeQuitCh)
+	mws.setAnalyzedBoard(*board)
+	go mws.analyze(*board, turn)
 
 	return nil
 }
@@ -188,6 +206,8 @@ func (mws *moveWebSocket) handleBotMoveEvent(botMoveEvent *botMoveEvent) (*wsMes
 		return nil, fmt.Errorf("no moves available")
 	}
 
+	mws.killAnalysis()
+
 	bot := players.NewBotHeuristic(ioutil.Discard, 8, 16)
 	bestMove := bot.DoMove(*board)
 
@@ -205,18 +225,8 @@ func (mws *moveWebSocket) handleBotMoveEvent(botMoveEvent *botMoveEvent) (*wsMes
 	return reply, nil
 }
 
-func (mws *moveWebSocket) handleAnalyzeStopEvent(analyzeStopEvent *analyzeStopEvent) error {
-
-	if analyzeStopEvent == nil {
-		return fmt.Errorf("analyzeStopEvent is nil")
-	}
-
-	go func() {
-		if mws.analyzeQuitCh != nil {
-			mws.analyzeQuitCh <- struct{}{}
-		}
-	}()
-
+func (mws *moveWebSocket) handleAnalyzeStopEvent(_ *analyzeStopEvent) error {
+	mws.killAnalysis()
 	return nil
 }
 

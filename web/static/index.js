@@ -147,10 +147,7 @@ function request_analysis_stop(){
     }
 
     let message = {
-        'event': 'analyze_stop',
-        'analyze_stop': {
-            state: state.board
-        }
+        'event': 'analyze_stop'
     };
 
     ws.send(JSON.stringify(message));
