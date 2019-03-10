@@ -13,6 +13,7 @@ type wsMessage struct {
 	AnalyzeMove      *analyzeMoveEvent `json:"analyze_move"`
 	AnalyzeMoveReply *analyzeMoveReply `json:"analyze_move_reply"`
 	AnalyzeStop      *analyzeStopEvent `json:"analyze_stop"`
+	GetXotReply      *getXotReply      `json:"get_xot_reply"`
 }
 
 type botMoveEvent struct {
@@ -35,3 +36,7 @@ type analyzeMoveReply struct {
 }
 
 type analyzeStopEvent struct{}
+
+type getXotReply struct {
+	State boardState `json:"state"`
+}

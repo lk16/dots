@@ -245,6 +245,13 @@ $(function(){
                 let heuristic = message.analyze_move_reply.heuristic;
                 $('#board img').eq(move).attr('src', window.location.origin + '/svg/field/?text=' + heuristic);
                 break;
+            case 'get_xot_reply':
+                state.board = message.get_xot_reply.state;
+                update_fields(state.board);
+                request_ws_move();
+                break;
+            default:
+                console.warn("Unhandled ws event ", message.event)
         }
     };
     ws.onerror = function(evt) {
@@ -309,10 +316,23 @@ $(document).on('change', 'select', function() {
     request_ws_move();
 });
 
-$(document).on('click', 'button', function(){
+$(document).on('click', 'button#new_game', function(){
 
     // deep copy
     state.board = JSON.parse(JSON.stringify(start_board));
+
+    request_analysis_stop();
+    update_fields(state.board);
+    request_ws_move();
+});
+
+$(document).on('click', 'button#xot_game', function(){
+
+    let message = {
+        'event': 'get_xot'
+    };
+
+    ws.send(JSON.stringify(message));
 
     request_analysis_stop();
     update_fields(state.board);

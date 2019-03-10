@@ -230,6 +230,23 @@ func (mws *moveWebSocket) handleAnalyzeStopEvent(_ *analyzeStopEvent) error {
 	return nil
 }
 
+func (mws *moveWebSocket) sendGetXotReply() {
+	board := othello.NewXotBoard()
+
+	message := &wsMessage{
+		Event: "get_xot_reply",
+		GetXotReply: &getXotReply{
+			State: newState(board, 0)}}
+
+	mws.send(message)
+}
+
+func (mws *moveWebSocket) handleGetXotEvent() error {
+	mws.killAnalysis()
+	go mws.sendGetXotReply()
+	return nil
+}
+
 func (mws *moveWebSocket) handleMessage(message wsMessage) (*wsMessage, error) {
 	switch message.Event {
 	case "bot_move":
@@ -238,6 +255,8 @@ func (mws *moveWebSocket) handleMessage(message wsMessage) (*wsMessage, error) {
 		return nil, mws.handleAnalyzeMoveEvent(message.AnalyzeMove)
 	case "analyze_stop":
 		return nil, mws.handleAnalyzeStopEvent(message.AnalyzeStop)
+	case "get_xot":
+		return nil, mws.handleGetXotEvent()
 	default:
 		return nil, fmt.Errorf("unhandled message of event %s", message.Event)
 	}

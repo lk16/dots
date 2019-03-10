@@ -24,8 +24,14 @@ gometalinter --enable-all --disable=goimports --disable=gofmt dots/...
     - [ ] add undo option
     - [ ] make bot_move reply asynchronously
     - [ ] show heuristic for white player in white
+    - [ ] use css ids instead of class where appropriate
+    - [ ] make every wsMessage have two fields: event and data
+    - [ ] generalize ws message handling
+    - [ ] reconnect websocket periodically if server goes down
+
 
 - [ ] cleaning
+    - [ ] move web.newState() and web.getBoard() to othello package
     - [ ] remove gtk front-end
     - [ ] use import github.com/lk16/dots everywhere
     - [ ] use project lay-out like https://github.com/golang-standards/project-layout
