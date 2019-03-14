@@ -22,7 +22,6 @@ gometalinter --enable-all --disable=goimports --disable=gofmt dots/...
 - [ ] web front end
     - [ ] add undo option
     - [ ] use css ids instead of class where appropriate
-    - [ ] make every wsMessage have two fields: event and data
     - [ ] generalize ws message handling
     - [ ] fix bug: last few moves don't show analysis in browser
     - [ ] reconnect websocket periodically if server goes down

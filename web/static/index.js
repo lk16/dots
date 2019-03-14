@@ -121,8 +121,8 @@ function request_ws_move(){
             break;
         case 'bot':
             message = {
-                'event': 'bot_move',
-                'bot_move': {
+                'event': 'bot_move_request',
+                'data': {
                     'state': state.board
                 }
             };
@@ -130,8 +130,8 @@ function request_ws_move(){
             break;
         case 'analyzer':
             message = {
-                'event': 'analyze_move',
-                'analyze_move': {
+                'event': 'analyze_move_request',
+                'data': {
                     'state': state.board
                 }
             };
@@ -147,7 +147,7 @@ function request_analysis_stop(){
     }
 
     let message = {
-        'event': 'analyze_stop'
+        'event': 'analyze_stop_request'
     };
 
     ws.send(JSON.stringify(message));
@@ -220,7 +220,8 @@ $(function(){
         let message = JSON.parse(evt.data);
         switch(message.event){
             case 'bot_move_reply':
-                state.board = message.bot_move_reply.state;
+                console.log
+                state.board = message.data.state;
                 update_fields(state.board);
                 if(get_valid_moves(state.board).length === 0){
                     state.board.turn = 1-state.board.turn;
@@ -233,16 +234,16 @@ $(function(){
                 break;
             case 'analyze_move_reply':
                 if(!(
-                    arraysEqual(state.board.white, message.analyze_move_reply.board.white) &&
-                    arraysEqual(state.board.black, message.analyze_move_reply.board.black) &&
-                    state.turn === message.turn)){
+                    arraysEqual(state.board.white, message.data.board.white) &&
+                    arraysEqual(state.board.black, message.data.board.black) &&
+                    state.turn === message.data.turn)){
 
                     console.warn("Received outdated analyze_move_reply message:", message);
                     break;
                 }
 
-                let move = message.analyze_move_reply.move;
-                let heuristic = message.analyze_move_reply.heuristic;
+                let move = message.data.move;
+                let heuristic = message.data.heuristic;
 
                 let img_url = window.location.origin + '/svg/field/?text=' + heuristic;
                 console.log(state.board.turn);
@@ -252,8 +253,8 @@ $(function(){
 
                 $('#board img').eq(move).attr('src', img_url);
                 break;
-            case 'get_xot_reply':
-                state.board = message.get_xot_reply.state;
+            case 'xot_reply':
+                state.board = message.data.state;
                 update_fields(state.board);
                 request_ws_move();
                 break;
@@ -336,7 +337,7 @@ $(document).on('click', 'button#new_game', function(){
 $(document).on('click', 'button#xot_game', function(){
 
     let message = {
-        'event': 'get_xot'
+        'event': 'xot_request'
     };
 
     ws.send(JSON.stringify(message));

@@ -146,9 +146,7 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 				Move:      analyzedChildren[i].analysis.Move,
 				Heuristic: bot.Search(analyzedChildren[i].child, depth)}
 
-			message := &wsMessage{
-				Event:            "analyze_move_reply",
-				AnalyzeMoveReply: &analysis}
+			message := newWsMessage(analysis)
 
 			if mws.getAnalyzedBoard() != board {
 				return
@@ -170,13 +168,14 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 	}
 }
 
-func (mws *moveWebSocket) handleAnalyzeMoveEvent(analyzeMoveEvent *analyzeMoveEvent) (err error) {
+func (mws *moveWebSocket) handleAnalyzeMoveRequest(request interface{}) (err error) {
 
-	if analyzeMoveEvent == nil {
-		return fmt.Errorf("analyzeMoveEvent is nil")
+	analyzeMoveRequest, ok := request.(analyzeMoveRequest)
+	if !ok {
+		return fmt.Errorf("unexpected type %T in handler, expected analyzeMoveRequest", request)
 	}
 
-	board, turn, err := analyzeMoveEvent.State.getBoard()
+	board, turn, err := analyzeMoveRequest.State.getBoard()
 	if err != nil {
 		return err
 	}
@@ -187,13 +186,14 @@ func (mws *moveWebSocket) handleAnalyzeMoveEvent(analyzeMoveEvent *analyzeMoveEv
 	return nil
 }
 
-func (mws *moveWebSocket) handleBotMoveEvent(botMoveEvent *botMoveEvent) error {
+func (mws *moveWebSocket) handlebotMoveRequest(request interface{}) error {
 
-	if botMoveEvent == nil {
-		return fmt.Errorf("botMoveEvent is nil")
+	botMoveRequest, ok := request.(botMoveRequest)
+	if !ok {
+		return fmt.Errorf("unexpected type %T in handler, expected botMoveRequest", request)
 	}
 
-	board, _, err := botMoveEvent.State.getBoard()
+	board, _, err := botMoveRequest.State.getBoard()
 	if err != nil {
 		return err
 	}
@@ -204,7 +204,7 @@ func (mws *moveWebSocket) handleBotMoveEvent(botMoveEvent *botMoveEvent) error {
 
 	mws.killAnalysis()
 
-	turn := botMoveEvent.State.Turn
+	turn := botMoveRequest.State.Turn
 	go mws.sendBotMoveReply(*board, turn)
 
 	return nil
@@ -220,16 +220,14 @@ func (mws *moveWebSocket) sendBotMoveReply(board othello.Board, turn int) {
 		board.SwitchTurn()
 	}
 
-	message := &wsMessage{
-		Event: "bot_move_reply",
-		BotMoveReply: &botMoveReply{
-			State: newState(bestMove, nextTurn)}}
+	message := newWsMessage(&botMoveReply{
+		State: newState(bestMove, nextTurn)})
 
 	mws.send(message)
 
 }
 
-func (mws *moveWebSocket) handleAnalyzeStopEvent(_ *analyzeStopEvent) error {
+func (mws *moveWebSocket) handleAnalyzeStopRequest(_ interface{}) error {
 	mws.killAnalysis()
 	return nil
 }
@@ -237,31 +235,30 @@ func (mws *moveWebSocket) handleAnalyzeStopEvent(_ *analyzeStopEvent) error {
 func (mws *moveWebSocket) sendGetXotReply() {
 	board := othello.NewXotBoard()
 
-	message := &wsMessage{
-		Event: "get_xot_reply",
-		GetXotReply: &getXotReply{
-			State: newState(board, 0)}}
+	message := newWsMessage(&xotReply{
+		State: newState(board, 0)})
 
 	mws.send(message)
 }
 
-func (mws *moveWebSocket) handleGetXotEvent() error {
+func (mws *moveWebSocket) handleGetXotEvent(_ interface{}) error {
 	mws.killAnalysis()
 	go mws.sendGetXotReply()
 	return nil
 }
 
 func (mws *moveWebSocket) handleMessage(message wsMessage) error {
-	switch message.Event {
-	case "bot_move":
-		return mws.handleBotMoveEvent(message.BotMove)
-	case "analyze_move":
-		return mws.handleAnalyzeMoveEvent(message.AnalyzeMove)
-	case "analyze_stop":
-		return mws.handleAnalyzeStopEvent(message.AnalyzeStop)
-	case "get_xot":
-		return mws.handleGetXotEvent()
-	default:
+
+	handlerMap := map[string]func(interface{}) error{
+		"bot_move_request":     mws.handlebotMoveRequest,
+		"analyze_move_request": mws.handleAnalyzeMoveRequest,
+		"analyze_stop_request": mws.handleAnalyzeStopRequest,
+		"xot_request":          mws.handleGetXotEvent}
+
+	handler, ok := handlerMap[message.Event]
+	if !ok {
 		return fmt.Errorf("unhandled message of event %s", message.Event)
 	}
+
+	return handler(message.Data)
 }
