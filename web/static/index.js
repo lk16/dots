@@ -182,6 +182,8 @@ let start_board = {
     'turn': 0
 };
 
+let board_history = [];
+
 let state = {
     'board': {},
     'players': {
@@ -220,7 +222,7 @@ $(function(){
         let message = JSON.parse(evt.data);
         switch(message.event){
             case 'bot_move_reply':
-                console.log
+                board_history.push(JSON.parse(JSON.stringify(state.board)));
                 state.board = message.data.state;
                 update_fields(state.board);
                 if(get_valid_moves(state.board).length === 0){
@@ -284,6 +286,7 @@ $(document).on('mousedown', '#board td', function () {
     }
 
     request_analysis_stop();
+    board_history.push(JSON.parse(JSON.stringify(state.board)));
 
     if(state.board.turn === 0){
         state.board.black.push(cell_id, ...flipped);
@@ -345,4 +348,21 @@ $(document).on('click', 'button#xot_game', function(){
     request_analysis_stop();
     update_fields(state.board);
     request_ws_move();
+});
+
+$(document).on('click', 'button#undo_move', function(){
+
+    let white_human = state.players.white === 'human';
+    let black_human = state.players.black === 'human';
+
+    for(let i = board_history.length - 1; i >= 0; i--){
+        let turn = board_history[i].turn; 
+        if((turn === 1 && white_human) || (turn === 0 && black_human)){
+            state.board = board_history[i];
+            board_history = board_history.slice(0, i);
+            update_fields(state.board);
+            return;
+        }
+    }
+    
 });

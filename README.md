@@ -20,7 +20,6 @@ gometalinter --enable-all --disable=goimports --disable=gofmt dots/...
 
 ### TODO
 - [ ] web front end
-    - [ ] add undo option
     - [ ] use css ids instead of class where appropriate
     - [ ] generalize ws message handling
     - [ ] fix bug: last few moves don't show analysis in browser
