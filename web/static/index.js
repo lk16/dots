@@ -331,6 +331,7 @@ $(document).on('click', 'button#new_game', function(){
 
     // deep copy
     state.board = JSON.parse(JSON.stringify(start_board));
+    board_history = [];
 
     request_analysis_stop();
     update_fields(state.board);
@@ -352,15 +353,14 @@ $(document).on('click', 'button#xot_game', function(){
 
 $(document).on('click', 'button#undo_move', function(){
 
-    let white_human = state.players.white === 'human';
-    let black_human = state.players.black === 'human';
-
     for(let i = board_history.length - 1; i >= 0; i--){
         let turn = board_history[i].turn; 
-        if((turn === 1 && white_human) || (turn === 0 && black_human)){
+        if((turn === 1 && state.players.white !== 'bot') || (turn === 0 && state.players.black !== 'bot')){
+            request_analysis_stop();
             state.board = board_history[i];
             board_history = board_history.slice(0, i);
             update_fields(state.board);
+            request_ws_move();  
             return;
         }
     }
