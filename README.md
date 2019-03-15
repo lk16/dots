@@ -15,7 +15,12 @@ go test dots/...
 ### Linter
 
 ```
-gometalinter --enable-all --disable=goimports --disable=gofmt dots/...
+golangci-lint run \
+    --enable-all \
+    --disable gochecknoglobals \
+    --disable gochecknoinits \
+    --disable goimports \
+    --disable goconst
 ```
 
 ### TODO
@@ -24,16 +29,18 @@ gometalinter --enable-all --disable=goimports --disable=gofmt dots/...
     - [ ] fix bug: last few moves don't show analysis in browser
     - [ ] fix bug: web client should ignore received bot_move_reply after undo 
     - [ ] reconnect websocket periodically if server goes down
+    - [ ] redo index.html with templates
 
 
 - [ ] cleaning
+    - [ ] setup golangci-lint config so we don't run with a list of flags
+    - [ ] go linting
     - [ ] javascript code is a mess
     - [ ] move web.newState() and web.getBoard() to othello package
     - [ ] ungeneralize or drop commandline frontend?
     - [ ] use import github.com/lk16/dots everywhere
     - [ ] use project lay-out like https://github.com/golang-standards/project-layout
     - [ ] start using https://github.com/pkg/errors with .Cause()
-    - [ ] linting
 
 - [ ] bot
     - [ ] allow faster killing of analysis go-routines

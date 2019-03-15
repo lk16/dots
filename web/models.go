@@ -100,8 +100,6 @@ func (reply analyzeMoveReply) GetEventName() string {
 	return "analyze_move_reply"
 }
 
-type analyzeStopRequest struct{}
-
 type xotReply struct {
 	State boardState `json:"state"`
 }

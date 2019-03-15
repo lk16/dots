@@ -90,7 +90,7 @@ func root(w http.ResponseWriter, _ *http.Request) {
 		log.Printf("error opening file: %s", err)
 		return
 	}
-	w.Write(buff)
+	_, _ = w.Write(buff)
 }
 
 func svgField(w http.ResponseWriter, r *http.Request) {

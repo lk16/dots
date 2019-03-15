@@ -18,7 +18,6 @@ import (
 type moveWebSocket struct {
 	ws                *websocket.Conn
 	writeLock         sync.Mutex
-	analyzeQuitCh     chan struct{}
 	analyzedBoard     othello.Board
 	analyzedBoardLock sync.Mutex
 }
@@ -223,8 +222,10 @@ func (mws *moveWebSocket) sendBotMoveReply(board othello.Board, turn int) {
 	message := newWsMessage(&botMoveReply{
 		State: newState(bestMove, nextTurn)})
 
-	mws.send(message)
-
+	err := mws.send(message)
+	if err != nil {
+		log.Printf("sendBotMoveReply(): %s", err)
+	}
 }
 
 func (mws *moveWebSocket) handleAnalyzeStopRequest(_ interface{}) error {
@@ -238,7 +239,10 @@ func (mws *moveWebSocket) sendGetXotReply() {
 	message := newWsMessage(&xotReply{
 		State: newState(board, 0)})
 
-	mws.send(message)
+	err := mws.send(message)
+	if err != nil {
+		log.Printf("sendGetXotReply(): %s", err)
+	}
 }
 
 func (mws *moveWebSocket) handleGetXotEvent(_ interface{}) error {
