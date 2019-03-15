@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"math/bits"
 	"math/rand"
 )
@@ -85,7 +86,7 @@ func RandomBoard(discs int) (board *Board) {
 	return
 }
 
-func (board Board) rotate(rotation int) (rotated Board) {
+func (board Board) rotate(rotation int) Board {
 
 	rotate := func(bitset uint64, rotation int) (result uint64) {
 		result = bitset
@@ -116,10 +117,10 @@ func (board Board) rotate(rotation int) (rotated Board) {
 		return
 	}
 
-	rotated = board
+	rotated := board
 	rotated.me = rotate(rotated.me, rotation)
 	rotated.opp = rotate(rotated.opp, rotation)
-	return
+	return rotated
 
 }
 
@@ -149,14 +150,14 @@ func (board Board) Normalize() Board {
 }
 
 // ASCIIArt writes ascii-art of a Board to a writer
-func (board Board) ASCIIArt(writer io.Writer, SwapDiscColors bool) {
+func (board Board) ASCIIArt(writer io.Writer, swapDiscColors bool) {
 
 	buffer := new(bytes.Buffer)
 	buffer.WriteString("+-a-b-c-d-e-f-g-h-+\n")
 
 	moves := board.Moves()
 
-	if SwapDiscColors {
+	if swapDiscColors {
 		board.SwitchTurn()
 	}
 
@@ -180,7 +181,10 @@ func (board Board) ASCIIArt(writer io.Writer, SwapDiscColors bool) {
 	}
 	buffer.WriteString("+-----------------+\n")
 
-	writer.Write(buffer.Bytes())
+	_, err := writer.Write(buffer.Bytes())
+	if err != nil {
+		log.Printf("board.ASCIIArt() error: %s", err)
+	}
 }
 
 // Moves returns a bitset of valid moves for a Board
@@ -223,7 +227,9 @@ func moves(me, opp uint64) (movesSet uint64) {
 }
 
 // DoMove does a move and returns the flipped discs
-func (board *Board) DoMove(index int) (flipped uint64) {
+func (board *Board) DoMove(index int) uint64 {
+
+	var flipped uint64
 
 	switch index {
 	case 0:
@@ -363,7 +369,7 @@ func (board *Board) DoMove(index int) (flipped uint64) {
 	board.me = board.opp &^ tmp
 	board.opp = tmp
 
-	return
+	return flipped
 }
 
 // GetChildren returns a slice with all children of a Board
@@ -459,7 +465,7 @@ func (board *Board) doMoveToLowerBits(line uint64) uint64 {
 		return 0
 	}
 	bit := uint64(1) << uint(bits.Len64(lineMask)-1)
-	line &^= uint64((bit << 1) - 1)
+	line &^= ((bit << 1) - 1)
 
 	if line&board.opp == line {
 		return line

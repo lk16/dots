@@ -35,6 +35,8 @@ golangci-lint run \
 - [ ] cleaning
     - [ ] setup golangci-lint config so we don't run with a list of flags
     - [ ] go linting
+    - [ ] ban naked returns completely
+    - [ ] clean board tests
     - [ ] javascript code is a mess
     - [ ] move web.newState() and web.getBoard() to othello package
     - [ ] ungeneralize or drop commandline frontend?

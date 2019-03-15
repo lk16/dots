@@ -19,12 +19,7 @@ func boardIsValid(board *Board) bool {
 	startBoard := NewBoard()
 	startMask := startBoard.me | startBoard.opp
 
-	if (board.me|board.opp)&startMask != startMask {
-		return false
-	}
-
-	// no indication othello is invalid
-	return true
+	return (board.me|board.opp)&startMask == startMask
 }
 
 // Helper for this testing file
@@ -37,8 +32,8 @@ func (board Board) asciiArtString(swapDiscColors bool) (output string) {
 }
 
 // Test othello generator
-func genTestBoards() (ch chan Board) {
-	ch = make(chan Board)
+func genTestBoards() chan Board {
+	ch := make(chan Board)
 	go func() {
 
 		// generate all boards with all flipping lines from each square
@@ -101,7 +96,7 @@ func genTestBoards() (ch chan Board) {
 
 		close(ch)
 	}()
-	return
+	return ch
 }
 
 func TestBoardIsValid(t *testing.T) {
@@ -185,10 +180,11 @@ func TestBoardCustom(t *testing.T) {
 
 }
 
-func (board *Board) doMove(index uint) (flipped uint64) {
+func (board *Board) doMove(index uint) uint64 {
 	if (board.me|board.opp)&(uint64(1)<<index) != 0 {
-		return
+		return 0
 	}
+	flipped := uint64(0)
 	for dx := -1; dx <= 1; dx++ {
 		for dy := -1; dy <= 1; dy++ {
 			if dx == 0 && dy == 0 {
@@ -220,7 +216,7 @@ func (board *Board) doMove(index uint) (flipped uint64) {
 	board.me |= uint64(1) << index
 	board.opp &= ^board.me
 	board.opp, board.me = board.me, board.opp
-	return
+	return flipped
 }
 
 func TestBoardDoMove(t *testing.T) {
@@ -544,7 +540,7 @@ func TestBoardExactScore(t *testing.T) {
 
 		meCount := bits.OnesCount64(board.me)
 		oppCount := bits.OnesCount64(board.opp)
-		emptyCount := int(board.CountEmpties())
+		emptyCount := board.CountEmpties()
 
 		if meCount > oppCount {
 			expected = meCount + emptyCount - oppCount

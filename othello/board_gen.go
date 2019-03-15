@@ -44,13 +44,13 @@ func NewGenerator(board *Board, lookAhead int) ChildGenerator {
 			child:       board}
 	}
 
-	var sortedChildren []sortedBoard
+	children := board.GetChildren()
+	sortedChildren := make([]sortedBoard, len(children))
 
-	for _, child := range board.GetChildren() {
-		sortedChild := sortedBoard{
+	for i, child := range children {
+		sortedChildren[i] = sortedBoard{
 			board: child,
 			heur:  bits.OnesCount64(board.Moves())}
-		sortedChildren = append(sortedChildren, sortedChild)
 	}
 
 	sort.Slice(sortedChildren, func(i, j int) bool {
