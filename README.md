@@ -4,12 +4,12 @@ Othello game with AI
 
 ### Install
 ```
-go get -tags gtk_3_18 github.com/lk16/dots
+go get github.com/lk16/dots
 ```
 
 ### Test
 ```
-go test -tags gtk_3_18 dots/...
+go test dots/...
 ```
 
 ### Linter
@@ -22,12 +22,14 @@ gometalinter --enable-all --disable=goimports --disable=gofmt dots/...
 - [ ] web front end
     - [ ] use css ids instead of class where appropriate
     - [ ] fix bug: last few moves don't show analysis in browser
+    - [ ] fix bug: web client should ignore received bot_move_reply after undo 
     - [ ] reconnect websocket periodically if server goes down
 
 
 - [ ] cleaning
+    - [ ] javascript code is a mess
     - [ ] move web.newState() and web.getBoard() to othello package
-    - [ ] remove gtk front-end
+    - [ ] ungeneralize or drop commandline frontend?
     - [ ] use import github.com/lk16/dots everywhere
     - [ ] use project lay-out like https://github.com/golang-standards/project-layout
     - [ ] start using https://github.com/pkg/errors with .Cause()

@@ -15,7 +15,6 @@ type Frontend interface {
 func Get(name string) Frontend {
 
 	frontendMap := map[string]func() Frontend{
-		"gtk": NewkGtkFrontend,
 		"cli": NewCommandLine}
 
 	if newFrontend, ok := frontendMap[name]; ok {
