@@ -214,7 +214,6 @@ $(function(){
     ws = new WebSocket('ws://localhost:8080/ws');
 
     ws.onclose = function(evt) {
-        // TODO try to reconnect
     };
 
     ws.onmessage = function(evt) {

@@ -57,7 +57,6 @@ func CustomBoard(me, opp uint64) (board *Board) {
 func RandomBoard(discs int) *Board {
 
 	if discs < 4 || discs > 64 {
-		// TODO return error
 		return nil
 	}
 

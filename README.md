@@ -29,8 +29,9 @@ golangci-lint run
 
 - [ ] cleaning
     - [ ] go linting
-    - [ ] move TODOs from code here
     - [ ] ban naked returns completely
+    - [ ] return (*Board, error) from othello.RandomBoard()
+    - [ ] create BotHeuristic.write() that does error checking
     - [ ] clean board tests
     - [ ] javascript code is a mess
     - [ ] move web.newState() and web.getBoard() to othello package

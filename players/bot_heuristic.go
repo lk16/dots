@@ -74,7 +74,6 @@ func (bot *BotHeuristic) DoMove(board othello.Board) othello.Board {
 
 		buff := bytes.NewBufferString(fmt.Sprintf("Child %2d/%2d: %d\n", i+1, len(children), heur))
 
-		// TODO create Write() method and let it complain on write errors
 		_, _ = bot.writer.Write(buff.Bytes())
 
 		if heur > alpha {
