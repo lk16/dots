@@ -88,7 +88,7 @@ linters-settings:
     local-prefixes: github.com/org/project
   gocyclo:
     # minimal code complexity to report, 30 by default (but we recommend 10-20)
-    min-complexity: 10
+    min-complexity: 20
   maligned:
     # print struct with more effective memory layout or not, false by default
     suggest-new: true
@@ -131,7 +131,7 @@ linters-settings:
     check-exported: false
   nakedret:
     # make an issue if func has more lines of code than this setting and it has naked returns; default is 30
-    max-func-lines: 30
+    max-func-lines: 0
   prealloc:
     # XXX: we don't recommend using this linter before doing performance profiling.
     # For most programs usage of prealloc will be a premature optimization.
@@ -150,7 +150,7 @@ linters-settings:
 
     # Which checks should be disabled; can't be combined with 'enabled-checks'; default is empty
     disabled-checks:
-      - regexpMust
+      - ifElseChain
 
     # Enable multiple checks by tags, run `GL_DEBUG=gocritic golangci-lint` run to see all tags and checks.
     # Empty list by default. See https://github.com/go-critic/go-critic#usage -> section "Tags".
@@ -165,7 +165,11 @@ linters-settings:
 
 linters:
   enable-all: true
-  disable: []
+  disable: 
+    - gochecknoglobals 
+    - gochecknoinits 
+    - goimports 
+    - goconst
   fast: false
 
 

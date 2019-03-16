@@ -15,12 +15,7 @@ go test dots/...
 ### Linter
 
 ```
-golangci-lint run \
-    --enable-all \
-    --disable gochecknoglobals \
-    --disable gochecknoinits \
-    --disable goimports \
-    --disable goconst
+golangci-lint run
 ```
 
 ### TODO
@@ -33,8 +28,8 @@ golangci-lint run \
 
 
 - [ ] cleaning
-    - [ ] setup golangci-lint config so we don't run with a list of flags
     - [ ] go linting
+    - [ ] move TODOs from code here
     - [ ] ban naked returns completely
     - [ ] clean board tests
     - [ ] javascript code is a mess

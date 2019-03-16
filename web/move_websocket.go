@@ -145,7 +145,7 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 				Move:      analyzedChildren[i].analysis.Move,
 				Heuristic: bot.Search(analyzedChildren[i].child, depth)}
 
-			message := newWsMessage(analysis)
+			message := newWsMessage(&analysis)
 
 			if mws.getAnalyzedBoard() != board {
 				return

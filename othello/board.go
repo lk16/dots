@@ -9,7 +9,7 @@ import (
 	"math/rand"
 )
 
-func bitsetASCIIArtString(bs uint64) (output string) {
+func bitsetASCIIArtString(bs uint64) string {
 	buffer := new(bytes.Buffer)
 	buffer.WriteString("+-a-b-c-d-e-f-g-h-+\n")
 
@@ -29,8 +29,7 @@ func bitsetASCIIArtString(bs uint64) (output string) {
 	}
 	buffer.WriteString("+-----------------+\n")
 
-	output = buffer.String()
-	return
+	return buffer.String()
 }
 
 // Board represents the state of an othello othello game.
@@ -55,13 +54,14 @@ func CustomBoard(me, opp uint64) (board *Board) {
 }
 
 // RandomBoard returns a random Board with a given number of discs
-func RandomBoard(discs int) (board *Board) {
+func RandomBoard(discs int) *Board {
 
 	if discs < 4 || discs > 64 {
+		// TODO return error
 		return nil
 	}
 
-	board = NewBoard()
+	board := NewBoard()
 	skips := 0
 
 	for board.CountDiscs() != discs {
@@ -83,7 +83,7 @@ func RandomBoard(discs int) (board *Board) {
 		board.DoRandomMove()
 	}
 
-	return
+	return board
 }
 
 func (board Board) rotate(rotation int) Board {
@@ -197,7 +197,7 @@ func (board Board) OpponentMoves() uint64 {
 	return moves(board.opp, board.me)
 }
 
-func moves(me, opp uint64) (movesSet uint64) {
+func moves(me, opp uint64) uint64 {
 	// Returns a subset of the moves for a Board
 	movesPartial := func(me, mask, n uint64) (moves uint64) {
 		flipL := mask & (me << n)
@@ -217,13 +217,13 @@ func moves(me, opp uint64) (movesSet uint64) {
 	// this function is a modified version of code from Edax
 	mask := opp & 0x7E7E7E7E7E7E7E7E
 
-	movesSet = movesPartial(me, mask, 1)
+	movesSet := movesPartial(me, mask, 1)
 	movesSet |= movesPartial(me, mask, 7)
 	movesSet |= movesPartial(me, mask, 9)
 	movesSet |= movesPartial(me, opp, 8)
 
 	movesSet &^= me | opp
-	return
+	return movesSet
 }
 
 // DoMove does a move and returns the flipped discs
@@ -373,10 +373,10 @@ func (board *Board) DoMove(index int) uint64 {
 }
 
 // GetChildren returns a slice with all children of a Board
-func (board Board) GetChildren() (children []Board) {
+func (board Board) GetChildren() []Board {
 
 	moves := board.Moves()
-	children = make([]Board, bits.OnesCount64(moves))
+	children := make([]Board, bits.OnesCount64(moves))
 
 	for i := range children {
 		moveIndex := bits.TrailingZeros64(moves)
@@ -387,7 +387,7 @@ func (board Board) GetChildren() (children []Board) {
 		children[i] = board
 		children[i].DoMove(moveIndex)
 	}
-	return
+	return children
 }
 
 // UndoMove undoes a move
@@ -479,7 +479,7 @@ func (board *Board) doMove0() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00000000000000FE)
 	flipped |= board.doMoveToHigherBits(0x0101010101010100)
 	flipped |= board.doMoveToHigherBits(0x8040201008040200)
-	return
+	return flipped
 }
 
 //Does the move at field 1.
@@ -488,7 +488,7 @@ func (board *Board) doMove1() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00000000000000FC)
 	flipped |= board.doMoveToHigherBits(0x0202020202020200)
 	flipped |= board.doMoveToHigherBits(0x0080402010080400)
-	return
+	return flipped
 }
 
 //Does the move at field 2.
@@ -499,7 +499,7 @@ func (board *Board) doMove2() (flipped uint64) {
 	flipped |= board.doMoveToHigherBits(0x0404040404040400)
 	flipped |= board.doMoveToHigherBits(0x0000804020100800)
 	flipped |= board.doMoveToLowerBits(0x0000000000000003)
-	return
+	return flipped
 }
 
 //Does the move at field 3.
@@ -510,7 +510,7 @@ func (board *Board) doMove3() (flipped uint64) {
 	flipped |= board.doMoveToHigherBits(0x0808080808080800)
 	flipped |= board.doMoveToHigherBits(0x0000008040201000)
 	flipped |= board.doMoveToLowerBits(0x0000000000000007)
-	return
+	return flipped
 }
 
 //Does the move at field 4.
@@ -521,7 +521,7 @@ func (board *Board) doMove4() (flipped uint64) {
 	flipped |= board.doMoveToHigherBits(0x1010101010101000)
 	flipped |= board.doMoveToHigherBits(0x0000000080402000)
 	flipped |= board.doMoveToLowerBits(0x000000000000000F)
-	return
+	return flipped
 }
 
 //Does the move at field 5.
@@ -532,7 +532,7 @@ func (board *Board) doMove5() (flipped uint64) {
 	flipped |= board.doMoveToHigherBits(0x2020202020202000)
 	flipped |= board.doMoveToHigherBits(0x0000000000804000)
 	flipped |= board.doMoveToLowerBits(0x000000000000001F)
-	return
+	return flipped
 }
 
 //Does the move at field 6.
@@ -541,7 +541,7 @@ func (board *Board) doMove6() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0001020408102000)
 	flipped |= board.doMoveToHigherBits(0x4040404040404000)
 	flipped |= board.doMoveToLowerBits(0x000000000000003F)
-	return
+	return flipped
 }
 
 //Does the move at field 7.
@@ -550,7 +550,7 @@ func (board *Board) doMove7() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0102040810204000)
 	flipped |= board.doMoveToHigherBits(0x8080808080808000)
 	flipped |= board.doMoveToLowerBits(0x000000000000007F)
-	return
+	return flipped
 }
 
 //Does the move at field 8.
@@ -559,7 +559,7 @@ func (board *Board) doMove8() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x000000000000FE00)
 	flipped |= board.doMoveToHigherBits(0x0101010101010000)
 	flipped |= board.doMoveToHigherBits(0x4020100804020000)
-	return
+	return flipped
 }
 
 //Does the move at field 9.
@@ -568,7 +568,7 @@ func (board *Board) doMove9() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x000000000000FC00)
 	flipped |= board.doMoveToHigherBits(0x0202020202020000)
 	flipped |= board.doMoveToHigherBits(0x8040201008040000)
-	return
+	return flipped
 }
 
 //Does the move at field 10.
@@ -579,7 +579,7 @@ func (board *Board) doMove10() (flipped uint64) {
 	flipped |= board.doMoveToHigherBits(0x0404040404040000)
 	flipped |= board.doMoveToHigherBits(0x0080402010080000)
 	flipped |= board.doMoveToLowerBits(0x0000000000000300)
-	return
+	return flipped
 }
 
 //Does the move at field 11.
@@ -590,7 +590,7 @@ func (board *Board) doMove11() (flipped uint64) {
 	flipped |= board.doMoveToHigherBits(0x0808080808080000)
 	flipped |= board.doMoveToHigherBits(0x0000804020100000)
 	flipped |= board.doMoveToLowerBits(0x0000000000000700)
-	return
+	return flipped
 }
 
 //Does the move at field 12.
@@ -601,7 +601,7 @@ func (board *Board) doMove12() (flipped uint64) {
 	flipped |= board.doMoveToHigherBits(0x1010101010100000)
 	flipped |= board.doMoveToHigherBits(0x0000008040200000)
 	flipped |= board.doMoveToLowerBits(0x0000000000000F00)
-	return
+	return flipped
 }
 
 //Does the move at field 13.
@@ -612,7 +612,7 @@ func (board *Board) doMove13() (flipped uint64) {
 	flipped |= board.doMoveToHigherBits(0x2020202020200000)
 	flipped |= board.doMoveToHigherBits(0x0000000080400000)
 	flipped |= board.doMoveToLowerBits(0x0000000000001F00)
-	return
+	return flipped
 }
 
 //Does the move at field 14.
@@ -621,7 +621,7 @@ func (board *Board) doMove14() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0102040810200000)
 	flipped |= board.doMoveToHigherBits(0x4040404040400000)
 	flipped |= board.doMoveToLowerBits(0x0000000000003F00)
-	return
+	return flipped
 }
 
 //Does the move at field 15.
@@ -630,7 +630,7 @@ func (board *Board) doMove15() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x0204081020400000)
 	flipped |= board.doMoveToHigherBits(0x8080808080800000)
 	flipped |= board.doMoveToLowerBits(0x0000000000007F00)
-	return
+	return flipped
 }
 
 //Does the move at field 16.
@@ -641,7 +641,7 @@ func (board *Board) doMove16() (flipped uint64) {
 	flipped |= board.doMoveToHigherBits(0x2010080402000000)
 	flipped |= board.doMoveToLowerBits(0x0000000000000204)
 	flipped |= board.doMoveToLowerBits(0x0000000000000101)
-	return
+	return flipped
 }
 
 //Does the move at field 17.
@@ -652,7 +652,7 @@ func (board *Board) doMove17() (flipped uint64) {
 	flipped |= board.doMoveToHigherBits(0x4020100804000000)
 	flipped |= board.doMoveToLowerBits(0x0000000000000408)
 	flipped |= board.doMoveToLowerBits(0x0000000000000202)
-	return
+	return flipped
 }
 
 //Does the move at field 18.
@@ -666,7 +666,7 @@ func (board *Board) doMove18() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000000000000810)
 	flipped |= board.doMoveToLowerBits(0x0000000000000404)
 	flipped |= board.doMoveToLowerBits(0x0000000000000201)
-	return
+	return flipped
 }
 
 //Does the move at field 19.
@@ -680,7 +680,7 @@ func (board *Board) doMove19() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000000000001020)
 	flipped |= board.doMoveToLowerBits(0x0000000000000808)
 	flipped |= board.doMoveToLowerBits(0x0000000000000402)
-	return
+	return flipped
 }
 
 //Does the move at field 20.
@@ -694,7 +694,7 @@ func (board *Board) doMove20() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000000000002040)
 	flipped |= board.doMoveToLowerBits(0x0000000000001010)
 	flipped |= board.doMoveToLowerBits(0x0000000000000804)
-	return
+	return flipped
 }
 
 //Does the move at field 21.
@@ -708,7 +708,7 @@ func (board *Board) doMove21() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000000000004080)
 	flipped |= board.doMoveToLowerBits(0x0000000000002020)
 	flipped |= board.doMoveToLowerBits(0x0000000000001008)
-	return
+	return flipped
 }
 
 //Does the move at field 22.
@@ -719,7 +719,7 @@ func (board *Board) doMove22() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x00000000003F0000)
 	flipped |= board.doMoveToLowerBits(0x0000000000004040)
 	flipped |= board.doMoveToLowerBits(0x0000000000002010)
-	return
+	return flipped
 }
 
 //Does the move at field 23.
@@ -730,7 +730,7 @@ func (board *Board) doMove23() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x00000000007F0000)
 	flipped |= board.doMoveToLowerBits(0x0000000000008080)
 	flipped |= board.doMoveToLowerBits(0x0000000000004020)
-	return
+	return flipped
 }
 
 //Does the move at field 24.
@@ -741,7 +741,7 @@ func (board *Board) doMove24() (flipped uint64) {
 	flipped |= board.doMoveToHigherBits(0x1008040200000000)
 	flipped |= board.doMoveToLowerBits(0x0000000000020408)
 	flipped |= board.doMoveToLowerBits(0x0000000000010101)
-	return
+	return flipped
 }
 
 //Does the move at field 25.
@@ -752,7 +752,7 @@ func (board *Board) doMove25() (flipped uint64) {
 	flipped |= board.doMoveToHigherBits(0x2010080400000000)
 	flipped |= board.doMoveToLowerBits(0x0000000000040810)
 	flipped |= board.doMoveToLowerBits(0x0000000000020202)
-	return
+	return flipped
 }
 
 //Does the move at field 26.
@@ -766,7 +766,7 @@ func (board *Board) doMove26() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000000000081020)
 	flipped |= board.doMoveToLowerBits(0x0000000000040404)
 	flipped |= board.doMoveToLowerBits(0x0000000000020100)
-	return
+	return flipped
 }
 
 //Does the move at field 27.
@@ -780,7 +780,7 @@ func (board *Board) doMove27() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000000000102040)
 	flipped |= board.doMoveToLowerBits(0x0000000000080808)
 	flipped |= board.doMoveToLowerBits(0x0000000000040201)
-	return
+	return flipped
 }
 
 //Does the move at field 28.
@@ -794,7 +794,7 @@ func (board *Board) doMove28() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000000000204080)
 	flipped |= board.doMoveToLowerBits(0x0000000000101010)
 	flipped |= board.doMoveToLowerBits(0x0000000000080402)
-	return
+	return flipped
 }
 
 //Does the move at field 29.
@@ -808,7 +808,7 @@ func (board *Board) doMove29() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000000000408000)
 	flipped |= board.doMoveToLowerBits(0x0000000000202020)
 	flipped |= board.doMoveToLowerBits(0x0000000000100804)
-	return
+	return flipped
 }
 
 //Does the move at field 30.
@@ -819,7 +819,7 @@ func (board *Board) doMove30() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x000000003F000000)
 	flipped |= board.doMoveToLowerBits(0x0000000000404040)
 	flipped |= board.doMoveToLowerBits(0x0000000000201008)
-	return
+	return flipped
 }
 
 //Does the move at field 31.
@@ -830,7 +830,7 @@ func (board *Board) doMove31() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x000000007F000000)
 	flipped |= board.doMoveToLowerBits(0x0000000000808080)
 	flipped |= board.doMoveToLowerBits(0x0000000000402010)
-	return
+	return flipped
 }
 
 //Does the move at field 32.
@@ -841,7 +841,7 @@ func (board *Board) doMove32() (flipped uint64) {
 	flipped |= board.doMoveToHigherBits(0x0804020000000000)
 	flipped |= board.doMoveToLowerBits(0x0000000002040810)
 	flipped |= board.doMoveToLowerBits(0x0000000001010101)
-	return
+	return flipped
 }
 
 //Does the move at field 33.
@@ -852,7 +852,7 @@ func (board *Board) doMove33() (flipped uint64) {
 	flipped |= board.doMoveToHigherBits(0x1008040000000000)
 	flipped |= board.doMoveToLowerBits(0x0000000004081020)
 	flipped |= board.doMoveToLowerBits(0x0000000002020202)
-	return
+	return flipped
 }
 
 //Does the move at field 34.
@@ -866,7 +866,7 @@ func (board *Board) doMove34() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000000008102040)
 	flipped |= board.doMoveToLowerBits(0x0000000004040404)
 	flipped |= board.doMoveToLowerBits(0x0000000002010000)
-	return
+	return flipped
 }
 
 //Does the move at field 35.
@@ -880,7 +880,7 @@ func (board *Board) doMove35() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000000010204080)
 	flipped |= board.doMoveToLowerBits(0x0000000008080808)
 	flipped |= board.doMoveToLowerBits(0x0000000004020100)
-	return
+	return flipped
 }
 
 //Does the move at field 36.
@@ -894,7 +894,7 @@ func (board *Board) doMove36() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000000020408000)
 	flipped |= board.doMoveToLowerBits(0x0000000010101010)
 	flipped |= board.doMoveToLowerBits(0x0000000008040201)
-	return
+	return flipped
 }
 
 //Does the move at field 37.
@@ -908,7 +908,7 @@ func (board *Board) doMove37() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000000040800000)
 	flipped |= board.doMoveToLowerBits(0x0000000020202020)
 	flipped |= board.doMoveToLowerBits(0x0000000010080402)
-	return
+	return flipped
 }
 
 //Does the move at field 38.
@@ -919,7 +919,7 @@ func (board *Board) doMove38() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000003F00000000)
 	flipped |= board.doMoveToLowerBits(0x0000000040404040)
 	flipped |= board.doMoveToLowerBits(0x0000000020100804)
-	return
+	return flipped
 }
 
 //Does the move at field 39.
@@ -930,7 +930,7 @@ func (board *Board) doMove39() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000007F00000000)
 	flipped |= board.doMoveToLowerBits(0x0000000080808080)
 	flipped |= board.doMoveToLowerBits(0x0000000040201008)
-	return
+	return flipped
 }
 
 //Does the move at field 40.
@@ -941,7 +941,7 @@ func (board *Board) doMove40() (flipped uint64) {
 	flipped |= board.doMoveToHigherBits(0x0402000000000000)
 	flipped |= board.doMoveToLowerBits(0x0000000204081020)
 	flipped |= board.doMoveToLowerBits(0x0000000101010101)
-	return
+	return flipped
 }
 
 //Does the move at field 41.
@@ -952,7 +952,7 @@ func (board *Board) doMove41() (flipped uint64) {
 	flipped |= board.doMoveToHigherBits(0x0804000000000000)
 	flipped |= board.doMoveToLowerBits(0x0000000408102040)
 	flipped |= board.doMoveToLowerBits(0x0000000202020202)
-	return
+	return flipped
 }
 
 //Does the move at field 42.
@@ -966,7 +966,7 @@ func (board *Board) doMove42() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000000810204080)
 	flipped |= board.doMoveToLowerBits(0x0000000404040404)
 	flipped |= board.doMoveToLowerBits(0x0000000201000000)
-	return
+	return flipped
 }
 
 //Does the move at field 43.
@@ -980,7 +980,7 @@ func (board *Board) doMove43() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000001020408000)
 	flipped |= board.doMoveToLowerBits(0x0000000808080808)
 	flipped |= board.doMoveToLowerBits(0x0000000402010000)
-	return
+	return flipped
 }
 
 //Does the move at field 44.
@@ -994,7 +994,7 @@ func (board *Board) doMove44() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000002040800000)
 	flipped |= board.doMoveToLowerBits(0x0000001010101010)
 	flipped |= board.doMoveToLowerBits(0x0000000804020100)
-	return
+	return flipped
 }
 
 //Does the move at field 45.
@@ -1008,7 +1008,7 @@ func (board *Board) doMove45() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000004080000000)
 	flipped |= board.doMoveToLowerBits(0x0000002020202020)
 	flipped |= board.doMoveToLowerBits(0x0000001008040201)
-	return
+	return flipped
 }
 
 //Does the move at field 46.
@@ -1019,7 +1019,7 @@ func (board *Board) doMove46() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x00003F0000000000)
 	flipped |= board.doMoveToLowerBits(0x0000004040404040)
 	flipped |= board.doMoveToLowerBits(0x0000002010080402)
-	return
+	return flipped
 }
 
 //Does the move at field 47.
@@ -1030,7 +1030,7 @@ func (board *Board) doMove47() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x00007F0000000000)
 	flipped |= board.doMoveToLowerBits(0x0000008080808080)
 	flipped |= board.doMoveToLowerBits(0x0000004020100804)
-	return
+	return flipped
 }
 
 //Does the move at field 48.
@@ -1039,7 +1039,7 @@ func (board *Board) doMove48() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00FE000000000000)
 	flipped |= board.doMoveToLowerBits(0x0000020408102040)
 	flipped |= board.doMoveToLowerBits(0x0000010101010101)
-	return
+	return flipped
 }
 
 //Does the move at field 49.
@@ -1048,7 +1048,7 @@ func (board *Board) doMove49() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0x00FC000000000000)
 	flipped |= board.doMoveToLowerBits(0x0000040810204080)
 	flipped |= board.doMoveToLowerBits(0x0000020202020202)
-	return
+	return flipped
 }
 
 //Does the move at field 50.
@@ -1059,7 +1059,7 @@ func (board *Board) doMove50() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000081020408000)
 	flipped |= board.doMoveToLowerBits(0x0000040404040404)
 	flipped |= board.doMoveToLowerBits(0x0000020100000000)
-	return
+	return flipped
 }
 
 //Does the move at field 51.
@@ -1070,7 +1070,7 @@ func (board *Board) doMove51() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000102040800000)
 	flipped |= board.doMoveToLowerBits(0x0000080808080808)
 	flipped |= board.doMoveToLowerBits(0x0000040201000000)
-	return
+	return flipped
 }
 
 //Does the move at field 52.
@@ -1081,7 +1081,7 @@ func (board *Board) doMove52() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000204080000000)
 	flipped |= board.doMoveToLowerBits(0x0000101010101010)
 	flipped |= board.doMoveToLowerBits(0x0000080402010000)
-	return
+	return flipped
 }
 
 //Does the move at field 53.
@@ -1092,7 +1092,7 @@ func (board *Board) doMove53() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0000408000000000)
 	flipped |= board.doMoveToLowerBits(0x0000202020202020)
 	flipped |= board.doMoveToLowerBits(0x0000100804020100)
-	return
+	return flipped
 }
 
 //Does the move at field 54.
@@ -1101,7 +1101,7 @@ func (board *Board) doMove54() (flipped uint64) {
 	flipped = board.doMoveToLowerBits(0x003F000000000000)
 	flipped |= board.doMoveToLowerBits(0x0000404040404040)
 	flipped |= board.doMoveToLowerBits(0x0000201008040201)
-	return
+	return flipped
 }
 
 //Does the move at field 55.
@@ -1110,7 +1110,7 @@ func (board *Board) doMove55() (flipped uint64) {
 	flipped = board.doMoveToLowerBits(0x007F000000000000)
 	flipped |= board.doMoveToLowerBits(0x0000808080808080)
 	flipped |= board.doMoveToLowerBits(0x0000402010080402)
-	return
+	return flipped
 }
 
 //Does the move at field 56.
@@ -1119,7 +1119,7 @@ func (board *Board) doMove56() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0xFE00000000000000)
 	flipped |= board.doMoveToLowerBits(0x0002040810204080)
 	flipped |= board.doMoveToLowerBits(0x0001010101010101)
-	return
+	return flipped
 }
 
 //Does the move at field 57.
@@ -1128,7 +1128,7 @@ func (board *Board) doMove57() (flipped uint64) {
 	flipped = board.doMoveToHigherBits(0xFC00000000000000)
 	flipped |= board.doMoveToLowerBits(0x0004081020408000)
 	flipped |= board.doMoveToLowerBits(0x0002020202020202)
-	return
+	return flipped
 }
 
 //Does the move at field 58.
@@ -1139,7 +1139,7 @@ func (board *Board) doMove58() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0008102040800000)
 	flipped |= board.doMoveToLowerBits(0x0004040404040404)
 	flipped |= board.doMoveToLowerBits(0x0002010000000000)
-	return
+	return flipped
 }
 
 //Does the move at field 59.
@@ -1150,7 +1150,7 @@ func (board *Board) doMove59() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0010204080000000)
 	flipped |= board.doMoveToLowerBits(0x0008080808080808)
 	flipped |= board.doMoveToLowerBits(0x0004020100000000)
-	return
+	return flipped
 }
 
 //Does the move at field 60.
@@ -1161,7 +1161,7 @@ func (board *Board) doMove60() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0020408000000000)
 	flipped |= board.doMoveToLowerBits(0x0010101010101010)
 	flipped |= board.doMoveToLowerBits(0x0008040201000000)
-	return
+	return flipped
 }
 
 //Does the move at field 61.
@@ -1172,7 +1172,7 @@ func (board *Board) doMove61() (flipped uint64) {
 	flipped |= board.doMoveToLowerBits(0x0040800000000000)
 	flipped |= board.doMoveToLowerBits(0x0020202020202020)
 	flipped |= board.doMoveToLowerBits(0x0010080402010000)
-	return
+	return flipped
 }
 
 //Does the move at field 62.
@@ -1181,7 +1181,7 @@ func (board *Board) doMove62() (flipped uint64) {
 	flipped = board.doMoveToLowerBits(0x3F00000000000000)
 	flipped |= board.doMoveToLowerBits(0x0040404040404040)
 	flipped |= board.doMoveToLowerBits(0x0020100804020100)
-	return
+	return flipped
 }
 
 //Does the move at field 63.
@@ -1190,5 +1190,5 @@ func (board *Board) doMove63() (flipped uint64) {
 	flipped = board.doMoveToLowerBits(0x7F00000000000000)
 	flipped |= board.doMoveToLowerBits(0x0080808080808080)
 	flipped |= board.doMoveToLowerBits(0x0040201008040201)
-	return
+	return flipped
 }

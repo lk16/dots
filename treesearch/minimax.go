@@ -54,14 +54,15 @@ func (minimax *MiniMax) search(board othello.Board, depth int, maxPlayer bool) i
 			}
 		}
 		return heur
-	} else {
-		heur := MaxHeuristic
-		for gen.Next() {
-			childHeur := minimax.search(child, depth-1, !maxPlayer)
-			if childHeur < heur {
-				heur = childHeur
-			}
-		}
-		return heur
 	}
+
+	heur := MaxHeuristic
+	for gen.Next() {
+		childHeur := minimax.search(child, depth-1, !maxPlayer)
+		if childHeur < heur {
+			heur = childHeur
+		}
+	}
+	return heur
+
 }

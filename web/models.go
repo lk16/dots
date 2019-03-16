@@ -96,7 +96,7 @@ type analyzeMoveReply struct {
 	Heuristic int        `json:"heuristic"`
 }
 
-func (reply analyzeMoveReply) GetEventName() string {
+func (reply *analyzeMoveReply) GetEventName() string {
 	return "analyze_move_reply"
 }
 

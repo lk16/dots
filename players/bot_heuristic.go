@@ -28,7 +28,7 @@ func NewBotHeuristic(writer io.Writer, searchDepth, exactDepth int) *BotHeuristi
 }
 
 // DoMove does a move
-func (bot *BotHeuristic) DoMove(board othello.Board) (afterwards othello.Board) {
+func (bot *BotHeuristic) DoMove(board othello.Board) othello.Board {
 
 	children := board.GetChildren()
 
@@ -37,12 +37,12 @@ func (bot *BotHeuristic) DoMove(board othello.Board) (afterwards othello.Board) 
 	}
 
 	// prevent returning empty othello when bot cannot prevent losing all discs
-	afterwards = children[0]
+	afterwards := children[0]
 
 	if len(children) == 1 {
 		buff := bytes.NewBufferString("Only one move. Skipping evaluation.\n")
-		bot.writer.Write(buff.Bytes())
-		return
+		_, _ = bot.writer.Write(buff.Bytes())
+		return afterwards
 	}
 
 	var alpha, beta int
@@ -73,7 +73,9 @@ func (bot *BotHeuristic) DoMove(board othello.Board) (afterwards othello.Board) 
 		}
 
 		buff := bytes.NewBufferString(fmt.Sprintf("Child %2d/%2d: %d\n", i+1, len(children), heur))
-		bot.writer.Write(buff.Bytes())
+
+		// TODO create Write() method and let it complain on write errors
+		_, _ = bot.writer.Write(buff.Bytes())
 
 		if heur > alpha {
 			alpha = heur
@@ -82,6 +84,6 @@ func (bot *BotHeuristic) DoMove(board othello.Board) (afterwards othello.Board) 
 
 	}
 
-	bot.writer.Write(bytes.NewBufferString("\n\n").Bytes())
-	return
+	_, _ = bot.writer.Write(bytes.NewBufferString("\n\n").Bytes())
+	return afterwards
 }

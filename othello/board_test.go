@@ -24,11 +24,10 @@ func boardIsValid(board *Board) bool {
 
 // Helper for this testing file
 // Returns a string written by othello.AsciiArt()
-func (board Board) asciiArtString(swapDiscColors bool) (output string) {
+func (board Board) asciiArtString(swapDiscColors bool) string {
 	buffer := new(bytes.Buffer)
 	board.ASCIIArt(buffer, swapDiscColors)
-	output = buffer.String()
-	return
+	return buffer.String()
 }
 
 // Test othello generator
@@ -302,7 +301,8 @@ func TestBoardDoMoveN(t *testing.T) {
 	}
 }
 
-func (board Board) moves() (moves uint64) {
+func (board Board) moves() uint64 {
+	moves := uint64(0)
 	empties := ^(board.me | board.opp)
 
 	for i := uint(0); i < 64; i++ {
@@ -311,7 +311,7 @@ func (board Board) moves() (moves uint64) {
 			moves |= uint64(1) << i
 		}
 	}
-	return
+	return moves
 }
 
 func TestBoardMoves(t *testing.T) {
@@ -333,14 +333,15 @@ func TestBoardMoves(t *testing.T) {
 	}
 }
 
-func (board *Board) getChildren() (children []Board) {
+func (board *Board) getChildren() []Board {
+	var children []Board
 	for i := uint(0); i < 64; i++ {
 		clone := *board
 		if clone.doMove(i) != 0 {
 			children = append(children, clone)
 		}
 	}
-	return
+	return children
 }
 
 func TestBoardGetChildren(t *testing.T) {
