@@ -29,7 +29,7 @@ golangci-lint run
 
 - [ ] cleaning
     - [ ] go linting
-    - [ ] ban naked returns completely
+    - [ ] move GameState from frontend to othello package
     - [ ] return (*Board, error) from othello.RandomBoard()
     - [ ] create BotHeuristic.write() that does error checking
     - [ ] clean board tests

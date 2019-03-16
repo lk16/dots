@@ -66,9 +66,9 @@ type Controller struct {
 
 // NewController returns a new Controller
 func NewController(black, white players.Player, writer io.Writer,
-	frontend Frontend, useXot, loop bool) (control *Controller) {
+	frontend Frontend, useXot, loop bool) *Controller {
 	_ = writer
-	control = &Controller{
+	return &Controller{
 		players:  [2]players.Player{black, white},
 		frontend: frontend,
 		history:  make([]GameState, 100),
@@ -76,13 +76,11 @@ func NewController(black, white players.Player, writer io.Writer,
 		redoMax:  0,
 		useXot:   useXot,
 		loop:     loop}
-	return
 }
 
 // GetState returns the current state of a Controller
-func (control *Controller) GetState() (state GameState) {
-	state = control.history[control.stateID]
-	return
+func (control *Controller) GetState() GameState {
+	return control.history[control.stateID]
 }
 
 func (control *Controller) setChild(child GameState) {
