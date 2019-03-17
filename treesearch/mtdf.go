@@ -1,8 +1,8 @@
 package treesearch
 
 import (
-	"dots/heuristics"
-	"dots/othello"
+	"github.com/lk16/dots/heuristics"
+	"github.com/lk16/dots/othello"
 )
 
 type hashtableKey struct {

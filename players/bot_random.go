@@ -1,7 +1,7 @@
 package players
 
 import (
-	"dots/othello"
+	"github.com/lk16/dots/othello"
 )
 
 // BotRandom is a bot that does random moves

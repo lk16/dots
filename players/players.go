@@ -3,7 +3,7 @@ package players
 import (
 	"os"
 
-	"dots/othello"
+	"github.com/lk16/dots/othello"
 )
 
 // Player is an interface for all structs that can play othello

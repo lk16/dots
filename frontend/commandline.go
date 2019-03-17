@@ -8,7 +8,7 @@ import (
 	"math/bits"
 	"os"
 
-	"dots/othello"
+	"github.com/lk16/dots/othello"
 )
 
 // CommandLine is used for command line interaction

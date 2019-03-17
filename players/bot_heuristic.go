@@ -2,9 +2,9 @@ package players
 
 import (
 	"bytes"
-	"dots/othello"
-	"dots/treesearch"
 	"fmt"
+	"github.com/lk16/dots/othello"
+	"github.com/lk16/dots/treesearch"
 	"io"
 )
 

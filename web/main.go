@@ -1,11 +1,11 @@
 package web
 
 import (
-	"dots/othello"
-	"dots/treesearch"
 	"fmt"
 	"github.com/ajstarks/svgo"
 	"github.com/gorilla/websocket"
+	"github.com/lk16/dots/othello"
+	"github.com/lk16/dots/treesearch"
 	"io/ioutil"
 	"log"
 	"net/http"

@@ -1,16 +1,14 @@
 package main
 
 import (
-	"dots/web"
 	"flag"
+	"github.com/lk16/dots/frontend"
+	"github.com/lk16/dots/players"
+	"github.com/lk16/dots/web"
 	"math/rand"
 	"os"
-	"time"
-
-	"dots/frontend"
-	"dots/players"
-
 	"runtime/pprof"
+	"time"
 )
 
 func main() {

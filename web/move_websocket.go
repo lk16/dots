@@ -1,12 +1,12 @@
 package web
 
 import (
-	"dots/othello"
-	"dots/players"
-	"dots/treesearch"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"github.com/lk16/dots/othello"
+	"github.com/lk16/dots/players"
+	"github.com/lk16/dots/treesearch"
 	"io/ioutil"
 	"log"
 	"math/bits"

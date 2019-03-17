@@ -1,7 +1,7 @@
 package heuristics
 
 import (
-	"dots/othello"
+	"github.com/lk16/dots/othello"
 	"math/bits"
 )
 

@@ -9,7 +9,7 @@ go get github.com/lk16/dots
 
 ### Test
 ```
-go test dots/...
+go test ./...
 ```
 
 ### Linter
@@ -36,7 +36,6 @@ golangci-lint run
     - [ ] javascript code is a mess
     - [ ] move web.newState() and web.getBoard() to othello package
     - [ ] ungeneralize or drop commandline frontend?
-    - [ ] use import github.com/lk16/dots everywhere
     - [ ] use project lay-out like https://github.com/golang-standards/project-layout
     - [ ] start using https://github.com/pkg/errors with .Cause()
 

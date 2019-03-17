@@ -3,8 +3,8 @@ package frontend
 import (
 	"io"
 
-	"dots/othello"
-	"dots/players"
+	"github.com/lk16/dots/othello"
+	"github.com/lk16/dots/players"
 )
 
 const (

@@ -1,7 +1,7 @@
 package frontend
 
 import (
-	"dots/othello"
+	"github.com/lk16/dots/othello"
 )
 
 // Frontend is an interface for frontends of Controller
