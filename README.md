@@ -7,6 +7,11 @@ Othello game with AI
 go get github.com/lk16/dots
 ```
 
+### Run
+```
+dots
+```
+
 ### Test
 ```
 go test ./...
@@ -35,7 +40,6 @@ golangci-lint run
     - [ ] clean board tests
     - [ ] javascript code is a mess
     - [ ] move web.newState() and web.getBoard() to othello package
-    - [ ] ungeneralize or drop commandline frontend?
     - [ ] use project lay-out like https://github.com/golang-standards/project-layout
     - [ ] start using https://github.com/pkg/errors with .Cause()
 
