@@ -63,12 +63,7 @@ linters-settings:
 
     # report about assignment of errors to blank identifier: `num, _ := strconv.Atoi(numStr)`;
     # default is false: such cases aren't reported by default.
-    check-blank: false
-
-    # [deprecated] comma-separated list of pairs of the form pkg:regex
-    # the regex is used to ignore names within pkg. (default "fmt:.*").
-    # see https://github.com/kisielk/errcheck#the-deprecated-method for details
-    ignore: fmt:.*,io/ioutil:^Read.*
+    check-blank: true
 
     # path to a file containing a list of functions to exclude from checking
     # see https://github.com/kisielk/errcheck#excluding-functions for details
@@ -78,7 +73,7 @@ linters-settings:
     check-shadowing: true
   golint:
     # minimal confidence for issues, default is 0.8
-    min-confidence: 0.8
+    min-confidence: 0
   gofmt:
     # simplify code: gofmt with `-s` option, true by default
     simplify: true
@@ -217,7 +212,7 @@ issues:
   # it can be disabled by this option. To list all
   # excluded by default patterns execute `golangci-lint run --help`.
   # Default value for this option is true.
-  exclude-use-default: true
+  exclude-use-default: false
 
   # Maximum issues count per one linter. Set to 0 to disable. Default is 50.
   max-per-linter: 0
