@@ -2,12 +2,34 @@ package main
 
 import (
 	"flag"
+	"github.com/lk16/dots/othello"
+	"github.com/lk16/dots/players"
 	"github.com/lk16/dots/web"
+	"io/ioutil"
+	"log"
 	"math/rand"
 	"os"
 	"runtime/pprof"
 	"time"
 )
+
+func profile(cpuprofile string, profiled func()) {
+
+	f, err := os.Create(cpuprofile)
+	if err != nil {
+		log.Printf("Error creating profiling file: %s", err)
+		return
+	}
+
+	err = pprof.StartCPUProfile(f)
+	if err != nil {
+		log.Printf("Profiling error: %s", err)
+		return
+	}
+	defer pprof.StopCPUProfile()
+
+	profiled()
+}
 
 func main() {
 
@@ -21,12 +43,13 @@ func main() {
 	rand.Seed(*seed)
 
 	if *cpuprofile != "" {
-		f, err := os.Create(*cpuprofile)
-		if err != nil {
-			panic(err)
-		}
-		pprof.StartCPUProfile(f)
-		defer pprof.StopCPUProfile()
+		profile(*cpuprofile, func() {
+			rand.Seed(0)
+			board := othello.NewXotBoard()
+			bot := players.NewBotHeuristic(ioutil.Discard, 12, 0)
+			bot.DoMove(board)
+		})
+		return
 	}
 
 	web.Main()

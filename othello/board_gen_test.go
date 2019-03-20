@@ -22,7 +22,7 @@ func TestBoardChildGenNext(t *testing.T) {
 			gotSet := map[Board]struct{}{}
 
 			clone := board
-			gen := NewGenerator(&clone, depth)
+			gen := NewUnsortedChildGenerator(&clone)
 
 			for gen.Next() {
 				gotSet[clone] = struct{}{}
@@ -65,7 +65,7 @@ func TestBoardChildGenNext(t *testing.T) {
 func TestBoardChildGenRestoreParent(t *testing.T) {
 	for depth := 0; depth < 4; depth++ {
 		board := NewBoard()
-		gen := NewGenerator(board, depth)
+		gen := NewUnsortedChildGenerator(board)
 		gen.Next()
 		gen.RestoreParent()
 		if *board != *NewBoard() {
@@ -77,13 +77,13 @@ func TestBoardChildGenRestoreParent(t *testing.T) {
 func TestBoardChildGenHasMoves(t *testing.T) {
 	for depth := 0; depth < 4; depth++ {
 		board := NewBoard()
-		gen := NewGenerator(board, depth)
+		gen := NewUnsortedChildGenerator(board)
 		if !gen.HasMoves() {
 			t.Errorf("Expected initial othello has moves")
 		}
 
 		board = RandomBoard(64)
-		gen = NewGenerator(board, depth)
+		gen = NewUnsortedChildGenerator(board)
 
 		if gen.HasMoves() {
 			t.Errorf("Expected full othello does not have moves")

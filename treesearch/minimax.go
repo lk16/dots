@@ -34,7 +34,7 @@ func (minimax *MiniMax) search(board othello.Board, depth int, maxPlayer bool) i
 	}
 
 	child := board
-	gen := othello.NewGenerator(&child, 0)
+	gen := othello.NewUnsortedChildGenerator(&child)
 
 	if !gen.HasMoves() {
 		if board.OpponentMoves() == 0 {

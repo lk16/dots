@@ -116,7 +116,7 @@ func (mtdf *Mtdf) search(alpha int) int {
 		}
 	}
 
-	gen := othello.NewGenerator(&mtdf.board, 0)
+	gen := othello.NewUnsortedChildGenerator(&mtdf.board)
 
 	if !gen.HasMoves() {
 
@@ -170,7 +170,7 @@ func (mtdf *Mtdf) searchNoHashtable(alpha int) (heur int) {
 		return mtdf.polish(heuristics.Squared(mtdf.board), alpha)
 	}
 
-	gen := othello.NewGenerator(&mtdf.board, 0)
+	gen := othello.NewUnsortedChildGenerator(&mtdf.board)
 
 	if !gen.HasMoves() {
 

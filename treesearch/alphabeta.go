@@ -38,7 +38,7 @@ func (alphabeta *AlphaBeta) search(alpha, beta int) int {
 		return heuristics.Squared(alphabeta.board)
 	}
 
-	gen := othello.NewGenerator(&alphabeta.board, 0)
+	gen := othello.NewUnsortedChildGenerator(&alphabeta.board)
 
 	if !gen.HasMoves() {
 		if alphabeta.board.OpponentMoves() == 0 {
