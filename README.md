@@ -31,10 +31,10 @@ golangci-lint run
     - [ ] fix bug: web client should ignore received bot_move_reply after undo 
     - [ ] reconnect websocket periodically if server goes down
     - [ ] redo index.html with templates
+    - [ ] move web folder into best-practices location
 
 
 - [ ] cleaning
-    - [ ] create BotHeuristic.write() that does error checking
     - [ ] start using https://github.com/pkg/errors with .Cause()
     - [ ] move GameState from frontend to othello package
     - [ ] move web.newState() and web.getBoard() to othello package

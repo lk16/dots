@@ -85,7 +85,7 @@ func ws(w http.ResponseWriter, r *http.Request) {
 }
 
 func root(w http.ResponseWriter, _ *http.Request) {
-	buff, err := ioutil.ReadFile("web/index.html")
+	buff, err := ioutil.ReadFile("internal/web/index.html")
 	if err != nil {
 		log.Printf("error opening file: %s", err)
 		return
@@ -166,7 +166,7 @@ func svgIcon(w http.ResponseWriter, _ *http.Request) {
 
 func Main() {
 	http.HandleFunc("/ws", ws)
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("internal/web/static"))))
 	http.HandleFunc("/svg/field/", svgField)
 	http.HandleFunc("/svg/icon/", svgIcon)
 	http.HandleFunc("/", root)

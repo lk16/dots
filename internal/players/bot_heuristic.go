@@ -1,11 +1,11 @@
 package players
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/lk16/dots/internal/othello"
 	"github.com/lk16/dots/internal/treesearch"
 	"io"
+	"log"
 )
 
 // Heuristic is a function that estimates how promising a Board is.
@@ -27,6 +27,14 @@ func NewBotHeuristic(writer io.Writer, searchDepth, exactDepth int) *BotHeuristi
 		writer:      writer}
 }
 
+func (bot *BotHeuristic) write(format string, args ...interface{}) {
+	formatted := fmt.Sprintf(format, args...)
+	_, err := bot.writer.Write([]byte(formatted))
+	if err != nil {
+		log.Printf("BotHeuristic write() error: %s", err)
+	}
+}
+
 // DoMove does a move
 func (bot *BotHeuristic) DoMove(board othello.Board) othello.Board {
 
@@ -36,12 +44,11 @@ func (bot *BotHeuristic) DoMove(board othello.Board) othello.Board {
 		return board
 	}
 
-	// prevent returning empty othello when bot cannot prevent losing all discs
+	// prevent returning empty Board when bot cannot prevent losing all discs
 	afterwards := children[0]
 
 	if len(children) == 1 {
-		buff := bytes.NewBufferString("Only one move. Skipping evaluation.\n")
-		_, _ = bot.writer.Write(buff.Bytes())
+		bot.write("Only one move. Skipping evaluation.\n")
 		return afterwards
 	}
 
@@ -72,9 +79,7 @@ func (bot *BotHeuristic) DoMove(board othello.Board) othello.Board {
 			heur = search.Search(child, depth)
 		}
 
-		buff := bytes.NewBufferString(fmt.Sprintf("Child %2d/%2d: %d\n", i+1, len(children), heur))
-
-		_, _ = bot.writer.Write(buff.Bytes())
+		bot.write("Child %2d/%2d: %d\n", i+1, len(children), heur)
 
 		if heur > alpha {
 			alpha = heur
@@ -83,6 +88,6 @@ func (bot *BotHeuristic) DoMove(board othello.Board) othello.Board {
 
 	}
 
-	_, _ = bot.writer.Write(bytes.NewBufferString("\n\n").Bytes())
+	bot.write("\n\n")
 	return afterwards
 }
