@@ -1,8 +1,8 @@
 package treesearch
 
 import (
-	"github.com/lk16/dots/heuristics"
-	"github.com/lk16/dots/othello"
+	"github.com/lk16/dots/internal/heuristics"
+	"github.com/lk16/dots/internal/othello"
 )
 
 type NegaMax struct {

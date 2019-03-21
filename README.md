@@ -5,6 +5,7 @@ Othello game with AI
 ### Install
 ```
 go get github.com/lk16/dots
+go install github.com/lk16/dots/cmd/dots
 ```
 
 ### Run
@@ -33,15 +34,14 @@ golangci-lint run
 
 
 - [ ] cleaning
-    - [ ] go linting
-    - [ ] move GameState from frontend to othello package
     - [ ] return (*Board, error) from othello.RandomBoard()
     - [ ] create BotHeuristic.write() that does error checking
+    - [ ] start using https://github.com/pkg/errors with .Cause()
+    - [ ] move GameState from frontend to othello package
+    - [ ] move web.newState() and web.getBoard() to othello package
+    - [ ] go linting
     - [ ] clean board tests
     - [ ] javascript code is a mess
-    - [ ] move web.newState() and web.getBoard() to othello package
-    - [ ] use project lay-out like https://github.com/golang-standards/project-layout
-    - [ ] start using https://github.com/pkg/errors with .Cause()
 
 - [ ] bot
     - [ ] allow faster killing of analysis go-routines

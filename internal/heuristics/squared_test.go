@@ -2,7 +2,7 @@ package heuristics
 
 import (
 	"bytes"
-	"github.com/lk16/dots/othello"
+	"github.com/lk16/dots/internal/othello"
 	"testing"
 )
 
