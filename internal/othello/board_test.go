@@ -3,6 +3,7 @@ package othello
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"math/bits"
 	"math/rand"
 	"testing"
@@ -80,7 +81,11 @@ func genTestBoards() chan Board {
 		// random reachable boards with 4-64 discs
 		for i := 0; i < 10; i++ {
 			for discs := 4; discs <= 64; discs++ {
-				ch <- *RandomBoard(discs)
+				board, err := RandomBoard(discs)
+				if err != nil {
+					log.Printf("genTestBoards() breaking: %s", err)
+				}
+				ch <- *board
 			}
 		}
 
@@ -142,7 +147,11 @@ func TestRandomBoard(t *testing.T) {
 
 		expected := discs
 
-		board := RandomBoard(discs)
+		board, err := RandomBoard(discs)
+		if err != nil {
+			t.Error(err)
+		}
+
 		got := bits.OnesCount64(board.me | board.opp)
 
 		if expected != got {
@@ -154,16 +163,15 @@ func TestRandomBoard(t *testing.T) {
 		}
 	}
 
-	board := RandomBoard(3)
-	if board != nil {
-		t.Fatalf("Expected nil, got:\n%s\n\n", board.asciiArtString(false))
+	board, err := RandomBoard(3)
+	if err == nil {
+		t.Fatalf("Expected error, got nil\n%s\n\n", board.asciiArtString(false))
 	}
 
-	board = RandomBoard(65)
-	if board != nil {
-		t.Fatalf("Expected nil, got:\n%s\n\n", board.asciiArtString(false))
+	board, err = RandomBoard(65)
+	if err == nil {
+		t.Fatalf("Expected error, got nil\n%s\n\n", board.asciiArtString(false))
 	}
-
 }
 
 func TestBoardCustom(t *testing.T) {

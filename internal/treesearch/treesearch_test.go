@@ -15,7 +15,10 @@ func TestTreeSearch(t *testing.T) {
 			NewNegaMax(),
 			NewAlphaBeta(MinHeuristic, MaxHeuristic),
 			NewMtdf(MinHeuristic, MaxHeuristic)}
-		board := othello.RandomBoard(discs)
+		board, err := othello.RandomBoard(discs)
+		if err != nil {
+			t.Errorf("Failed to generate random board: %s", err)
+		}
 
 		results := make(map[string]int, len(algos))
 

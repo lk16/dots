@@ -34,13 +34,14 @@ golangci-lint run
 
 
 - [ ] cleaning
-    - [ ] return (*Board, error) from othello.RandomBoard()
     - [ ] create BotHeuristic.write() that does error checking
     - [ ] start using https://github.com/pkg/errors with .Cause()
     - [ ] move GameState from frontend to othello package
     - [ ] move web.newState() and web.getBoard() to othello package
     - [ ] go linting
-    - [ ] clean board tests
+    - [ ] clean board tests:
+        - [ ] drop "log" import
+        - [ ] redo genTestBoards()
     - [ ] javascript code is a mess
 
 - [ ] bot

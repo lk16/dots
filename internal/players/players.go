@@ -18,10 +18,6 @@ func Get(name string, lvl int, parallel bool) Player {
 		return nil
 	}
 
-	if name == "random" {
-		return NewBotRandom()
-	}
-
 	if name == "heur" {
 		perfectDepth := 2 * lvl
 		if lvl > 8 {

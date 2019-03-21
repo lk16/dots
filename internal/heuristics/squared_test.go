@@ -16,7 +16,6 @@ func TestSquared(t *testing.T) {
 	testCases := []testCase{
 		{othello.CustomBoard(0, 0), 0},
 		{othello.NewBoard(), 0},
-		{othello.RandomBoard(5), 0},
 		{othello.CustomBoard(1, 0), 3},
 		{othello.CustomBoard(0, 1), -3},
 		{othello.CustomBoard(1, 2), 4}}

@@ -82,7 +82,10 @@ func TestBoardChildGenHasMoves(t *testing.T) {
 			t.Errorf("Expected initial othello has moves")
 		}
 
-		board = RandomBoard(64)
+		board, err := RandomBoard(64)
+		if err != nil {
+			t.Errorf("Error generating random full board: %s", err)
+		}
 		gen = NewUnsortedChildGenerator(board)
 
 		if gen.HasMoves() {

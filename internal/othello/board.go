@@ -54,10 +54,11 @@ func CustomBoard(me, opp uint64) (board *Board) {
 }
 
 // RandomBoard returns a random Board with a given number of discs
-func RandomBoard(discs int) *Board {
+func RandomBoard(discs int) (*Board, error) {
 
 	if discs < 4 || discs > 64 {
-		return nil
+		err := fmt.Errorf("cannot create random board with %d discs", discs)
+		return nil, err
 	}
 
 	board := NewBoard()
@@ -82,7 +83,7 @@ func RandomBoard(discs int) *Board {
 		board.DoRandomMove()
 	}
 
-	return board
+	return board, nil
 }
 
 func (board Board) rotate(rotation int) Board {
