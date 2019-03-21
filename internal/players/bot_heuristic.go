@@ -3,8 +3,8 @@ package players
 import (
 	"bytes"
 	"fmt"
-	"github.com/lk16/dots/othello"
-	"github.com/lk16/dots/treesearch"
+	"github.com/lk16/dots/internal/othello"
+	"github.com/lk16/dots/internal/treesearch"
 	"io"
 )
 

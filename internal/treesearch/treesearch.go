@@ -1,6 +1,6 @@
 package treesearch
 
-import "github.com/lk16/dots/othello"
+import "github.com/lk16/dots/internal/othello"
 
 const (
 	// MaxScore is the highest game result score possible

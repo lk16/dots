@@ -3,7 +3,7 @@ package treesearch
 import (
 	"bytes"
 	"fmt"
-	"github.com/lk16/dots/othello"
+	"github.com/lk16/dots/internal/othello"
 	"testing"
 )
 
