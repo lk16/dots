@@ -7,10 +7,10 @@ import (
 	"github.com/lk16/dots/internal/othello"
 	"github.com/lk16/dots/internal/players"
 	"github.com/lk16/dots/internal/treesearch"
-	"io/ioutil"
 	"log"
 	"math/bits"
 	"net/http"
+	"os"
 	"sort"
 	"sync"
 )
@@ -210,7 +210,7 @@ func (mws *moveWebSocket) handlebotMoveRequest(request interface{}) error {
 }
 
 func (mws *moveWebSocket) sendBotMoveReply(board othello.Board, turn int) {
-	bot := players.NewBotHeuristic(ioutil.Discard, 8, 16)
+	bot := players.NewBotHeuristic(os.Stdout, 8, 16)
 	bestMove := bot.DoMove(board)
 
 	nextTurn := 1 - turn
