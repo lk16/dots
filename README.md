@@ -35,7 +35,8 @@ golangci-lint run
 
 
 - [ ] cleaning
-    - [ ] start using https://github.com/pkg/errors with .Cause()
+    - [ ] move alpha/beta from initializers to Search()/SearchExact()
+    - [ ] introduce SearchWinner()
     - [ ] move GameState from frontend to othello package
     - [ ] move web.newState() and web.getBoard() to othello package
     - [ ] go linting
@@ -43,6 +44,7 @@ golangci-lint run
         - [ ] drop "log" import
         - [ ] redo genTestBoards()
     - [ ] javascript code is a mess
+    - [ ] cleaner error handling (after go 2 release)
 
 - [ ] bot
     - [ ] allow faster killing of analysis go-routines

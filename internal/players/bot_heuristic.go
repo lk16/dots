@@ -41,6 +41,7 @@ func (bot *BotHeuristic) DoMove(board othello.Board) othello.Board {
 	children := board.GetChildren()
 
 	if len(children) == 0 {
+		bot.write("No moves found. Something went wrong.\n")
 		return board
 	}
 
@@ -49,28 +50,24 @@ func (bot *BotHeuristic) DoMove(board othello.Board) othello.Board {
 
 	if len(children) == 1 {
 		bot.write("Only one move. Skipping evaluation.\n")
-		return afterwards
+		return children[0]
 	}
 
-	var alpha, beta int
-	var depth int
+	alpha := treesearch.MinHeuristic
+	beta := treesearch.MaxHeuristic
 
+	var depth int
 	if board.CountEmpties() <= bot.exactDepth {
-		alpha = treesearch.MinScore
-		beta = treesearch.MaxScore
 		depth = board.CountEmpties()
 	} else {
 		depth = bot.searchDepth
-
-		// HACK: stumbling upon an exact solution
-		// takes forever to compute. we set limits to solve that for now.
-		alpha = -100
-		beta = 100
 	}
+
+	search := treesearch.NewMtdf(alpha, beta)
 
 	for i, child := range children {
 
-		search := (treesearch.Interface)(treesearch.NewMtdf(alpha, beta))
+		search.SetAlphaBeta(alpha, beta)
 
 		var heur int
 		if board.CountEmpties() <= bot.exactDepth {
@@ -85,8 +82,10 @@ func (bot *BotHeuristic) DoMove(board othello.Board) othello.Board {
 			alpha = heur
 			afterwards = child
 		}
-
 	}
+
+	bot.write("%d nodes in %.3f seconds = %dK nodes/second\n",
+		search.Stats.Nodes, search.Stats.Duration.Seconds(), int(search.Stats.NodesPerSecond())/1000)
 
 	bot.write("\n\n")
 	return afterwards

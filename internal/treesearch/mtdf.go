@@ -3,7 +3,33 @@ package treesearch
 import (
 	"github.com/lk16/dots/internal/heuristics"
 	"github.com/lk16/dots/internal/othello"
+	"time"
 )
+
+type stats struct {
+	Nodes     uint64
+	StartTime time.Time
+	Duration  time.Duration
+}
+
+func (s *stats) StartClock() {
+	s.StartTime = time.Now()
+}
+
+func (s *stats) StopClock() {
+	s.Duration += time.Now().Sub(s.StartTime)
+}
+
+func (s *stats) NodesPerSecond() float64 {
+
+	duration := s.Duration.Seconds()
+
+	if duration == 0.0 {
+		return 0.0
+	}
+
+	return float64(s.Nodes) / duration
+}
 
 type hashtableKey struct {
 	board othello.Board
@@ -21,32 +47,47 @@ type Mtdf struct {
 	low       int
 	depth     int
 	hashtable map[hashtableKey]bounds
+	Stats     stats
 }
 
 func NewMtdf(low, high int) *Mtdf {
-	return &Mtdf{
-		high: high,
-		low:  low}
+
+	// HACK to limit search time when we run into an exact solution
+	if low < -100 {
+		low = -100
+	}
+
+	if high > 100 {
+		high = 100
+	}
+
+	mtdf := &Mtdf{}
+	mtdf.SetAlphaBeta(low, high)
+	return mtdf
 }
 
 func (mtdf *Mtdf) Name() string {
 	return "mtdf"
 }
 
+func (mtdf *Mtdf) SetAlphaBeta(alpha, beta int) {
+	mtdf.low = alpha
+	mtdf.high = beta
+}
+
 func (mtdf *Mtdf) Search(board othello.Board, depth int) int {
 	mtdf.board = board
 	mtdf.depth = depth
 	mtdf.hashtable = make(map[hashtableKey]bounds, 100000)
-	return mtdf.slideWindow()
+	mtdf.Stats.StartClock()
+	heuristic := mtdf.slideWindow()
+	mtdf.Stats.StopClock()
+	return heuristic
 }
 
 func (mtdf *Mtdf) ExactSearch(board othello.Board) int {
-	mtdf.high *= ExactScoreFactor
-	mtdf.low *= ExactScoreFactor
-	defer func() {
-		mtdf.high /= ExactScoreFactor
-		mtdf.low /= ExactScoreFactor
-	}()
+	mtdf.high = MaxHeuristic
+	mtdf.low = MinHeuristic
 	return mtdf.Search(board, 60) / ExactScoreFactor
 }
 
@@ -97,6 +138,8 @@ func (mtdf *Mtdf) polish(heur, alpha int) int {
 }
 
 func (mtdf *Mtdf) search(alpha int) int {
+
+	mtdf.Stats.Nodes++
 
 	if mtdf.depth <= 6 {
 		return mtdf.searchNoHashtable(alpha)
@@ -165,6 +208,8 @@ func (mtdf *Mtdf) search(alpha int) int {
 }
 
 func (mtdf *Mtdf) searchNoHashtable(alpha int) (heur int) {
+
+	mtdf.Stats.Nodes++
 
 	if mtdf.depth == 0 {
 		return mtdf.polish(heuristics.Squared(mtdf.board), alpha)
