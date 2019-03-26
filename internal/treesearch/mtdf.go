@@ -78,7 +78,13 @@ func (mtdf *Mtdf) SetAlphaBeta(alpha, beta int) {
 func (mtdf *Mtdf) Search(board othello.Board, depth int) int {
 	mtdf.board = board
 	mtdf.depth = depth
-	mtdf.hashtable = make(map[hashtableKey]bounds, 100000)
+	if mtdf.hashtable == nil {
+		mtdf.hashtable = make(map[hashtableKey]bounds, 100000)
+	} else {
+		for key := range mtdf.hashtable {
+			delete(mtdf.hashtable, key)
+		}
+	}
 	mtdf.Stats.StartClock()
 	heuristic := mtdf.slideWindow()
 	mtdf.Stats.StopClock()
@@ -141,7 +147,7 @@ func (mtdf *Mtdf) search(alpha int) int {
 
 	mtdf.Stats.Nodes++
 
-	if mtdf.depth <= 6 {
+	if mtdf.depth <= 4 {
 		return mtdf.searchNoHashtable(alpha)
 	}
 
