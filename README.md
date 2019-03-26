@@ -47,6 +47,8 @@ golangci-lint run
     - [ ] cleaner error handling (after go 2 release)
 
 - [ ] bot
+    - [ ] maybe use FastHeuristic() for move sorting?
+    - [ ] optimize bitset functions for FastHeuristic() and move them to othello package
     - [ ] allow faster killing of analysis go-routines
     - [ ] fix pending bugs from treesearch
         - [ ] unit test tree search using ffo test set

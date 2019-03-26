@@ -103,7 +103,7 @@ func (mtdf *Mtdf) slideWindow() int {
 
 	var step int
 	if mtdf.board.CountEmpties() > mtdf.depth {
-		f = heuristics.Squared(mtdf.board)
+		f = heuristics.FastHeuristic(mtdf.board)
 		step = 1
 	} else {
 		f = 0
@@ -218,7 +218,7 @@ func (mtdf *Mtdf) searchNoHashtable(alpha int) (heur int) {
 	mtdf.Stats.Nodes++
 
 	if mtdf.depth == 0 {
-		return mtdf.polish(heuristics.Squared(mtdf.board), alpha)
+		return mtdf.polish(heuristics.FastHeuristic(mtdf.board), alpha)
 	}
 
 	gen := othello.NewUnsortedChildGenerator(&mtdf.board)
