@@ -31,3 +31,19 @@ func TestSquared(t *testing.T) {
 		}
 	}
 }
+
+var dummy int
+
+func BenchmarkSquared(b *testing.B) {
+	board := *othello.NewBoard()
+	for i := 0; i < b.N; i++ {
+		dummy += Squared(board)
+	}
+}
+
+func BenchmarkFastHeuristic(b *testing.B) {
+	board := *othello.NewBoard()
+	for i := 0; i < b.N; i++ {
+		dummy += FastHeuristic(board)
+	}
+}

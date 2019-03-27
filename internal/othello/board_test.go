@@ -662,3 +662,42 @@ func TestBoardNormalize(t *testing.T) {
 		}
 	}
 }
+
+var dummy int
+
+func TestBoardCornerCountDifference(t *testing.T) {
+	for board := range genTestBoards() {
+		expected := bits.OnesCount64(board.Me()&cornerMask) - bits.OnesCount64(board.Opp()&cornerMask)
+		got := board.CornerCountDifference()
+
+		if expected != got {
+			t.Errorf("\n%s\n\nExpected: %d\nGot: %d\n", board.asciiArtString(false), expected, got)
+			t.FailNow()
+		}
+	}
+}
+
+func TestBoardXsquareCountDifference(t *testing.T) {
+	for board := range genTestBoards() {
+		expected := bits.OnesCount64(board.Me()&xSquareMask) - bits.OnesCount64(board.Opp()&xSquareMask)
+		got := board.XsquareCountDifference()
+		if expected != got {
+			t.Errorf("\n%s\n\nExpected: %d\nGot: %d\n", board.asciiArtString(false), expected, got)
+			t.FailNow()
+		}
+	}
+}
+
+func BenchmarkCornerCountDifference(b *testing.B) {
+	board := NewBoard()
+	for i := 0; i < b.N; i++ {
+		dummy = board.CornerCountDifference()
+	}
+}
+
+func BenchmarkXsquareCountDifference(b *testing.B) {
+	board := NewBoard()
+	for i := 0; i < b.N; i++ {
+		dummy = board.XsquareCountDifference()
+	}
+}

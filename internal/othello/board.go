@@ -9,6 +9,11 @@ import (
 	"math/rand"
 )
 
+const (
+	cornerMask  = uint64(1<<0 | 1<<7 | 1<<56 | 1<<63)
+	xSquareMask = uint64(1<<9 | 1<<14 | 1<<49 | 1<<54)
+)
+
 func bitsetASCIIArtString(bs uint64) string {
 	buffer := new(bytes.Buffer)
 	buffer.WriteString("+-a-b-c-d-e-f-g-h-+\n")
@@ -415,6 +420,36 @@ func (board *Board) SwitchTurn() {
 // CountDiscs counts the number of discs on a Board
 func (board Board) CountDiscs() int {
 	return bits.OnesCount64(board.me | board.opp)
+}
+
+// CornerCountDifference returns the corner difference.
+// Positive result means player to move has more corners.
+func (board Board) CornerCountDifference() int {
+
+	masked := board.me & cornerMask
+	masked += (masked >> 56)
+	masked += (masked >> 7)
+	myCorners := int(masked & 7)
+
+	masked = board.opp & cornerMask
+	masked += (masked >> 56)
+	masked += (masked >> 7)
+	oppCorners := int(masked & 7)
+
+	return myCorners - oppCorners
+}
+
+// XsquareCountDifference returns the x-square difference (fields diagonal to corner)
+// Positive result means player to move has more x-squares.
+func (board Board) XsquareCountDifference() int {
+
+	masked := (board.me & xSquareMask) | ((board.opp & xSquareMask) >> 9)
+	masked += (masked >> 40)
+	masked += (masked >> 5)
+	myXsquares := int((masked >> 9) & 7)
+	oppXsquares := int(masked & 7)
+
+	return myXsquares - oppXsquares
 }
 
 // CountEmpties returns the number of empty fields on a Board
