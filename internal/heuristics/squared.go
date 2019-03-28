@@ -5,16 +5,6 @@ import (
 	"math/bits"
 )
 
-const (
-	cSquareMaskVertical   = uint64(1<<1 | 1<<6 | 1<<55 | 1<<62)
-	cSquareMaskHorizontal = uint64(1<<8 | 1<<15 | 1<<48 | 1<<53)
-)
-
-func countCsquares(bitset uint64) int {
-	// TODO more efficient solution
-	return bits.OnesCount64(bitset & (cSquareMaskHorizontal | cSquareMaskVertical))
-}
-
 // Squared is a heuristic taken from a similar project with that name
 // see http://github.com/lk16/squared
 func Squared(board othello.Board) int {
@@ -28,16 +18,9 @@ func Squared(board othello.Board) int {
 	return (3 * cornerDiff) + moveDiff
 }
 
+// FastHeuristic is way faster by not computing all possible moves
 func FastHeuristic(board othello.Board) int {
-
-	me := board.Me()
-	opp := board.Opp()
-
-	heur := 0
-	heur += 49 * board.CornerCountDifference()
-	heur += -27 * board.XsquareCountDifference()
-	heur += -17 * (countCsquares(me) - countCsquares(opp))
-	heur += -11 * (bits.OnesCount64(me) - bits.OnesCount64(opp))
+	heur := 3 * board.CornerCountDifference()
+	heur += 1 * board.PotentialMoveCountDifference()
 	return heur
-
 }

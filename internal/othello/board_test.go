@@ -677,6 +677,13 @@ func TestBoardCornerCountDifference(t *testing.T) {
 	}
 }
 
+func BenchmarkCornerCountDifference(b *testing.B) {
+	board := NewBoard()
+	for i := 0; i < b.N; i++ {
+		dummy = board.CornerCountDifference()
+	}
+}
+
 func TestBoardXsquareCountDifference(t *testing.T) {
 	for board := range genTestBoards() {
 		expected := bits.OnesCount64(board.Me()&xSquareMask) - bits.OnesCount64(board.Opp()&xSquareMask)
@@ -688,16 +695,34 @@ func TestBoardXsquareCountDifference(t *testing.T) {
 	}
 }
 
-func BenchmarkCornerCountDifference(b *testing.B) {
-	board := NewBoard()
-	for i := 0; i < b.N; i++ {
-		dummy = board.CornerCountDifference()
-	}
-}
-
 func BenchmarkXsquareCountDifference(b *testing.B) {
 	board := NewBoard()
 	for i := 0; i < b.N; i++ {
 		dummy = board.XsquareCountDifference()
+	}
+}
+
+func TestBoardCsquareCountDifference(t *testing.T) {
+	for board := range genTestBoards() {
+		expected := bits.OnesCount64(board.Me()&cSquareMask) - bits.OnesCount64(board.Opp()&cSquareMask)
+		got := board.CsquareCountDifference()
+		if expected != got {
+			t.Errorf("\n%s\n\nExpected: %d\nGot: %d\n", board.asciiArtString(false), expected, got)
+			t.FailNow()
+		}
+	}
+}
+
+func BenchmarkCsquareCountDifference(b *testing.B) {
+	board := NewBoard()
+	for i := 0; i < b.N; i++ {
+		dummy = board.CsquareCountDifference()
+	}
+}
+
+func BenchmarkPotentialMoveCountDifference(b *testing.B) {
+	board := NewBoard()
+	for i := 0; i < b.N; i++ {
+		dummy = board.PotentialMoveCountDifference()
 	}
 }

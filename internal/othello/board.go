@@ -12,6 +12,7 @@ import (
 const (
 	cornerMask  = uint64(1<<0 | 1<<7 | 1<<56 | 1<<63)
 	xSquareMask = uint64(1<<9 | 1<<14 | 1<<49 | 1<<54)
+	cSquareMask = uint64(1<<1 | 1<<6 | 1<<8 | 1<<15 | 1<<48 | 1<<53 | 1<<55 | 1<<62)
 )
 
 func bitsetASCIIArtString(bs uint64) string {
@@ -422,34 +423,53 @@ func (board Board) CountDiscs() int {
 	return bits.OnesCount64(board.me | board.opp)
 }
 
-// CornerCountDifference returns the corner difference.
+// CornerCountDifference returns the corner count difference.
 // Positive result means player to move has more corners.
 func (board Board) CornerCountDifference() int {
-
-	masked := board.me & cornerMask
-	masked += (masked >> 56)
-	masked += (masked >> 7)
-	myCorners := int(masked & 7)
-
-	masked = board.opp & cornerMask
-	masked += (masked >> 56)
-	masked += (masked >> 7)
-	oppCorners := int(masked & 7)
-
-	return myCorners - oppCorners
+	return bits.OnesCount64(board.me&cornerMask) - bits.OnesCount64(board.opp&cornerMask)
 }
 
-// XsquareCountDifference returns the x-square difference (fields diagonal to corner)
+// XsquareCountDifference returns the x-square count difference
+// X-squares are fields fields diagonal to a corner.
 // Positive result means player to move has more x-squares.
 func (board Board) XsquareCountDifference() int {
+	return bits.OnesCount64(board.me&xSquareMask) - bits.OnesCount64(board.opp&xSquareMask)
+}
 
-	masked := (board.me & xSquareMask) | ((board.opp & xSquareMask) >> 9)
-	masked += (masked >> 40)
-	masked += (masked >> 5)
-	myXsquares := int((masked >> 9) & 7)
-	oppXsquares := int(masked & 7)
+// CsquareCountDifference returns the c-square count difference
+// C-squares are fields on side of the board next to a corner.
+// Positive result means player to move has more c-squares.
+func (board Board) CsquareCountDifference() int {
+	return bits.OnesCount64(board.me&cSquareMask) - bits.OnesCount64(board.opp&cSquareMask)
+}
 
-	return myXsquares - oppXsquares
+func potentialMoves(me, opp uint64) uint64 {
+
+	const (
+		leftMask  = 0x7F7F7F7F7F7F7F7F
+		rightMask = 0xFEFEFEFEFEFEFEFE
+	)
+
+	oppSurrounded := uint64(0)
+	oppSurrounded |= (opp & leftMask) << 1
+	oppSurrounded |= (opp & rightMask) >> 1
+	oppSurrounded |= (opp & leftMask) << 9
+	oppSurrounded |= (opp & rightMask) >> 9
+	oppSurrounded |= (opp & rightMask) << 7
+	oppSurrounded |= (opp & leftMask) >> 7
+
+	oppSurrounded |= opp << 8
+	oppSurrounded |= opp >> 8
+
+	oppSurrounded &^= (me | opp)
+	return oppSurrounded
+}
+
+// PotentialMoveCountDifference returns the difference in a rough estimation of the amount of moves
+func (board Board) PotentialMoveCountDifference() int {
+	mePotentialMoveCount := bits.OnesCount64(potentialMoves(board.me, board.opp))
+	oppPotentialMoveCount := bits.OnesCount64(potentialMoves(board.opp, board.me))
+	return mePotentialMoveCount - oppPotentialMoveCount
 }
 
 // CountEmpties returns the number of empty fields on a Board

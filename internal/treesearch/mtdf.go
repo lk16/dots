@@ -51,16 +51,6 @@ type Mtdf struct {
 }
 
 func NewMtdf(low, high int) *Mtdf {
-
-	// HACK to limit search time when we run into an exact solution
-	if low < -100 {
-		low = -100
-	}
-
-	if high > 100 {
-		high = 100
-	}
-
 	mtdf := &Mtdf{}
 	mtdf.SetAlphaBeta(low, high)
 	return mtdf

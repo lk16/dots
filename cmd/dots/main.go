@@ -28,6 +28,10 @@ func profile(cpuprofile string, profiled func()) {
 	profiled()
 }
 
+func devMain() {
+	log.Printf("devMain() running")
+}
+
 func main() {
 
 	defaultSeed := time.Now().UTC().UnixNano()
@@ -35,9 +39,16 @@ func main() {
 
 	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to file")
 
+	dev := flag.Bool("dev", false, "run devMain()")
+
 	flag.Parse()
 
 	rand.Seed(*seed)
+
+	if *dev {
+		devMain()
+		return
+	}
 
 	if *cpuprofile != "" {
 		profile(*cpuprofile, func() {
