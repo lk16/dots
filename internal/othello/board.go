@@ -204,29 +204,57 @@ func (board Board) OpponentMoves() uint64 {
 }
 
 func moves(me, opp uint64) uint64 {
-	// Returns a subset of the moves for a Board
-	movesPartial := func(me, mask, n uint64) (moves uint64) {
-		flipL := mask & (me << n)
-		flipL |= mask & (flipL << n)
-		maskL := mask & (mask << n)
-		flipL |= maskL & (flipL << (2 * n))
-		flipL |= maskL & (flipL << (2 * n))
-		flipR := mask & (me >> n)
-		flipR |= mask & (flipR >> n)
-		maskR := mask & (mask >> n)
-		flipR |= maskR & (flipR >> (2 * n))
-		flipR |= maskR & (flipR >> (2 * n))
-		moves = (flipL << n) | (flipR >> n)
-		return
-	}
 
 	// this function is a modified version of code from Edax
 	mask := opp & 0x7E7E7E7E7E7E7E7E
 
-	movesSet := movesPartial(me, mask, 1)
-	movesSet |= movesPartial(me, mask, 7)
-	movesSet |= movesPartial(me, mask, 9)
-	movesSet |= movesPartial(me, opp, 8)
+	flipL := mask & (me << 1)
+	flipL |= mask & (flipL << 1)
+	maskL := mask & (mask << 1)
+	flipL |= maskL & (flipL << (2 * 1))
+	flipL |= maskL & (flipL << (2 * 1))
+	flipR := mask & (me >> 1)
+	flipR |= mask & (flipR >> 1)
+	maskR := mask & (mask >> 1)
+	flipR |= maskR & (flipR >> (2 * 1))
+	flipR |= maskR & (flipR >> (2 * 1))
+	movesSet := (flipL << 1) | (flipR >> 1)
+
+	flipL = mask & (me << 7)
+	flipL |= mask & (flipL << 7)
+	maskL = mask & (mask << 7)
+	flipL |= maskL & (flipL << (2 * 7))
+	flipL |= maskL & (flipL << (2 * 7))
+	flipR = mask & (me >> 7)
+	flipR |= mask & (flipR >> 7)
+	maskR = mask & (mask >> 7)
+	flipR |= maskR & (flipR >> (2 * 7))
+	flipR |= maskR & (flipR >> (2 * 7))
+	movesSet |= (flipL << 7) | (flipR >> 7)
+
+	flipL = mask & (me << 9)
+	flipL |= mask & (flipL << 9)
+	maskL = mask & (mask << 9)
+	flipL |= maskL & (flipL << (2 * 9))
+	flipL |= maskL & (flipL << (2 * 9))
+	flipR = mask & (me >> 9)
+	flipR |= mask & (flipR >> 9)
+	maskR = mask & (mask >> 9)
+	flipR |= maskR & (flipR >> (2 * 9))
+	flipR |= maskR & (flipR >> (2 * 9))
+	movesSet |= (flipL << 9) | (flipR >> 9)
+
+	flipL = opp & (me << 8)
+	flipL |= opp & (flipL << 8)
+	maskL = opp & (opp << 8)
+	flipL |= maskL & (flipL << (2 * 8))
+	flipL |= maskL & (flipL << (2 * 8))
+	flipR = opp & (me >> 8)
+	flipR |= opp & (flipR >> 8)
+	maskR = opp & (opp >> 8)
+	flipR |= maskR & (flipR >> (2 * 8))
+	flipR |= maskR & (flipR >> (2 * 8))
+	movesSet |= (flipL << 8) | (flipR >> 8)
 
 	movesSet &^= me | opp
 	return movesSet
