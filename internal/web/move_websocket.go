@@ -210,7 +210,7 @@ func (mws *moveWebSocket) handlebotMoveRequest(request interface{}) error {
 }
 
 func (mws *moveWebSocket) sendBotMoveReply(board othello.Board, turn int) {
-	bot := players.NewBotHeuristic(os.Stdout, 8, 16)
+	bot := players.NewBotHeuristic(os.Stdout, 10, 16)
 	bestMove := bot.DoMove(board)
 
 	nextTurn := 1 - turn

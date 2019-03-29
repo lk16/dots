@@ -56,7 +56,7 @@ func main() {
 			for i := 0; i < 1; i++ {
 				board := othello.NewXotBoard()
 				board.ASCIIArt(os.Stdout, false)
-				bot := players.NewBotHeuristic(os.Stdout, 10, 0)
+				bot := players.NewBotHeuristic(os.Stdout, 12, 0)
 				bot.DoMove(board)
 			}
 		})

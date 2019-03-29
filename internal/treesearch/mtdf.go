@@ -45,13 +45,13 @@ type Mtdf struct {
 	board     othello.Board
 	high      int
 	low       int
-	depth     int
 	hashtable map[hashtableKey]bounds
 	Stats     stats
 }
 
 func NewMtdf(low, high int) *Mtdf {
-	mtdf := &Mtdf{}
+	mtdf := &Mtdf{
+		hashtable: make(map[hashtableKey]bounds, 100000)}
 	mtdf.SetAlphaBeta(low, high)
 	return mtdf
 }
@@ -65,18 +65,16 @@ func (mtdf *Mtdf) SetAlphaBeta(alpha, beta int) {
 	mtdf.high = beta
 }
 
+func (mtdf *Mtdf) ClearHashTable() {
+	for key := range mtdf.hashtable {
+		delete(mtdf.hashtable, key)
+	}
+}
+
 func (mtdf *Mtdf) Search(board othello.Board, depth int) int {
 	mtdf.board = board
-	mtdf.depth = depth
-	if mtdf.hashtable == nil {
-		mtdf.hashtable = make(map[hashtableKey]bounds, 100000)
-	} else {
-		for key := range mtdf.hashtable {
-			delete(mtdf.hashtable, key)
-		}
-	}
 	mtdf.Stats.StartClock()
-	heuristic := mtdf.slideWindow()
+	heuristic := mtdf.slideWindow(depth)
 	mtdf.Stats.StopClock()
 	return heuristic
 }
@@ -87,12 +85,12 @@ func (mtdf *Mtdf) ExactSearch(board othello.Board) int {
 	return mtdf.Search(board, 60) / ExactScoreFactor
 }
 
-func (mtdf *Mtdf) slideWindow() int {
+func (mtdf *Mtdf) slideWindow(depth int) int {
 
 	var f int
 
 	var step int
-	if mtdf.board.CountEmpties() > mtdf.depth {
+	if mtdf.board.CountEmpties() > depth {
 		f = heuristics.FastHeuristic(mtdf.board)
 		step = 1
 	} else {
@@ -112,7 +110,7 @@ func (mtdf *Mtdf) slideWindow() int {
 	}
 
 	for mtdf.high-mtdf.low >= step {
-		var bound = -mtdf.search(-(f + 1))
+		var bound = -mtdf.search(-(f + 1), depth)
 
 		if f == bound {
 			f -= step
@@ -133,25 +131,29 @@ func (mtdf *Mtdf) polish(heur, alpha int) int {
 	return alpha
 }
 
-func (mtdf *Mtdf) search(alpha int) int {
+func (mtdf *Mtdf) search(alpha, depth int) int {
 
 	mtdf.Stats.Nodes++
 
-	if mtdf.depth <= 4 {
-		return mtdf.searchNoHashtable(alpha)
+	if depth == 0 {
+		return mtdf.polish(heuristics.FastHeuristic(mtdf.board), alpha)
 	}
 
-	key := hashtableKey{
-		board: mtdf.board.Normalize(),
-		depth: mtdf.depth}
+	var key hashtableKey
 
-	entry, ok := mtdf.hashtable[key]
-	if ok {
-		if entry.high <= alpha {
-			return alpha
-		}
-		if entry.low >= alpha+1 {
-			return alpha + 1
+	if depth > 4 {
+		key = hashtableKey{
+			board: mtdf.board.Normalize(),
+			depth: depth}
+
+		entry, ok := mtdf.hashtable[key]
+		if ok {
+			if entry.high <= alpha {
+				return alpha
+			}
+			if entry.low >= alpha+1 {
+				return alpha + 1
+			}
 		}
 	}
 
@@ -161,7 +163,7 @@ func (mtdf *Mtdf) search(alpha int) int {
 
 		if mtdf.board.OpponentMoves() != 0 {
 			mtdf.board.SwitchTurn()
-			heur := -mtdf.search(-(alpha + 1))
+			heur := -mtdf.search(-(alpha + 1), depth)
 			mtdf.board.SwitchTurn()
 			return heur
 		}
@@ -171,9 +173,7 @@ func (mtdf *Mtdf) search(alpha int) int {
 
 	heur := alpha
 	for gen.Next() {
-		mtdf.depth--
-		childHeur := -mtdf.search(-(alpha + 1))
-		mtdf.depth++
+		childHeur := -mtdf.search(-(alpha + 1), depth-1)
 		if childHeur > alpha {
 			gen.RestoreParent()
 			heur = alpha + 1
@@ -181,28 +181,31 @@ func (mtdf *Mtdf) search(alpha int) int {
 		}
 	}
 
-	entry, ok = mtdf.hashtable[key]
+	if depth > 4 {
+		entry, ok := mtdf.hashtable[key]
 
-	if !ok {
-		entry = bounds{
-			high: MaxHeuristic,
-			low:  MinHeuristic}
-	}
-
-	if heur == alpha {
-		if alpha < entry.high {
-			entry.high = alpha
+		if !ok {
+			entry = bounds{
+				high: MaxHeuristic,
+				low:  MinHeuristic}
 		}
-	} else {
-		if alpha+1 > entry.low {
-			entry.low = alpha + 1
-		}
-	}
 
-	mtdf.hashtable[key] = entry
+		if heur == alpha {
+			if alpha < entry.high {
+				entry.high = alpha
+			}
+		} else {
+			if alpha+1 > entry.low {
+				entry.low = alpha + 1
+			}
+		}
+
+		mtdf.hashtable[key] = entry
+	}
 	return heur
 }
 
+/*
 func (mtdf *Mtdf) searchNoHashtable(alpha int) (heur int) {
 
 	mtdf.Stats.Nodes++
@@ -236,3 +239,4 @@ func (mtdf *Mtdf) searchNoHashtable(alpha int) (heur int) {
 	}
 	return alpha
 }
+*/
