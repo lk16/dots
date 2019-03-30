@@ -90,7 +90,7 @@ func (mtdf *Mtdf) slideWindow(depth int) int {
 	var f int
 
 	var step int
-	if mtdf.board.CountEmpties() > depth {
+	if mtdf.board.CountEmpties() >= depth {
 		f = heuristics.FastHeuristic(mtdf.board)
 		step = 1
 	} else {

@@ -24,9 +24,6 @@ func TestTreeSearch(t *testing.T) {
 		results := make(map[string]int, len(algos))
 
 		for _, algo := range algos {
-			if (algo.Name() == "minimax" || algo.Name() == "negamax") && depth >= 4 {
-				continue
-			}
 
 			result := algo.Search(*board, depth)
 
@@ -44,13 +41,10 @@ func TestTreeSearch(t *testing.T) {
 		}
 
 		if len(resultsSet) > 1 {
+			fmt.Printf("\n")
 			msg := "Found inconsistent tree search results:\n"
 			for _, algo := range algos {
-				if result, ok := results[algo.Name()]; ok {
-					msg += fmt.Sprintf("%10s: %5d\n", algo.Name(), result)
-				} else {
-					msg += fmt.Sprintf("%10s: <skipped>\n", algo.Name())
-				}
+				msg += fmt.Sprintf("%10s: %5d\n", algo.Name(), results[algo.Name()])
 			}
 			var buff bytes.Buffer
 			board.ASCIIArt(&buff, false)
@@ -61,18 +55,18 @@ func TestTreeSearch(t *testing.T) {
 	}
 
 	rand.Seed(0)
+	testedBoards := 0
 
-	for depth := 0; depth <= 4; depth++ {
+	for depth := 0; depth <= 5; depth++ {
 		for discs := 4; discs <= 64; discs++ {
-			for i := 0; i <= 5; i++ {
+			for i := 0; i <= 20; i++ {
+				fmt.Printf("\rTesting board %10d", testedBoards)
+				testedBoards++
 				internal(t, discs, depth)
 			}
 		}
 	}
-
-	for i := 0; i < 20; i++ {
-		internal(t, 8, 6)
-	}
+	fmt.Printf("\n")
 }
 
 func Benchmark8Deep(b *testing.B) {
