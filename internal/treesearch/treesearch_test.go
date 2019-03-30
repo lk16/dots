@@ -13,8 +13,6 @@ func TestTreeSearch(t *testing.T) {
 	internal := func(t *testing.T, discs, depth int) {
 		algos := []Interface{
 			NewMinimax(),
-			NewNegaMax(),
-			NewAlphaBeta(MinHeuristic, MaxHeuristic),
 			NewMtdf(MinHeuristic, MaxHeuristic)}
 		board, err := othello.RandomBoard(discs)
 		if err != nil {
@@ -73,8 +71,6 @@ func Benchmark8Deep(b *testing.B) {
 
 	algos := []Interface{
 		NewMinimax(),
-		NewNegaMax(),
-		NewAlphaBeta(MinHeuristic, MaxHeuristic),
 		NewMtdf(MinHeuristic, MaxHeuristic)}
 
 	for _, algo := range algos {
