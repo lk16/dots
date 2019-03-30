@@ -246,7 +246,7 @@ func TestBoardDoMove(t *testing.T) {
 			expectedBoard := clone
 
 			clone = board
-			gotReturn := clone.DoMove(int(i))
+			gotReturn := clone.DoMove(uint64(1 << i))
 			gotBoard := clone
 
 			if (gotReturn != expectedReturn) || (gotBoard != expectedBoard) {
@@ -268,7 +268,7 @@ func (board Board) moves() uint64 {
 
 	for i := uint(0); i < 64; i++ {
 		clone := board
-		if (empties&(uint64(1)<<i) != 0) && clone.DoMove(int(i)) != 0 {
+		if (empties&(uint64(1)<<i) != 0) && clone.DoMove(uint64(1<<i)) != 0 {
 			moves |= uint64(1) << i
 		}
 	}
@@ -700,14 +700,15 @@ func BenchmarkPotentialMoveCountDifference(b *testing.B) {
 	b.StopTimer()
 }
 
-var dummyBitset uint64
+var dummyBoardSlice []Board
 
-func BenchmarkDoMove0(b *testing.B) {
-	board := NewBoard()
+func BenchmarkGetChildrenXot(b *testing.B) {
+	rand.Seed(0)
+	board := NewXotBoard()
 	b.ResetTimer()
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		dummyBitset = board.DoMove(0)
+		dummyBoardSlice = board.GetChildren()
 	}
 	b.StopTimer()
 }
