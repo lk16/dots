@@ -35,6 +35,8 @@ golangci-lint run
 
 
 - [ ] cleaning
+    - [ ] make bot return error if asked to do move when there are no moves
+        - [ ] update treesearch for this
     - [ ] move alpha/beta from initializers to Search()/SearchExact()
     - [ ] introduce SearchWinner()
     - [ ] move GameState from frontend to othello package
