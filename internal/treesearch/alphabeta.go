@@ -35,7 +35,7 @@ func (alphabeta *AlphaBeta) ExactSearch(board othello.Board) int {
 func (alphabeta *AlphaBeta) search(alpha, beta int) int {
 
 	if alphabeta.depth == 0 {
-		return heuristics.Squared(alphabeta.board)
+		return heuristics.FastHeuristic(alphabeta.board)
 	}
 
 	gen := othello.NewUnsortedChildGenerator(&alphabeta.board)

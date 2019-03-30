@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/lk16/dots/internal/othello"
+	"math/rand"
 	"testing"
 )
 
@@ -46,9 +47,9 @@ func TestTreeSearch(t *testing.T) {
 			msg := "Found inconsistent tree search results:\n"
 			for _, algo := range algos {
 				if result, ok := results[algo.Name()]; ok {
-					msg += fmt.Sprintf("%s: %d\n", algo.Name(), result)
+					msg += fmt.Sprintf("%10s: %5d\n", algo.Name(), result)
 				} else {
-					msg += fmt.Sprintf("%s: <skipped>\n", algo.Name())
+					msg += fmt.Sprintf("%10s: <skipped>\n", algo.Name())
 				}
 			}
 			var buff bytes.Buffer
@@ -59,7 +60,9 @@ func TestTreeSearch(t *testing.T) {
 		}
 	}
 
-	for depth := 1; depth <= 4; depth++ {
+	rand.Seed(0)
+
+	for depth := 0; depth <= 4; depth++ {
 		for discs := 4; discs <= 64; discs++ {
 			for i := 0; i <= 5; i++ {
 				internal(t, discs, depth)

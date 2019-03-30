@@ -27,7 +27,7 @@ func (negamax *NegaMax) ExactSearch(board othello.Board) int {
 func (negamax *NegaMax) search(board othello.Board, depth int) int {
 
 	if depth == 0 {
-		return heuristics.Squared(board)
+		return heuristics.FastHeuristic(board)
 	}
 
 	child := board

@@ -26,7 +26,7 @@ func (minimax *MiniMax) ExactSearch(board othello.Board) int {
 func (minimax *MiniMax) search(board othello.Board, depth int, maxPlayer bool) int {
 
 	if depth == 0 {
-		heur := heuristics.Squared(board)
+		heur := heuristics.FastHeuristic(board)
 		if !maxPlayer {
 			heur = -heur
 		}
