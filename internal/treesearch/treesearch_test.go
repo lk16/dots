@@ -10,40 +10,26 @@ import (
 
 func TestTreeSearch(t *testing.T) {
 
-	internal := func(t *testing.T, discs, depth int) {
-		algos := []Interface{
-			NewMinimax(),
-			NewMtdf(MinHeuristic, MaxHeuristic)}
-		board, err := othello.RandomBoard(discs)
-		if err != nil {
-			t.Errorf("Failed to generate random board: %s", err)
+	internal := func(t *testing.T, discs, depth int, board othello.Board) {
+
+		minimax := (Interface)(NewMinimax())
+		mtdf := (Interface)(NewMtdf(MinHeuristic, MaxHeuristic))
+
+		minimaxResult := minimax.Search(board, depth)
+
+		if minimaxResult <= -200 || minimaxResult >= 200 {
+			// skip exact search
+			return
 		}
 
-		results := make(map[string]int, len(algos))
+		mtdfResult := mtdf.Search(board, depth)
 
-		for _, algo := range algos {
-
-			result := algo.Search(*board, depth)
-
-			if result <= -200 || result >= 200 {
-				// skip exact search
-				break
-			}
-			results[algo.Name()] = result
-		}
-
-		resultsSet := make(map[int]struct{}, len(algos))
-
-		for _, result := range results {
-			resultsSet[result] = struct{}{}
-		}
-
-		if len(resultsSet) > 1 {
+		if minimaxResult != mtdfResult {
 			fmt.Printf("\n")
 			msg := "Found inconsistent tree search results:\n"
-			for _, algo := range algos {
-				msg += fmt.Sprintf("%10s: %5d\n", algo.Name(), results[algo.Name()])
-			}
+			msg += fmt.Sprintf("%10s: %5d\n", minimax.Name(), minimaxResult)
+			msg += fmt.Sprintf("%10s: %5d\n", mtdf.Name(), mtdfResult)
+
 			var buff bytes.Buffer
 			board.ASCIIArt(&buff, false)
 			msg += fmt.Sprintf("for this board at depth %d:\n\n%s", depth, buff.String())
@@ -53,18 +39,35 @@ func TestTreeSearch(t *testing.T) {
 	}
 
 	rand.Seed(0)
-	testedBoards := 0
+	testedBoards := make(map[othello.Board]struct{})
 
-	for depth := 0; depth <= 5; depth++ {
+	for depth := 0; depth <= 4; depth++ {
 		for discs := 4; discs <= 64; discs++ {
-			for i := 0; i <= 20; i++ {
-				fmt.Printf("\rTesting board %10d", testedBoards)
-				testedBoards++
-				internal(t, discs, depth)
+			for i := 0; i < 100; i++ {
+
+				board, err := othello.RandomBoard(discs)
+				if err != nil {
+					t.Errorf("Failed to generate random board: %s", err)
+				}
+
+				if board.Moves() == 0 {
+					continue
+				}
+
+				normalized := board.Normalize()
+
+				if _, ok := testedBoards[normalized]; ok {
+					continue
+				}
+
+				testedBoards[normalized] = struct{}{}
+
+				fmt.Printf("\rTesting board %10d", len(testedBoards))
+				internal(t, discs, depth, *board)
 			}
 		}
 	}
-	fmt.Printf("\n")
+	fmt.Printf("\rTesting board %10d\n", len(testedBoards))
 }
 
 func Benchmark8Deep(b *testing.B) {

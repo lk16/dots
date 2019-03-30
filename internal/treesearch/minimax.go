@@ -16,6 +16,11 @@ func (minimax *MiniMax) Name() string {
 }
 
 func (minimax *MiniMax) Search(board othello.Board, depth int) int {
+
+	if depth > board.CountEmpties() {
+		depth = board.CountEmpties()
+	}
+
 	return -minimax.search(board, depth, true)
 }
 
@@ -53,7 +58,6 @@ func (minimax *MiniMax) search(board othello.Board, depth int, maxPlayer bool) i
 				heur = childHeur
 			}
 		}
-		return heur
 	}
 
 	heur := MaxHeuristic
@@ -64,5 +68,4 @@ func (minimax *MiniMax) search(board othello.Board, depth int, maxPlayer bool) i
 		}
 	}
 	return heur
-
 }

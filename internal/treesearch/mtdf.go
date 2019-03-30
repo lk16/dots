@@ -72,6 +72,11 @@ func (mtdf *Mtdf) ClearHashTable() {
 }
 
 func (mtdf *Mtdf) Search(board othello.Board, depth int) int {
+
+	if depth > board.CountEmpties() {
+		depth = board.CountEmpties()
+	}
+
 	mtdf.board = board
 	mtdf.Stats.StartClock()
 	heuristic := mtdf.slideWindow(depth)
