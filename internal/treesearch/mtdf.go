@@ -131,6 +131,62 @@ func (mtdf *Mtdf) polish(heur, alpha int) int {
 	return alpha
 }
 
+func (mtdf *Mtdf) handleNoMoves(alpha, depth int) int {
+
+	if mtdf.board.OpponentMoves() == 0 {
+		return mtdf.polish(ExactScoreFactor*mtdf.board.ExactScore(), alpha)
+	}
+
+	mtdf.board.SwitchTurn()
+	heur := -mtdf.search(-(alpha + 1), depth)
+	mtdf.board.SwitchTurn()
+	return heur
+}
+
+func (mtdf *Mtdf) checkHashTable(alpha, depth int) (int, bool) {
+	key := hashtableKey{
+		board: mtdf.board.Normalize(),
+		depth: depth}
+
+	entry, ok := mtdf.hashtable[key]
+	if ok {
+		if entry.high <= alpha {
+			return alpha, true
+		}
+		if entry.low >= alpha+1 {
+			return alpha + 1, true
+		}
+	}
+	return 0, false
+}
+
+func (mtdf *Mtdf) updateHashTable(alpha, depth, heur int) {
+
+	key := hashtableKey{
+		board: mtdf.board.Normalize(),
+		depth: depth}
+
+	entry, ok := mtdf.hashtable[key]
+
+	if !ok {
+		entry = bounds{
+			high: MaxHeuristic,
+			low:  MinHeuristic}
+	}
+
+	if heur == alpha {
+		if alpha < entry.high {
+			entry.high = alpha
+		}
+	} else {
+		if alpha+1 > entry.low {
+			entry.low = alpha + 1
+		}
+	}
+
+	mtdf.hashtable[key] = entry
+}
+
 func (mtdf *Mtdf) search(alpha, depth int) int {
 
 	mtdf.Stats.Nodes++
@@ -139,36 +195,15 @@ func (mtdf *Mtdf) search(alpha, depth int) int {
 		return mtdf.polish(heuristics.FastHeuristic(mtdf.board), alpha)
 	}
 
-	var key hashtableKey
-
 	if depth > 4 {
-		key = hashtableKey{
-			board: mtdf.board.Normalize(),
-			depth: depth}
-
-		entry, ok := mtdf.hashtable[key]
-		if ok {
-			if entry.high <= alpha {
-				return alpha
-			}
-			if entry.low >= alpha+1 {
-				return alpha + 1
-			}
+		if heur, ok := mtdf.checkHashTable(alpha, depth); ok {
+			return heur
 		}
 	}
 
 	gen := othello.NewUnsortedChildGenerator(&mtdf.board)
-
 	if !gen.HasMoves() {
-
-		if mtdf.board.OpponentMoves() != 0 {
-			mtdf.board.SwitchTurn()
-			heur := -mtdf.search(-(alpha + 1), depth)
-			mtdf.board.SwitchTurn()
-			return heur
-		}
-
-		return mtdf.polish(ExactScoreFactor*mtdf.board.ExactScore(), alpha)
+		return mtdf.handleNoMoves(alpha, depth)
 	}
 
 	heur := alpha
@@ -182,61 +217,8 @@ func (mtdf *Mtdf) search(alpha, depth int) int {
 	}
 
 	if depth > 4 {
-		entry, ok := mtdf.hashtable[key]
-
-		if !ok {
-			entry = bounds{
-				high: MaxHeuristic,
-				low:  MinHeuristic}
-		}
-
-		if heur == alpha {
-			if alpha < entry.high {
-				entry.high = alpha
-			}
-		} else {
-			if alpha+1 > entry.low {
-				entry.low = alpha + 1
-			}
-		}
-
-		mtdf.hashtable[key] = entry
+		mtdf.updateHashTable(alpha, depth, heur)
 	}
+
 	return heur
 }
-
-/*
-func (mtdf *Mtdf) searchNoHashtable(alpha int) (heur int) {
-
-	mtdf.Stats.Nodes++
-
-	if mtdf.depth == 0 {
-		return mtdf.polish(heuristics.FastHeuristic(mtdf.board), alpha)
-	}
-
-	gen := othello.NewUnsortedChildGenerator(&mtdf.board)
-
-	if !gen.HasMoves() {
-
-		if mtdf.board.OpponentMoves() != 0 {
-			mtdf.board.SwitchTurn()
-			heur = -mtdf.searchNoHashtable(-(alpha + 1))
-			mtdf.board.SwitchTurn()
-			return
-		}
-
-		return mtdf.polish(ExactScoreFactor*mtdf.board.ExactScore(), alpha)
-	}
-
-	for gen.Next() {
-		mtdf.depth--
-		childHeur := -mtdf.searchNoHashtable(-(alpha + 1))
-		mtdf.depth++
-		if childHeur > alpha {
-			gen.RestoreParent()
-			return alpha + 1
-		}
-	}
-	return alpha
-}
-*/
