@@ -35,11 +35,6 @@ golangci-lint run
 
 
 - [ ] cleaning
-    - [ ] make bot return error if asked to do move when there are no moves
-        - [ ] update treesearch test for this
-    - [ ] move alpha/beta from initializers to Search()/SearchExact()
-    - [ ] treesearch test for SearchExact()
-    - [ ] introduce SearchWinner()
     - [ ] move GameState from frontend to othello package
     - [ ] move web.newState() and web.getBoard() to othello package
     - [ ] go linting
@@ -50,6 +45,12 @@ golangci-lint run
     - [ ] cleaner error handling (after go 2 release)
 
 - [ ] bot
+
+    - [ ] make bot return error if asked to do move when there are no moves
+        - [ ] update treesearch test for this
+    - [ ] move alpha/beta from initializers to Search()/SearchExact()
+    - [ ] treesearch test for SearchExact()
+    - [ ] introduce SearchWinner()
     - [ ] use Board.potentialMoves() to create faster Moves() ?
     - [ ] allow faster killing of analysis go-routines
     - [ ] fix pending bugs from treesearch

@@ -5,16 +5,20 @@ import (
 	"github.com/lk16/dots/internal/othello"
 )
 
+// MiniMax implements the minimax tree search algorithm
 type MiniMax struct{}
 
+// NewMinimax returns a new MiniMax
 func NewMinimax() *MiniMax {
 	return &MiniMax{}
 }
 
+// Name returns the tree search algorithm name
 func (minimax *MiniMax) Name() string {
 	return "minimax"
 }
 
+// Search searches for the the best move up to a certain depth
 func (minimax *MiniMax) Search(board othello.Board, depth int) int {
 
 	if depth > board.CountEmpties() {
@@ -24,6 +28,7 @@ func (minimax *MiniMax) Search(board othello.Board, depth int) int {
 	return -minimax.search(board, depth, true)
 }
 
+// ExactSearch searches for the best move without a depth limitation
 func (minimax *MiniMax) ExactSearch(board othello.Board) int {
 	return minimax.Search(board, 60)
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/lk16/dots/internal/othello"
-	"github.com/lk16/dots/internal/players"
 	"github.com/lk16/dots/internal/treesearch"
 	"log"
 	"math/bits"
@@ -210,8 +209,12 @@ func (mws *moveWebSocket) handlebotMoveRequest(request interface{}) error {
 }
 
 func (mws *moveWebSocket) sendBotMoveReply(board othello.Board, turn int) {
-	bot := players.NewBotHeuristic(os.Stdout, 10, 16)
-	bestMove := bot.DoMove(board)
+	bot := treesearch.NewBot(os.Stdout, 10, 16)
+	bestMove, err := bot.DoMove(board)
+	if err != nil {
+		log.Printf("sendBotMoveReply(): %s", err)
+		return
+	}
 
 	nextTurn := 1 - turn
 	if board.Moves() == 0 {
@@ -220,9 +223,9 @@ func (mws *moveWebSocket) sendBotMoveReply(board othello.Board, turn int) {
 	}
 
 	message := newWsMessage(&botMoveReply{
-		State: newState(bestMove, nextTurn)})
+		State: newState(*bestMove, nextTurn)})
 
-	err := mws.send(message)
+	err = mws.send(message)
 	if err != nil {
 		log.Printf("sendBotMoveReply(): %s", err)
 	}

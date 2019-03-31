@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/lk16/dots/internal/othello"
-	"github.com/lk16/dots/internal/players"
+	"github.com/lk16/dots/internal/treesearch"
 	"github.com/lk16/dots/internal/web"
 	"log"
 	"math/rand"
@@ -56,7 +56,7 @@ func main() {
 			for i := 0; i < 1; i++ {
 				board := othello.NewXotBoard()
 				board.ASCIIArt(os.Stdout, false)
-				bot := players.NewBotHeuristic(os.Stdout, 12, 0)
+				bot := treesearch.NewBot(os.Stdout, 12, 0)
 				bot.DoMove(board)
 			}
 		})

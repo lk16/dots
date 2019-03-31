@@ -71,6 +71,7 @@ func (mtdf *Mtdf) ClearHashTable() {
 	}
 }
 
+// Search searches for the the best move up to a certain depth
 func (mtdf *Mtdf) Search(board othello.Board, depth int) int {
 
 	if depth > board.CountEmpties() {
@@ -84,6 +85,7 @@ func (mtdf *Mtdf) Search(board othello.Board, depth int) int {
 	return heuristic
 }
 
+// ExactSearch searches for the best move without a depth limitation
 func (mtdf *Mtdf) ExactSearch(board othello.Board) int {
 	mtdf.high = MaxHeuristic
 	mtdf.low = MinHeuristic
