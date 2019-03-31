@@ -50,10 +50,6 @@ func TestTreeSearch(t *testing.T) {
 					t.Errorf("Failed to generate random board: %s", err)
 				}
 
-				if board.Moves() == 0 {
-					continue
-				}
-
 				normalized := board.Normalize()
 
 				if _, ok := testedBoards[normalized]; ok {

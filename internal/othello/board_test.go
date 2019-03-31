@@ -404,7 +404,7 @@ func TestBoardAsciiArt(t *testing.T) {
 				expected.WriteString("|\n")
 			}
 
-			expected.WriteString("+-----------------+\n")
+			expected.WriteString("+-----------------+\nTo move: ○\n")
 
 			got := new(bytes.Buffer)
 			clone = board

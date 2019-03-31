@@ -82,6 +82,13 @@ func (mtdf *Mtdf) Search(board othello.Board, depth int) int {
 		depth = board.CountEmpties()
 	}
 
+	if board.Moves() == 0 && board.OpponentMoves() != 0 {
+		board.SwitchTurn()
+		heur := mtdf.Search(board, depth)
+		board.SwitchTurn()
+		return heur
+	}
+
 	mtdf.board = board
 	mtdf.Stats.StartClock()
 	heuristic := mtdf.slideWindow(depth)

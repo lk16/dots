@@ -24,6 +24,13 @@ func (minimax *MiniMax) Search(board othello.Board, depth int) int {
 		depth = board.CountEmpties()
 	}
 
+	if board.Moves() == 0 && board.OpponentMoves() != 0 {
+		board.SwitchTurn()
+		heur := minimax.Search(board, depth)
+		board.SwitchTurn()
+		return heur
+	}
+
 	return -minimax.search(board, depth, true)
 }
 
