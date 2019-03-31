@@ -1,3 +1,4 @@
+// Package treesearch contains algorithms for Board evaluation
 package treesearch
 
 import "github.com/lk16/dots/internal/othello"
@@ -20,6 +21,7 @@ const (
 	MinHeuristic = ExactScoreFactor * MinScore
 )
 
+// Interface is the interface for tree search algorithms
 type Interface interface {
 	Name() string
 	Search(board othello.Board, depth int) int

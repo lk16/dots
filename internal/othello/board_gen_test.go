@@ -10,7 +10,10 @@ func TestBoardChildGenNext(t *testing.T) {
 		t.SkipNow()
 	}
 
-	for board := range genTestBoards() {
+	for b := range genTestBoards() {
+
+		// create copy to silence warnings
+		board := b
 
 		if !boardIsValid(&board) {
 			continue

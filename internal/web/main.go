@@ -90,7 +90,10 @@ func root(w http.ResponseWriter, _ *http.Request) {
 		log.Printf("error opening file: %s", err)
 		return
 	}
-	_, _ = w.Write(buff)
+	_, err = w.Write(buff)
+	if err != nil {
+		log.Printf("response writer Write() failed: %s", err)
+	}
 }
 
 func svgField(w http.ResponseWriter, r *http.Request) {
@@ -164,6 +167,7 @@ func svgIcon(w http.ResponseWriter, _ *http.Request) {
 	canvas.End()
 }
 
+// Main initializes and runs the dots webserver
 func Main() {
 	http.HandleFunc("/ws", ws)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("internal/web/static"))))

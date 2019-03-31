@@ -1,4 +1,4 @@
-package heuristics
+package treesearch
 
 import (
 	"github.com/lk16/dots/internal/othello"

@@ -276,7 +276,10 @@ func (board Board) moves() uint64 {
 }
 
 func TestBoardMoves(t *testing.T) {
-	for board := range genTestBoards() {
+	for b := range genTestBoards() {
+
+		// create copy to silence warnings
+		board := b
 
 		if !boardIsValid(&board) {
 			continue
@@ -310,7 +313,10 @@ func (board *Board) getChildren() []Board {
 }
 
 func TestBoardGetChildren(t *testing.T) {
-	for board := range genTestBoards() {
+	for b := range genTestBoards() {
+
+		// create copy to silence warnings
+		board := b
 
 		if !boardIsValid(&board) {
 			continue
@@ -340,7 +346,10 @@ func TestBoardGetChildren(t *testing.T) {
 				t.Fatalf("Pieces were removed from othello with othello.GetChildren()\n")
 			}
 
-			if !boardIsValid(&child) {
+			// create copy to silence warnings
+			childCopy := child
+
+			if !boardIsValid(&childCopy) {
 				t.Fatalf("Valid othello:\n%s\n\nInvalid child:\n%s\n\n",
 					board.asciiArtString(false), child.asciiArtString(false))
 			}
@@ -415,7 +424,11 @@ func TestBoardAsciiArt(t *testing.T) {
 }
 
 func TestBoardDoRandomMove(t *testing.T) {
-	for board := range genTestBoards() {
+	for b := range genTestBoards() {
+
+		// make copy to silence warnings
+		board := b
+
 		clone := board
 
 		clone.DoRandomMove()

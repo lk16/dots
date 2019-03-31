@@ -1,7 +1,6 @@
 package treesearch
 
 import (
-	"github.com/lk16/dots/internal/heuristics"
 	"github.com/lk16/dots/internal/othello"
 	"time"
 )
@@ -41,6 +40,7 @@ type bounds struct {
 	low  int
 }
 
+// Mtdf implements the mtdf tree search algorithm
 type Mtdf struct {
 	board     othello.Board
 	high      int
@@ -49,6 +49,7 @@ type Mtdf struct {
 	Stats     stats
 }
 
+// NewMtdf returns a new Mtdf
 func NewMtdf(low, high int) *Mtdf {
 	mtdf := &Mtdf{
 		hashtable: make(map[hashtableKey]bounds, 100000)}
@@ -56,15 +57,18 @@ func NewMtdf(low, high int) *Mtdf {
 	return mtdf
 }
 
+// Name returns the tree search algorithm name
 func (mtdf *Mtdf) Name() string {
 	return "mtdf"
 }
 
+// SetAlphaBeta updates the bounds for next Search() call
 func (mtdf *Mtdf) SetAlphaBeta(alpha, beta int) {
 	mtdf.low = alpha
 	mtdf.high = beta
 }
 
+// ClearHashTable clears the Mtdf hash table
 func (mtdf *Mtdf) ClearHashTable() {
 	for key := range mtdf.hashtable {
 		delete(mtdf.hashtable, key)
@@ -98,7 +102,7 @@ func (mtdf *Mtdf) slideWindow(depth int) int {
 
 	var step int
 	if mtdf.board.CountEmpties() >= depth {
-		f = heuristics.FastHeuristic(mtdf.board)
+		f = FastHeuristic(mtdf.board)
 		step = 1
 	} else {
 		f = 0
@@ -199,7 +203,7 @@ func (mtdf *Mtdf) search(alpha, depth int) int {
 	mtdf.Stats.Nodes++
 
 	if depth == 0 {
-		return mtdf.polish(heuristics.FastHeuristic(mtdf.board), alpha)
+		return mtdf.polish(FastHeuristic(mtdf.board), alpha)
 	}
 
 	if depth > 4 {

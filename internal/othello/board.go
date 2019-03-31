@@ -12,28 +12,28 @@ import (
 const (
 	cornerMask  = uint64(1<<0 | 1<<7 | 1<<56 | 1<<63)
 	xSquareMask = uint64(1<<9 | 1<<14 | 1<<49 | 1<<54)
-	cSquareMask = uint64(1<<1 | 1<<6 | 1<<8 | 1<<15 | 1<<48 | 1<<53 | 1<<55 | 1<<62)
+	cSquareMask = uint64(1<<1 | 1<<6 | 1<<8 | 1<<15 | 1<<48 | 1<<55 | 1<<57 | 1<<62)
 )
 
 func bitsetASCIIArtString(bs uint64) string {
 	buffer := new(bytes.Buffer)
-	buffer.WriteString("+-a-b-c-d-e-f-g-h-+\n")
+	_, _ = buffer.WriteString("+-a-b-c-d-e-f-g-h-+\n")
 
 	for y := uint(0); y < 8; y++ {
-		buffer.WriteString(fmt.Sprintf("%d ", y+1))
+		_, _ = buffer.WriteString(fmt.Sprintf("%d ", y+1))
 
 		for x := uint(0); x < 8; x++ {
 			f := y*8 + x
 			if bs&uint64(1<<f) != 0 {
-				buffer.WriteString("@ ")
+				_, _ = buffer.WriteString("@ ")
 			} else {
-				buffer.WriteString("- ")
+				_, _ = buffer.WriteString("- ")
 			}
 
 		}
-		buffer.WriteString("|\n")
+		_, _ = buffer.WriteString("|\n")
 	}
-	buffer.WriteString("+-----------------+\n")
+	_, _ = buffer.WriteString("+-----------------+\n")
 
 	return buffer.String()
 }
@@ -159,7 +159,7 @@ func (board Board) Normalize() Board {
 func (board Board) ASCIIArt(writer io.Writer, swapDiscColors bool) {
 
 	buffer := new(bytes.Buffer)
-	buffer.WriteString("+-a-b-c-d-e-f-g-h-+\n")
+	_, _ = buffer.WriteString("+-a-b-c-d-e-f-g-h-+\n")
 
 	moves := board.Moves()
 
@@ -168,24 +168,24 @@ func (board Board) ASCIIArt(writer io.Writer, swapDiscColors bool) {
 	}
 
 	for y := uint(0); y < 8; y++ {
-		buffer.WriteString(fmt.Sprintf("%d ", y+1))
+		_, _ = buffer.WriteString(fmt.Sprintf("%d ", y+1))
 
 		for x := uint(0); x < 8; x++ {
 			mask := uint64(1) << (y*8 + x)
 			if board.me&mask != 0 {
-				buffer.WriteString("○ ")
+				_, _ = buffer.WriteString("○ ")
 			} else if board.opp&mask != 0 {
-				buffer.WriteString("● ")
+				_, _ = buffer.WriteString("● ")
 			} else if moves&mask != 0 {
-				buffer.WriteString("- ")
+				_, _ = buffer.WriteString("- ")
 			} else {
-				buffer.WriteString("  ")
+				_, _ = buffer.WriteString("  ")
 			}
 		}
 
-		buffer.WriteString("|\n")
+		_, _ = buffer.WriteString("|\n")
 	}
-	buffer.WriteString("+-----------------+\n")
+	_, _ = buffer.WriteString("+-----------------+\n")
 
 	_, err := writer.Write(buffer.Bytes())
 	if err != nil {

@@ -57,7 +57,10 @@ func main() {
 				board := othello.NewXotBoard()
 				board.ASCIIArt(os.Stdout, false)
 				bot := treesearch.NewBot(os.Stdout, 12, 0)
-				bot.DoMove(board)
+				_, err := bot.DoMove(board)
+				if err != nil {
+					log.Printf("error: %s", err)
+				}
 			}
 		})
 		return

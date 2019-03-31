@@ -1,7 +1,6 @@
 package treesearch
 
 import (
-	"github.com/lk16/dots/internal/heuristics"
 	"github.com/lk16/dots/internal/othello"
 )
 
@@ -36,7 +35,7 @@ func (minimax *MiniMax) ExactSearch(board othello.Board) int {
 func (minimax *MiniMax) search(board othello.Board, depth int, maxPlayer bool) int {
 
 	if depth == 0 {
-		heur := heuristics.FastHeuristic(board)
+		heur := FastHeuristic(board)
 		if !maxPlayer {
 			heur = -heur
 		}

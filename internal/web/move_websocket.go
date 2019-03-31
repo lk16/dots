@@ -69,7 +69,12 @@ func (mws *moveWebSocket) send(message *wsMessage) error {
 }
 
 func (mws *moveWebSocket) loop() {
-	defer mws.ws.Close()
+	defer func() {
+		err := mws.ws.Close()
+		if err != nil {
+			log.Printf("Error closing websocket: %s", err)
+		}
+	}()
 	for {
 		_, rawMessage, err := mws.ws.ReadMessage()
 		if err != nil {
