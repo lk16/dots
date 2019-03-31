@@ -45,10 +45,7 @@ golangci-lint run
     - [ ] cleaner error handling (after go 2 release)
 
 - [ ] bot
-
-    - [ ] make bot return error if asked to do move when there are no moves
-        - [ ] update treesearch test for this
-    - [ ] move alpha/beta from initializers to Search()/SearchExact()
+    - [ ] SearchExact() is completely broken
     - [ ] treesearch test for SearchExact()
     - [ ] introduce SearchWinner()
     - [ ] use Board.potentialMoves() to create faster Moves() ?

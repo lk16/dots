@@ -13,16 +13,13 @@ func TestTreeSearch(t *testing.T) {
 	internal := func(t *testing.T, discs, depth int, board othello.Board) {
 
 		minimax := (Interface)(NewMinimax())
-		mtdf := (Interface)(NewMtdf(MinHeuristic, MaxHeuristic))
+		mtdf := (Interface)(NewMtdf())
 
-		minimaxResult := minimax.Search(board, depth)
+		bound := (2 * ExactScoreFactor) - 1
 
-		if minimaxResult <= -200 || minimaxResult >= 200 {
-			// skip exact search
-			return
-		}
+		minimaxResult := minimax.Search(board, -bound, bound, depth)
 
-		mtdfResult := mtdf.Search(board, depth)
+		mtdfResult := mtdf.Search(board, -bound, bound, depth)
 
 		if minimaxResult != mtdfResult {
 			fmt.Printf("\n")

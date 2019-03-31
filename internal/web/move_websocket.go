@@ -137,7 +137,7 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 
 		for i := range analyzedChildren {
 
-			bot := treesearch.NewMtdf(treesearch.MinHeuristic, treesearch.MaxHeuristic)
+			bot := treesearch.NewMtdf()
 
 			if mws.getAnalyzedBoard() != board {
 				return
@@ -147,7 +147,7 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 				Board:     evaluated,
 				Depth:     depth,
 				Move:      analyzedChildren[i].analysis.Move,
-				Heuristic: bot.Search(analyzedChildren[i].child, depth)}
+				Heuristic: bot.Search(analyzedChildren[i].child, treesearch.MinHeuristic, treesearch.MaxHeuristic, depth)}
 
 			message := newWsMessage(&analysis)
 

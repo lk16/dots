@@ -58,17 +58,15 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 		depth = bot.searchDepth
 	}
 
-	search := NewMtdf(alpha, beta)
+	search := NewMtdf()
 
 	for i, child := range children {
 
-		search.SetAlphaBeta(alpha, beta)
-
 		var heur int
 		if board.CountEmpties() <= bot.exactDepth {
-			heur = search.ExactSearch(child)
+			heur = search.ExactSearch(child, alpha, beta)
 		} else {
-			heur = search.Search(child, depth)
+			heur = search.Search(child, alpha, beta, depth)
 		}
 
 		bot.write("Child %2d/%2d: %d\n", i+1, len(children), heur)

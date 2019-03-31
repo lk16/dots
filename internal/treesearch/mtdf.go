@@ -50,22 +50,14 @@ type Mtdf struct {
 }
 
 // NewMtdf returns a new Mtdf
-func NewMtdf(low, high int) *Mtdf {
-	mtdf := &Mtdf{
+func NewMtdf() *Mtdf {
+	return &Mtdf{
 		hashtable: make(map[hashtableKey]bounds, 100000)}
-	mtdf.SetAlphaBeta(low, high)
-	return mtdf
 }
 
 // Name returns the tree search algorithm name
 func (mtdf *Mtdf) Name() string {
 	return "mtdf"
-}
-
-// SetAlphaBeta updates the bounds for next Search() call
-func (mtdf *Mtdf) SetAlphaBeta(alpha, beta int) {
-	mtdf.low = alpha
-	mtdf.high = beta
 }
 
 // ClearHashTable clears the Mtdf hash table
@@ -76,7 +68,10 @@ func (mtdf *Mtdf) ClearHashTable() {
 }
 
 // Search searches for the the best move up to a certain depth
-func (mtdf *Mtdf) Search(board othello.Board, depth int) int {
+func (mtdf *Mtdf) Search(board othello.Board, alpha, beta, depth int) int {
+
+	mtdf.low = alpha
+	mtdf.high = beta
 
 	if depth > board.CountEmpties() {
 		depth = board.CountEmpties()
@@ -84,7 +79,7 @@ func (mtdf *Mtdf) Search(board othello.Board, depth int) int {
 
 	if board.Moves() == 0 && board.OpponentMoves() != 0 {
 		board.SwitchTurn()
-		heur := mtdf.Search(board, depth)
+		heur := -mtdf.Search(board, -beta, -alpha, depth)
 		board.SwitchTurn()
 		return heur
 	}
@@ -97,10 +92,8 @@ func (mtdf *Mtdf) Search(board othello.Board, depth int) int {
 }
 
 // ExactSearch searches for the best move without a depth limitation
-func (mtdf *Mtdf) ExactSearch(board othello.Board) int {
-	mtdf.high = MaxHeuristic
-	mtdf.low = MinHeuristic
-	return mtdf.Search(board, 60) / ExactScoreFactor
+func (mtdf *Mtdf) ExactSearch(board othello.Board, alpha, beta int) int {
+	return mtdf.Search(board, alpha, beta, 60) / ExactScoreFactor
 }
 
 func (mtdf *Mtdf) slideWindow(depth int) int {

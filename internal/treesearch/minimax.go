@@ -18,25 +18,35 @@ func (minimax *MiniMax) Name() string {
 }
 
 // Search searches for the the best move up to a certain depth
-func (minimax *MiniMax) Search(board othello.Board, depth int) int {
+func (minimax *MiniMax) Search(board othello.Board, alpha, beta, depth int) int {
 
 	if depth > board.CountEmpties() {
 		depth = board.CountEmpties()
 	}
 
+	var heur int
 	if board.Moves() == 0 && board.OpponentMoves() != 0 {
 		board.SwitchTurn()
-		heur := minimax.Search(board, depth)
+		heur = -minimax.Search(board, -beta, -alpha, depth)
 		board.SwitchTurn()
-		return heur
+	} else {
+		heur = -minimax.search(board, depth, true)
 	}
 
-	return -minimax.search(board, depth, true)
+	if heur < alpha {
+		return alpha
+	}
+
+	if heur > beta {
+		return beta
+	}
+
+	return heur
 }
 
 // ExactSearch searches for the best move without a depth limitation
-func (minimax *MiniMax) ExactSearch(board othello.Board) int {
-	return minimax.Search(board, 60)
+func (minimax *MiniMax) ExactSearch(board othello.Board, alpha, beta int) int {
+	return minimax.Search(board, alpha, beta, 60)
 }
 
 func (minimax *MiniMax) search(board othello.Board, depth int, maxPlayer bool) int {

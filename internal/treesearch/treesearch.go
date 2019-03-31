@@ -24,6 +24,6 @@ const (
 // Interface is the interface for tree search algorithms
 type Interface interface {
 	Name() string
-	Search(board othello.Board, depth int) int
-	ExactSearch(board othello.Board) int
+	Search(board othello.Board, alpha, beta, depth int) int
+	ExactSearch(board othello.Board, alpha, beta int) int
 }
