@@ -10,6 +10,9 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+
+	// register profiling handlers
+	_ "net/http/pprof"
 )
 
 var upgrader = websocket.Upgrader{}

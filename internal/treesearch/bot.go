@@ -39,6 +39,10 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 	// prevent returning empty Board when bot cannot prevent losing all discs
 	afterwards := children[0]
 
+	if len(children) == 0 {
+		return nil, fmt.Errorf("no moves possible")
+	}
+
 	if len(children) == 1 {
 		bot.write("Only one move. Skipping evaluation.\n")
 		return &children[0], nil
