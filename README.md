@@ -43,8 +43,10 @@ golangci-lint run
     - [ ] clean board tests:
         - [ ] drop "log" import
         - [ ] redo genTestBoards()
-    - [ ] javascript code is a mess
     - [ ] cleaner error handling (after go 2 release)
+    - [ ] return (*Board, error) from othello.RandomBoard()
+    - [ ] create BotHeuristic.write() that does error checking
+    - [ ] javascript code is a mess
 
 - [ ] bot
     - [ ] allow faster killing of analysis go-routines
