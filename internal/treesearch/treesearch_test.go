@@ -10,7 +10,7 @@ import (
 
 func TestTreeSearch(t *testing.T) {
 
-	internal := func(t *testing.T, discs, depth int, board othello.Board) {
+	internal := func(t *testing.T, depth int, board othello.Board) {
 
 		minimax := (Interface)(NewMinimax())
 		mtdf := (Interface)(NewMtdf())
@@ -56,7 +56,7 @@ func TestTreeSearch(t *testing.T) {
 				testedBoards[normalized] = struct{}{}
 
 				fmt.Printf("\rTesting board %10d", len(testedBoards))
-				internal(t, discs, depth, *board)
+				internal(t, depth, *board)
 			}
 		}
 	}

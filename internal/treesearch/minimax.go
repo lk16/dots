@@ -79,6 +79,7 @@ func (minimax *MiniMax) search(board othello.Board, depth int, maxPlayer bool) i
 				heur = childHeur
 			}
 		}
+		return heur
 	}
 
 	heur := MaxHeuristic
