@@ -77,7 +77,12 @@ func (mtdf *Mtdf) Search(board othello.Board, alpha, beta, depth int) int {
 		depth = board.CountEmpties()
 	}
 
-	if board.Moves() == 0 && board.OpponentMoves() != 0 {
+	if board.Moves() == 0 {
+
+		if board.OpponentMoves() == 0 {
+			return ExactScoreFactor * board.ExactScore()
+		}
+
 		board.SwitchTurn()
 		heur := -mtdf.Search(board, -beta, -alpha, depth)
 		board.SwitchTurn()
