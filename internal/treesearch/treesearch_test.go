@@ -38,24 +38,25 @@ func TestTreeSearch(t *testing.T) {
 	rand.Seed(0)
 	testedBoards := make(map[othello.Board]struct{})
 
-	for depth := 0; depth <= 4; depth++ {
-		for discs := 4; discs <= 64; discs++ {
-			for i := 0; i < 100; i++ {
+	for i := 0; i < 100; i++ {
+		for discs := 4; discs < 64; discs++ {
 
-				board, err := othello.RandomBoard(discs)
-				if err != nil {
-					t.Errorf("Failed to generate random board: %s", err)
-				}
+			board, err := othello.RandomBoard(discs)
+			if err != nil {
+				t.Errorf("Failed to generate random board: %s", err)
+			}
 
-				normalized := board.Normalize()
+			normalized := board.Normalize()
 
-				if _, ok := testedBoards[normalized]; ok {
-					continue
-				}
+			if _, ok := testedBoards[normalized]; ok {
+				continue
+			}
 
-				testedBoards[normalized] = struct{}{}
+			testedBoards[normalized] = struct{}{}
 
-				fmt.Printf("\rTesting board %10d", len(testedBoards))
+			fmt.Printf("\rTesting board %10d", len(testedBoards))
+
+			for depth := 0; depth < 4; depth++ {
 				internal(t, depth, *board)
 			}
 		}

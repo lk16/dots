@@ -150,7 +150,7 @@ func (mtdf *Mtdf) polish(heur, alpha int) int {
 func (mtdf *Mtdf) handleNoMoves(alpha, depth int) int {
 
 	if mtdf.board.OpponentMoves() == 0 {
-		return mtdf.polish(-ExactScoreFactor*mtdf.board.ExactScore(), alpha)
+		return mtdf.polish(ExactScoreFactor*mtdf.board.ExactScore(), alpha)
 	}
 
 	mtdf.board.SwitchTurn()
