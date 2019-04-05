@@ -73,8 +73,8 @@ func (mtdf *Mtdf) Search(board othello.Board, alpha, beta, depth int) int {
 	mtdf.low = alpha
 	mtdf.high = beta
 
-	if depth > board.CountEmpties() {
-		depth = board.CountEmpties()
+	if depth >= board.CountEmpties() {
+		depth = 60
 	}
 
 	if board.Moves() == 0 {
@@ -106,7 +106,7 @@ func (mtdf *Mtdf) slideWindow(depth int) int {
 	var f int
 
 	var step int
-	if mtdf.board.CountEmpties() >= depth {
+	if depth < mtdf.board.CountEmpties() {
 		f = FastHeuristic(mtdf.board)
 		step = 1
 	} else {
@@ -150,7 +150,7 @@ func (mtdf *Mtdf) polish(heur, alpha int) int {
 func (mtdf *Mtdf) handleNoMoves(alpha, depth int) int {
 
 	if mtdf.board.OpponentMoves() == 0 {
-		return mtdf.polish(ExactScoreFactor*mtdf.board.ExactScore(), alpha)
+		return mtdf.polish(-ExactScoreFactor*mtdf.board.ExactScore(), alpha)
 	}
 
 	mtdf.board.SwitchTurn()

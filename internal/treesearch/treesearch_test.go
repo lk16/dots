@@ -15,7 +15,7 @@ func TestTreeSearch(t *testing.T) {
 		minimax := (Interface)(NewMinimax())
 		mtdf := (Interface)(NewMtdf())
 
-		bound := (2 * ExactScoreFactor) - 1
+		bound := 2 * ExactScoreFactor
 
 		minimaxResult := minimax.Search(board, -bound, bound, depth)
 
