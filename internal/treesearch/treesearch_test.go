@@ -10,10 +10,7 @@ import (
 
 func TestTreeSearch(t *testing.T) {
 
-	internal := func(t *testing.T, depth int, board othello.Board) {
-
-		minimax := (Interface)(NewMinimax())
-		mtdf := (Interface)(NewMtdf())
+	internal := func(t *testing.T, depth int, board othello.Board, minimax, mtdf Interface) {
 
 		bound := 2 * ExactScoreFactor
 
@@ -29,7 +26,7 @@ func TestTreeSearch(t *testing.T) {
 
 			var buff bytes.Buffer
 			board.ASCIIArt(&buff, false)
-			msg += fmt.Sprintf("for this board at depth %d:\n\n%s", depth, buff.String())
+			msg += fmt.Sprintf("for this board at depth %d:\n\n%s\n", depth, buff.String())
 			t.Error(msg)
 			t.FailNow()
 		}
@@ -38,7 +35,10 @@ func TestTreeSearch(t *testing.T) {
 	rand.Seed(0)
 	testedBoards := make(map[othello.Board]struct{})
 
-	for i := 0; i < 100; i++ {
+	minimax := NewMinimax()
+	mtdf := NewMtdf()
+
+	for i := 0; i < 1000; i++ {
 		for discs := 4; discs < 64; discs++ {
 
 			board, err := othello.RandomBoard(discs)
@@ -57,7 +57,7 @@ func TestTreeSearch(t *testing.T) {
 			fmt.Printf("\rTesting board %10d", len(testedBoards))
 
 			for depth := 0; depth < 4; depth++ {
-				internal(t, depth, *board)
+				internal(t, depth, *board, minimax, mtdf)
 			}
 		}
 	}

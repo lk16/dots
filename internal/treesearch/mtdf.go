@@ -77,18 +77,6 @@ func (mtdf *Mtdf) Search(board othello.Board, alpha, beta, depth int) int {
 		depth = 60
 	}
 
-	if board.Moves() == 0 {
-
-		if board.OpponentMoves() == 0 {
-			return ExactScoreFactor * board.ExactScore()
-		}
-
-		board.SwitchTurn()
-		heur := -mtdf.Search(board, -beta, -alpha, depth)
-		board.SwitchTurn()
-		return heur
-	}
-
 	mtdf.board = board
 	mtdf.Stats.StartClock()
 	heuristic := mtdf.slideWindow(depth)
@@ -150,7 +138,7 @@ func (mtdf *Mtdf) polish(heur, alpha int) int {
 func (mtdf *Mtdf) handleNoMoves(alpha, depth int) int {
 
 	if mtdf.board.OpponentMoves() == 0 {
-		return mtdf.polish(ExactScoreFactor*mtdf.board.ExactScore(), alpha)
+		return mtdf.polish(-ExactScoreFactor*mtdf.board.ExactScore(), alpha)
 	}
 
 	mtdf.board.SwitchTurn()

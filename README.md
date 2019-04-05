@@ -45,7 +45,7 @@ golangci-lint run
     - [ ] cleaner error handling (after go 2 release)
 
 - [ ] bot
-    - [ ] write a few simple test cases manually for tree search 
+    - [ ] bring pvs back
     - [ ] SearchExact() is completely broken
     - [ ] treesearch test for SearchExact()
     - [ ] introduce SearchWinner()

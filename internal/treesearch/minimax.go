@@ -24,19 +24,7 @@ func (minimax *MiniMax) Search(board othello.Board, alpha, beta, depth int) int 
 		depth = 60
 	}
 
-	var heur int
-	if board.Moves() == 0 {
-
-		if board.OpponentMoves() == 0 {
-			return ExactScoreFactor * board.ExactScore()
-		}
-
-		board.SwitchTurn()
-		heur = -minimax.Search(board, alpha, beta, depth)
-		board.SwitchTurn()
-	} else {
-		heur = -minimax.search(board, depth, true)
-	}
+	heur := -minimax.search(board, depth, true)
 
 	if heur < alpha {
 		return alpha
@@ -68,11 +56,12 @@ func (minimax *MiniMax) search(board othello.Board, depth int, maxPlayer bool) i
 	gen := othello.NewUnsortedChildGenerator(&child)
 
 	if !gen.HasMoves() {
-		if board.OpponentMoves() == 0 {
-			return ExactScoreFactor * board.ExactScore()
-		}
 
 		child.SwitchTurn()
+
+		if child.Moves() == 0 {
+			return -ExactScoreFactor * child.ExactScore()
+		}
 
 		return minimax.search(child, depth, !maxPlayer)
 	}
