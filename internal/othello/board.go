@@ -185,7 +185,15 @@ func (board Board) ASCIIArt(writer io.Writer, swapDiscColors bool) {
 
 		_, _ = buffer.WriteString("|\n")
 	}
-	_, _ = buffer.WriteString("+-----------------+\nTo move: ○\n")
+
+	var moveDisc string
+	if swapDiscColors {
+		moveDisc = "●"
+	} else {
+		moveDisc = "○"
+	}
+
+	_, _ = buffer.WriteString("+-----------------+\nTo move: " + moveDisc + "\n")
 
 	_, err := writer.Write(buffer.Bytes())
 	if err != nil {
