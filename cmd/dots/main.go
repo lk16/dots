@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/lk16/dots/internal/othello"
-	"github.com/lk16/dots/internal/players"
+	"github.com/lk16/dots/internal/treesearch"
 	"github.com/lk16/dots/internal/web"
 	"log"
 	"math/rand"
@@ -28,6 +28,10 @@ func profile(cpuprofile string, profiled func()) {
 	profiled()
 }
 
+func devMain() {
+	log.Printf("devMain() running")
+}
+
 func main() {
 
 	defaultSeed := time.Now().UTC().UnixNano()
@@ -35,9 +39,16 @@ func main() {
 
 	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to file")
 
+	dev := flag.Bool("dev", false, "run devMain()")
+
 	flag.Parse()
 
 	rand.Seed(*seed)
+
+	if *dev {
+		devMain()
+		return
+	}
 
 	if *cpuprofile != "" {
 		profile(*cpuprofile, func() {
@@ -45,8 +56,11 @@ func main() {
 			for i := 0; i < 1; i++ {
 				board := othello.NewXotBoard()
 				board.ASCIIArt(os.Stdout, false)
-				bot := players.NewBotHeuristic(os.Stdout, 10, 0)
-				bot.DoMove(board)
+				bot := treesearch.NewBot(os.Stdout, 12, 0)
+				_, err := bot.DoMove(board)
+				if err != nil {
+					log.Printf("error: %s", err)
+				}
 			}
 		})
 		return

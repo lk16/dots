@@ -230,8 +230,14 @@ func TestBoardDoMove(t *testing.T) {
 	for board := range genTestBoards() {
 		moves := board.Moves()
 		for i := uint(0); i < 64; i++ {
+
+			// othello.DoMove() should not be called for invalid moves
 			if moves&(uint64(1)<<i) == 0 {
-				// othello.DoMove() should not be called for invalid moves
+				continue
+			}
+
+			// don't play start disc moves
+			if i == 27 || i == 28 || i == 35 || i == 36 {
 				continue
 			}
 
@@ -240,7 +246,7 @@ func TestBoardDoMove(t *testing.T) {
 			expectedBoard := clone
 
 			clone = board
-			gotReturn := clone.DoMove(int(i))
+			gotReturn := clone.DoMove(uint64(1 << i))
 			gotBoard := clone
 
 			if (gotReturn != expectedReturn) || (gotBoard != expectedBoard) {
@@ -256,66 +262,13 @@ func TestBoardDoMove(t *testing.T) {
 	}
 }
 
-func TestBoardDoMoveN(t *testing.T) {
-
-	for board := range genTestBoards() {
-
-		clone := board
-
-		doMoveFuncs := []func() uint64{
-			clone.doMove0, clone.doMove1, clone.doMove2, clone.doMove3,
-			clone.doMove4, clone.doMove5, clone.doMove6, clone.doMove7,
-			clone.doMove8, clone.doMove9, clone.doMove10, clone.doMove11,
-			clone.doMove12, clone.doMove13, clone.doMove14, clone.doMove15,
-			clone.doMove16, clone.doMove17, clone.doMove18, clone.doMove19,
-			clone.doMove20, clone.doMove21, clone.doMove22, clone.doMove23,
-			clone.doMove24, clone.doMove25, clone.doMove26, clone.doMove27,
-			clone.doMove28, clone.doMove29, clone.doMove30, clone.doMove31,
-			clone.doMove32, clone.doMove33, clone.doMove34, clone.doMove35,
-			clone.doMove36, clone.doMove37, clone.doMove38, clone.doMove39,
-			clone.doMove40, clone.doMove41, clone.doMove42, clone.doMove43,
-			clone.doMove44, clone.doMove45, clone.doMove46, clone.doMove47,
-			clone.doMove48, clone.doMove49, clone.doMove50, clone.doMove51,
-			clone.doMove52, clone.doMove53, clone.doMove54, clone.doMove55,
-			clone.doMove56, clone.doMove57, clone.doMove58, clone.doMove59,
-			clone.doMove60, clone.doMove61, clone.doMove62, clone.doMove63}
-
-		moves := board.Moves()
-		for i := uint(0); i < 64; i++ {
-			if moves&(uint64(1)<<i) == 0 {
-				// othello.DoMove() should not be called for invalid moves
-				continue
-			}
-
-			clone = board
-			expected := clone.doMove(i)
-
-			clone = board
-			got := doMoveFuncs[i]()
-
-			if clone != board {
-				t.Errorf("Board was changed. Before:\n%s\n\nAfter:\n%s\n\n",
-					board.asciiArtString(false), clone.asciiArtString(false))
-			}
-
-			if expected != got {
-				t.Errorf("Doing move %c%d on othello\n%s\n", 'a'+i%8, (i/8)+1,
-					board.asciiArtString(false))
-				t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
-					bitsetASCIIArtString(expected), bitsetASCIIArtString(got))
-				t.FailNow()
-			}
-		}
-	}
-}
-
 func (board Board) moves() uint64 {
 	moves := uint64(0)
 	empties := ^(board.me | board.opp)
 
 	for i := uint(0); i < 64; i++ {
 		clone := board
-		if (empties&(uint64(1)<<i) != 0) && clone.DoMove(int(i)) != 0 {
+		if (empties&(uint64(1)<<i) != 0) && clone.DoMove(uint64(1<<i)) != 0 {
 			moves |= uint64(1) << i
 		}
 	}
@@ -323,7 +276,14 @@ func (board Board) moves() uint64 {
 }
 
 func TestBoardMoves(t *testing.T) {
-	for board := range genTestBoards() {
+	for b := range genTestBoards() {
+
+		// create copy to silence warnings
+		board := b
+
+		if !boardIsValid(&board) {
+			continue
+		}
 
 		clone := board
 		expected := board.moves()
@@ -353,9 +313,14 @@ func (board *Board) getChildren() []Board {
 }
 
 func TestBoardGetChildren(t *testing.T) {
-	for board := range genTestBoards() {
+	for b := range genTestBoards() {
 
-		valid := boardIsValid(&board)
+		// create copy to silence warnings
+		board := b
+
+		if !boardIsValid(&board) {
+			continue
+		}
 
 		expected := board.getChildren()
 		expectedSet := make(map[Board]struct{}, 10)
@@ -381,7 +346,10 @@ func TestBoardGetChildren(t *testing.T) {
 				t.Fatalf("Pieces were removed from othello with othello.GetChildren()\n")
 			}
 
-			if valid && !boardIsValid(&child) {
+			// create copy to silence warnings
+			childCopy := child
+
+			if !boardIsValid(&childCopy) {
 				t.Fatalf("Valid othello:\n%s\n\nInvalid child:\n%s\n\n",
 					board.asciiArtString(false), child.asciiArtString(false))
 			}
@@ -436,7 +404,7 @@ func TestBoardAsciiArt(t *testing.T) {
 				expected.WriteString("|\n")
 			}
 
-			expected.WriteString("+-----------------+\n")
+			expected.WriteString("+-----------------+\nTo move: ○\n")
 
 			got := new(bytes.Buffer)
 			clone = board
@@ -456,7 +424,11 @@ func TestBoardAsciiArt(t *testing.T) {
 }
 
 func TestBoardDoRandomMove(t *testing.T) {
-	for board := range genTestBoards() {
+	for b := range genTestBoards() {
+
+		// make copy to silence warnings
+		board := b
+
 		clone := board
 
 		clone.DoRandomMove()
@@ -661,4 +633,95 @@ func TestBoardNormalize(t *testing.T) {
 			}
 		}
 	}
+}
+
+var dummy int
+
+func TestBoardCornerCountDifference(t *testing.T) {
+	for board := range genTestBoards() {
+		expected := bits.OnesCount64(board.Me()&cornerMask) - bits.OnesCount64(board.Opp()&cornerMask)
+		got := board.CornerCountDifference()
+
+		if expected != got {
+			t.Errorf("\n%s\n\nExpected: %d\nGot: %d\n", board.asciiArtString(false), expected, got)
+			t.FailNow()
+		}
+	}
+}
+
+func BenchmarkCornerCountDifference(b *testing.B) {
+	board := NewBoard()
+	b.ResetTimer()
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		dummy = board.CornerCountDifference()
+	}
+	b.StopTimer()
+}
+
+func TestBoardXsquareCountDifference(t *testing.T) {
+	for board := range genTestBoards() {
+		expected := bits.OnesCount64(board.Me()&xSquareMask) - bits.OnesCount64(board.Opp()&xSquareMask)
+		got := board.XsquareCountDifference()
+		if expected != got {
+			t.Errorf("\n%s\n\nExpected: %d\nGot: %d\n", board.asciiArtString(false), expected, got)
+			t.FailNow()
+		}
+	}
+}
+
+func BenchmarkXsquareCountDifference(b *testing.B) {
+	board := NewBoard()
+	b.ResetTimer()
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		dummy = board.XsquareCountDifference()
+	}
+	b.StopTimer()
+}
+
+func TestBoardCsquareCountDifference(t *testing.T) {
+	for board := range genTestBoards() {
+		expected := bits.OnesCount64(board.Me()&cSquareMask) - bits.OnesCount64(board.Opp()&cSquareMask)
+		got := board.CsquareCountDifference()
+		if expected != got {
+			t.Errorf("\n%s\n\nExpected: %d\nGot: %d\n", board.asciiArtString(false), expected, got)
+			t.FailNow()
+		}
+	}
+}
+
+func BenchmarkCsquareCountDifference(b *testing.B) {
+	board := NewBoard()
+	b.ResetTimer()
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		dummy = board.CsquareCountDifference()
+	}
+	b.StopTimer()
+}
+
+func BenchmarkPotentialMoveCountDifference(b *testing.B) {
+	board := NewBoard()
+	b.ResetTimer()
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		dummy = board.PotentialMoveCountDifference()
+	}
+	b.StopTimer()
+}
+
+var dummyBoardSlice []Board
+
+func BenchmarkGetChildrenXot(b *testing.B) {
+	rand.Seed(0)
+	board := NewXotBoard()
+	b.ResetTimer()
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		dummyBoardSlice = board.GetChildren()
+	}
+	b.StopTimer()
 }

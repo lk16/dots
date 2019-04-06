@@ -35,8 +35,6 @@ golangci-lint run
 
 
 - [ ] cleaning
-    - [ ] move alpha/beta from initializers to Search()/SearchExact()
-    - [ ] introduce SearchWinner()
     - [ ] move GameState from frontend to othello package
     - [ ] move web.newState() and web.getBoard() to othello package
     - [ ] go linting
@@ -49,9 +47,11 @@ golangci-lint run
     - [ ] javascript code is a mess
 
 - [ ] bot
+    - [ ] treesearch test for SearchExact()
+    - [ ] introduce SearchWinner()
+    - [ ] use Board.potentialMoves() to create faster Moves() ?
     - [ ] allow faster killing of analysis go-routines
-    - [ ] fix pending bugs from treesearch
-        - [ ] unit test tree search using ffo test set
+    - [ ] unit test tree search using ffo test set
     - [ ] optimize analysis algorithm
         - [ ] parallel search with hash table in separate goroutine
         - [ ] create benchmarks like https://campoy.cat/blog/justforfunc-28-benchmarks/

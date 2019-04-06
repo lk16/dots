@@ -10788,6 +10788,8 @@ var xotBoards = []Board{
 	{me: 0x241c100000, opp: 0xe1820000000},
 	{me: 0x42418100000, opp: 0x81824020000}}
 
+// NewXotBoard returns a new xot board
+// http://berg.earthlingz.de/xot/aboutxot.php?lang=en
 func NewXotBoard() Board {
 	return xotBoards[rand.Intn(len(xotBoards))]
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/lk16/dots/internal/othello"
-	"github.com/lk16/dots/internal/players"
 	"github.com/lk16/dots/internal/treesearch"
 	"log"
 	"math/bits"
@@ -70,7 +69,12 @@ func (mws *moveWebSocket) send(message *wsMessage) error {
 }
 
 func (mws *moveWebSocket) loop() {
-	defer mws.ws.Close()
+	defer func() {
+		err := mws.ws.Close()
+		if err != nil {
+			log.Printf("Error closing websocket: %s", err)
+		}
+	}()
 	for {
 		_, rawMessage, err := mws.ws.ReadMessage()
 		if err != nil {
@@ -133,7 +137,7 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 
 		for i := range analyzedChildren {
 
-			bot := treesearch.NewMtdf(treesearch.MinHeuristic, treesearch.MaxHeuristic)
+			bot := treesearch.NewPvs()
 
 			if mws.getAnalyzedBoard() != board {
 				return
@@ -143,7 +147,7 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 				Board:     evaluated,
 				Depth:     depth,
 				Move:      analyzedChildren[i].analysis.Move,
-				Heuristic: bot.Search(analyzedChildren[i].child, depth)}
+				Heuristic: bot.Search(analyzedChildren[i].child, treesearch.MinHeuristic, treesearch.MaxHeuristic, depth)}
 
 			message := newWsMessage(&analysis)
 
@@ -210,8 +214,12 @@ func (mws *moveWebSocket) handlebotMoveRequest(request interface{}) error {
 }
 
 func (mws *moveWebSocket) sendBotMoveReply(board othello.Board, turn int) {
-	bot := players.NewBotHeuristic(os.Stdout, 8, 16)
-	bestMove := bot.DoMove(board)
+	bot := treesearch.NewBot(os.Stdout, 10, 16)
+	bestMove, err := bot.DoMove(board)
+	if err != nil {
+		log.Printf("sendBotMoveReply(): %s", err)
+		return
+	}
 
 	nextTurn := 1 - turn
 	if board.Moves() == 0 {
@@ -220,9 +228,9 @@ func (mws *moveWebSocket) sendBotMoveReply(board othello.Board, turn int) {
 	}
 
 	message := newWsMessage(&botMoveReply{
-		State: newState(bestMove, nextTurn)})
+		State: newState(*bestMove, nextTurn)})
 
-	err := mws.send(message)
+	err = mws.send(message)
 	if err != nil {
 		log.Printf("sendBotMoveReply(): %s", err)
 	}

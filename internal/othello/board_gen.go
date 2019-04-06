@@ -1,9 +1,5 @@
 package othello
 
-import (
-	"math/bits"
-)
-
 // UnsortedChildGenerator generates children in no particular order
 type UnsortedChildGenerator struct {
 	movesLeft   uint64
@@ -41,12 +37,9 @@ func (gen *UnsortedChildGenerator) Next() bool {
 		return false
 	}
 
-	index := bits.TrailingZeros64(gen.movesLeft)
-
-	gen.lastMove = uint64(1) << uint(index)
-	gen.lastFlipped = gen.child.DoMove(index)
+	gen.lastMove = gen.movesLeft & (-gen.movesLeft)
+	gen.lastFlipped = gen.child.DoMove(gen.lastMove)
 	gen.movesLeft &^= gen.lastMove
-
 	return true
 }
 
