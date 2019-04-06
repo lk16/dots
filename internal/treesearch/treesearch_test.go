@@ -40,7 +40,7 @@ func TestTreeSearch(t *testing.T) {
 	mtdf := NewMtdf()
 	pvs := NewPvs()
 
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 1000; i++ {
 		for discs := 4; discs < 64; discs++ {
 
 			board, err := othello.RandomBoard(discs)

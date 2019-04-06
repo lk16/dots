@@ -2,7 +2,6 @@ package treesearch
 
 import (
 	"github.com/lk16/dots/internal/othello"
-	"log"
 )
 
 // Pvs implements the principal variation search algorithm
@@ -42,36 +41,25 @@ func (pvs *Pvs) Search(board othello.Board, alpha, beta, depth int) int {
 	return heur
 }
 
-func (pvs *Pvs) printf(format string, args ...interface{}) {
-	if false {
-		log.Printf(format, args...)
-	}
-}
-
 func (pvs *Pvs) search(board othello.Board, alpha, beta, depth int) int {
 
-	a := alpha
-
 	if depth == 0 {
-		pvs.printf("pvs search(board, alpha=%d, beta=%d, depth=%d) = %d <depth limit>", alpha, beta, depth,
-			FastHeuristic(board))
 		return FastHeuristic(board)
 	}
 
 	children := board.GetChildren()
 
 	if len(children) == 0 {
+
 		if board.OpponentMoves() == 0 {
 			heur := ExactScoreFactor * board.ExactScore()
-			pvs.printf("pvs search(board, alpha=%d, beta=%d, depth=%d) = %d <game end>", alpha, beta, depth, heur)
-			return heur
-		} else {
-			board.SwitchTurn()
-			heur := -pvs.search(board, -beta, -alpha, depth)
-			board.SwitchTurn()
-			pvs.printf("pvs search(board, alpha=%d, beta=%d, depth=%d) = %d <skipped turn>", alpha, beta, depth, heur)
 			return heur
 		}
+
+		board.SwitchTurn()
+		heur := -pvs.search(board, -beta, -alpha, depth)
+		board.SwitchTurn()
+		return heur
 	}
 
 	for i, it := range children {
@@ -93,7 +81,6 @@ func (pvs *Pvs) search(board othello.Board, alpha, beta, depth int) int {
 		}
 
 	}
-	pvs.printf("pvs search(board, alpha=%d, beta=%d, depth=%d) = %d <move>", a, beta, depth, alpha)
 
 	return alpha
 }
