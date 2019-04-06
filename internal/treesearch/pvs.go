@@ -80,21 +80,21 @@ func (pvs *Pvs) search(board *othello.Board, alpha, beta, depth int) int {
 
 	for i, child := range children {
 
-		var score int
+		var heur int
 		if i == 0 {
-			score = -pvs.search(&child, -beta, -alpha, depth-1)
+			heur = -pvs.search(&child, -beta, -alpha, depth-1)
 		} else {
-			score = -pvs.searchNullWindow(&child, -alpha-1, depth-1)
-			if (alpha < score) && (score < beta) {
-				score = -pvs.search(&child, -beta, -score, depth-1)
+			heur = -pvs.searchNullWindow(&child, -(alpha + 1), depth-1)
+			if (alpha < heur) && (heur < beta) {
+				heur = -pvs.search(&child, -beta, -heur, depth-1)
 			}
 		}
-		if score >= beta {
+		if heur >= beta {
 			alpha = beta
 			break
 		}
-		if score > alpha {
-			alpha = score
+		if heur > alpha {
+			alpha = heur
 		}
 
 	}
@@ -103,8 +103,6 @@ func (pvs *Pvs) search(board *othello.Board, alpha, beta, depth int) int {
 }
 
 func (pvs *Pvs) searchNullWindow(board *othello.Board, alpha, depth int) int {
-
-	beta := alpha + 1
 
 	pvs.stats.Nodes++
 
@@ -122,28 +120,17 @@ func (pvs *Pvs) searchNullWindow(board *othello.Board, alpha, depth int) int {
 		}
 
 		board.SwitchTurn()
-		heur := -pvs.search(board, -beta, -alpha, depth)
+		heur := -pvs.searchNullWindow(board, -(alpha + 1), depth)
 		board.SwitchTurn()
 		return heur
 	}
 
-	for i, child := range children {
+	for _, child := range children {
 
-		var score int
-		if i == 0 {
-			score = -pvs.search(&child, -beta, -alpha, depth-1)
-		} else {
-			score = -pvs.search(&child, -alpha-1, -alpha, depth-1)
-			if (alpha < score) && (score < beta) {
-				score = -pvs.search(&child, -beta, -score, depth-1)
-			}
-		}
-		if score >= beta {
-			alpha = beta
-			break
-		}
-		if score > alpha {
-			alpha = score
+		heur := -pvs.searchNullWindow(&child, -(alpha + 1), depth-1)
+
+		if heur > alpha {
+			return alpha + 1
 		}
 
 	}
