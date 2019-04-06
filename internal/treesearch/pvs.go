@@ -7,12 +7,14 @@ import (
 
 // Pvs implements the principal variation search algorithm
 type Pvs struct {
-	stats Stats
+	stats   Stats
+	sortPvs *Pvs
 }
 
 // NewPvs returns a new Pvs
 func NewPvs() *Pvs {
-	return &Pvs{}
+	return &Pvs{
+		sortPvs: &Pvs{}}
 }
 
 // Name returns the name of the tree search algorithm
@@ -22,17 +24,21 @@ func (pvs Pvs) Name() string {
 
 // ExactSearch searches for the best move without a depth limitation
 func (pvs *Pvs) ExactSearch(board othello.Board, alpha, beta int) int {
-	return pvs.Search(board, alpha, beta, 60) / ExactScoreFactor
+	return pvs.Search(board, alpha*ExactScoreFactor, beta*ExactScoreFactor, 60) / ExactScoreFactor
 }
 
 // GetStats returns the statistics for the latest search
 func (pvs Pvs) GetStats() Stats {
-	return pvs.stats
+	stats := Stats{}
+	stats.Add(pvs.stats)
+	stats.Add(pvs.sortPvs.stats)
+	return stats
 }
 
 // ResetStats resets the statistics for the latest search to zeroes
 func (pvs *Pvs) ResetStats() {
 	pvs.stats.Reset()
+	pvs.sortPvs.stats.Reset()
 }
 
 // Search searches for the the best move up to a certain depth
@@ -79,9 +85,9 @@ func (pvs *Pvs) search(board *othello.Board, alpha, beta, depth int) int {
 		return heur
 	}
 
-	if depth > 4 {
+	if depth > 4 && pvs.sortPvs != nil {
 		for i := range children {
-			children[i].Heur = pvs.Search(children[i].Board, MinHeuristic, MaxHeuristic, 2)
+			children[i].Heur = pvs.sortPvs.Search(children[i].Board, MinHeuristic, MaxHeuristic, 2)
 		}
 		sort.Slice(children, func(i, j int) bool {
 			return children[i].Heur > children[j].Heur
@@ -135,9 +141,9 @@ func (pvs *Pvs) searchNullWindow(board *othello.Board, alpha, depth int) int {
 		return heur
 	}
 
-	if depth > 6 {
+	if depth > 6 && pvs.sortPvs != nil {
 		for i := range children {
-			children[i].Heur = pvs.Search(children[i].Board, MinHeuristic, MaxHeuristic, 2)
+			children[i].Heur = pvs.sortPvs.Search(children[i].Board, MinHeuristic, MaxHeuristic, 2)
 		}
 		sort.Slice(children, func(i, j int) bool {
 			return children[i].Heur > children[j].Heur

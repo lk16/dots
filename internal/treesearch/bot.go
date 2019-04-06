@@ -57,13 +57,15 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 		depth = board.CountEmpties()
 	} else {
 		depth = bot.searchDepth
+		alpha = MinScore
+		beta = MaxScore
 	}
 
 	search := Interface(NewPvs())
 
-	if depth > 4 {
+	if depth > 6 {
 		for i := range children {
-			children[i].Heur = search.Search(children[i].Board, MinHeuristic, MaxHeuristic, 4)
+			children[i].Heur = search.Search(children[i].Board, MinHeuristic, MaxHeuristic, 6)
 		}
 		sort.Slice(children, func(i, j int) bool {
 			return children[i].Heur > children[j].Heur
@@ -71,7 +73,7 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 	}
 
 	sortStats := search.GetStats()
-	bot.write("%12s %63s\n\n", "Sorting:", sortStats.String())
+	bot.write("\n\n%12s %63s\n\n", "Sorting:", sortStats.String())
 	search.ResetStats()
 
 	totalStats := sortStats
