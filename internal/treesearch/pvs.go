@@ -31,14 +31,18 @@ func (pvs *Pvs) ExactSearch(board othello.Board, alpha, beta int) int {
 func (pvs Pvs) GetStats() Stats {
 	stats := Stats{}
 	stats.Add(pvs.stats)
-	stats.Add(pvs.sortPvs.stats)
+	if pvs.sortPvs != nil {
+		stats.Add(pvs.sortPvs.GetStats())
+	}
 	return stats
 }
 
 // ResetStats resets the statistics for the latest search to zeroes
 func (pvs *Pvs) ResetStats() {
 	pvs.stats.Reset()
-	pvs.sortPvs.stats.Reset()
+	if pvs.sortPvs != nil {
+		pvs.sortPvs.ResetStats()
+	}
 }
 
 // Search searches for the the best move up to a certain depth
@@ -64,11 +68,11 @@ func (pvs *Pvs) Search(board othello.Board, alpha, beta, depth int) int {
 
 func (pvs *Pvs) search(board *othello.Board, alpha, beta, depth int) int {
 
-	pvs.stats.Nodes++
-
-	if depth == 0 {
-		return FastHeuristic(*board)
+	if depth <= 7 || pvs.sortPvs == nil {
+		return pvs.searchNoSort(board, alpha, beta, depth)
 	}
+
+	pvs.stats.Nodes++
 
 	children := board.GetSortableChildren()
 
@@ -82,14 +86,12 @@ func (pvs *Pvs) search(board *othello.Board, alpha, beta, depth int) int {
 		return -pvs.search(board, -beta, -alpha, depth)
 	}
 
-	if depth > 4 && pvs.sortPvs != nil {
-		for i := range children {
-			children[i].Heur = pvs.sortPvs.Search(children[i].Board, MinHeuristic, MaxHeuristic, 2)
-		}
-		sort.Slice(children, func(i, j int) bool {
-			return children[i].Heur > children[j].Heur
-		})
+	for i := range children {
+		children[i].Heur = pvs.sortPvs.Search(children[i].Board, MinHeuristic, MaxHeuristic, 2)
 	}
+	sort.Slice(children, func(i, j int) bool {
+		return children[i].Heur > children[j].Heur
+	})
 
 	for i, child := range children {
 
@@ -103,8 +105,53 @@ func (pvs *Pvs) search(board *othello.Board, alpha, beta, depth int) int {
 			}
 		}
 		if heur >= beta {
-			alpha = beta
-			break
+			return beta
+		}
+		if heur > alpha {
+			alpha = heur
+		}
+
+	}
+
+	return alpha
+}
+
+func (pvs *Pvs) searchNoSort(board *othello.Board, alpha, beta, depth int) int {
+
+	pvs.stats.Nodes++
+
+	if depth == 0 {
+		return FastHeuristic(*board)
+	}
+
+	gen := othello.NewUnsortedChildGenerator(board)
+
+	if !gen.HasMoves() {
+
+		if board.OpponentMoves() == 0 {
+			return ExactScoreFactor * board.ExactScore()
+		}
+
+		board.SwitchTurn()
+		heur := -pvs.searchNoSort(board, -beta, -alpha, depth)
+		board.SwitchTurn()
+		return heur
+	}
+
+	for i := 0; gen.Next(); i++ {
+
+		var heur int
+		if i == 0 {
+			heur = -pvs.searchNoSort(board, -beta, -alpha, depth-1)
+		} else {
+			heur = -pvs.searchNullWindowNoSort(board, -(alpha + 1), depth-1)
+			if (alpha < heur) && (heur < beta) {
+				heur = -pvs.searchNoSort(board, -beta, -heur, depth-1)
+			}
+		}
+		if heur >= beta {
+			gen.RestoreParent()
+			return beta
 		}
 		if heur > alpha {
 			alpha = heur
@@ -117,11 +164,11 @@ func (pvs *Pvs) search(board *othello.Board, alpha, beta, depth int) int {
 
 func (pvs *Pvs) searchNullWindow(board *othello.Board, alpha, depth int) int {
 
-	pvs.stats.Nodes++
-
-	if depth == 0 {
-		return FastHeuristic(*board)
+	if depth <= 7 || pvs.sortPvs == nil {
+		return pvs.searchNullWindowNoSort(board, alpha, depth)
 	}
+
+	pvs.stats.Nodes++
 
 	children := board.GetSortableChildren()
 
@@ -137,19 +184,51 @@ func (pvs *Pvs) searchNullWindow(board *othello.Board, alpha, depth int) int {
 		return heur
 	}
 
-	if depth > 6 && pvs.sortPvs != nil {
-		for i := range children {
-			children[i].Heur = pvs.sortPvs.Search(children[i].Board, MinHeuristic, MaxHeuristic, 2)
-		}
-		sort.Slice(children, func(i, j int) bool {
-			return children[i].Heur > children[j].Heur
-		})
+	for i := range children {
+		children[i].Heur = pvs.sortPvs.Search(children[i].Board, MinHeuristic, MaxHeuristic, 2)
 	}
+	sort.Slice(children, func(i, j int) bool {
+		return children[i].Heur > children[j].Heur
+	})
 
 	for _, child := range children {
 
 		heur := -pvs.searchNullWindow(&child.Board, -(alpha + 1), depth-1)
 		if heur > alpha {
+			return alpha + 1
+		}
+	}
+
+	return alpha
+}
+
+func (pvs *Pvs) searchNullWindowNoSort(board *othello.Board, alpha, depth int) int {
+
+	pvs.stats.Nodes++
+
+	if depth == 0 {
+		return FastHeuristic(*board)
+	}
+
+	gen := othello.NewUnsortedChildGenerator(board)
+
+	if !gen.HasMoves() {
+
+		if board.OpponentMoves() == 0 {
+			return ExactScoreFactor * board.ExactScore()
+		}
+
+		board.SwitchTurn()
+		heur := -pvs.searchNullWindowNoSort(board, -(alpha + 1), depth)
+		board.SwitchTurn()
+		return heur
+	}
+
+	for i := 0; gen.Next(); i++ {
+
+		heur := -pvs.searchNullWindowNoSort(board, -(alpha + 1), depth-1)
+		if heur > alpha {
+			gen.RestoreParent()
 			return alpha + 1
 		}
 	}
