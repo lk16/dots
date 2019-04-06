@@ -11,6 +11,10 @@ type Stats struct {
 	Duration  time.Duration
 }
 
+func NewStats() Stats {
+	return Stats{}
+}
+
 func (s *Stats) StartClock() {
 	s.StartTime = time.Now()
 }

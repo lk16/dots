@@ -61,6 +61,9 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 
 	search := NewPvs()
 
+	stats := NewStats()
+	stats.StartClock()
+
 	if depth > 4 {
 		for i := range children {
 			children[i].Heur = search.Search(children[i].Board, MinHeuristic, MaxHeuristic, 4)
@@ -87,7 +90,9 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 		}
 	}
 
-	stats := search.GetStats()
+	stats.StopClock()
+
+	stats.Add(search.GetStats())
 
 	bot.write("%s nodes in %.3f seconds = %s nodes/second\n",
 		FormatBigNumber(stats.Nodes), stats.Duration.Seconds(), FormatBigNumber(stats.NodesPerSecond()))

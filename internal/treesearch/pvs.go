@@ -120,7 +120,7 @@ func (pvs *Pvs) searchNullWindow(board *othello.Board, alpha, depth int) int {
 		return FastHeuristic(*board)
 	}
 
-	children := board.GetChildren()
+	children := board.GetSortableChildren()
 
 	if len(children) == 0 {
 
@@ -135,9 +135,18 @@ func (pvs *Pvs) searchNullWindow(board *othello.Board, alpha, depth int) int {
 		return heur
 	}
 
+	if depth > 6 {
+		for i := range children {
+			children[i].Heur = pvs.Search(children[i].Board, MinHeuristic, MaxHeuristic, 2)
+		}
+		sort.Slice(children, func(i, j int) bool {
+			return children[i].Heur > children[j].Heur
+		})
+	}
+
 	for _, child := range children {
 
-		heur := -pvs.searchNullWindow(&child, -(alpha + 1), depth-1)
+		heur := -pvs.searchNullWindow(&child.Board, -(alpha + 1), depth-1)
 
 		if heur > alpha {
 			return alpha + 1
