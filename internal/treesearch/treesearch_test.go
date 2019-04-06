@@ -12,11 +12,9 @@ func TestTreeSearch(t *testing.T) {
 
 	internal := func(t *testing.T, depth int, board othello.Board, minimax, mtdf, pvs Interface, testedBoards int) {
 
-		bound := 2 * ExactScoreFactor
-
-		minimaxResult := minimax.Search(board, -bound, bound, depth)
-		mtdfResult := mtdf.Search(board, -bound, bound, depth)
-		pvsResult := pvs.Search(board, -bound, bound, depth)
+		minimaxResult := minimax.Search(board, MinHeuristic, MaxHeuristic, depth)
+		mtdfResult := mtdf.Search(board, MinHeuristic, MaxHeuristic, depth)
+		pvsResult := pvs.Search(board, MinHeuristic, MaxHeuristic, depth)
 
 		if minimaxResult != mtdfResult || minimaxResult != pvsResult {
 			fmt.Printf("\nFailed at board %d\n", testedBoards)

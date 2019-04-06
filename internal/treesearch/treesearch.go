@@ -26,4 +26,6 @@ type Interface interface {
 	Name() string
 	Search(board othello.Board, alpha, beta, depth int) int
 	ExactSearch(board othello.Board, alpha, beta int) int
+	GetStats() Stats
+	ResetStats()
 }

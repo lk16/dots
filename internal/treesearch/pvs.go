@@ -5,7 +5,9 @@ import (
 )
 
 // Pvs implements the principal variation search algorithm
-type Pvs struct{}
+type Pvs struct {
+	stats Stats
+}
 
 // NewPvs returns a new Pvs
 func NewPvs() *Pvs {
@@ -22,13 +24,25 @@ func (pvs *Pvs) ExactSearch(board othello.Board, alpha, beta int) int {
 	return pvs.Search(board, alpha, beta, 60) / ExactScoreFactor
 }
 
+// GetStats returns the statistics for the latest search
+func (pvs Pvs) GetStats() Stats {
+	return pvs.stats
+}
+
+// ResetStats resets the statistics for the latest search to zeroes
+func (pvs *Pvs) ResetStats() {
+	pvs.stats.Reset()
+}
+
 // Search searches for the the best move up to a certain depth
 func (pvs *Pvs) Search(board othello.Board, alpha, beta, depth int) int {
 	if depth >= board.CountEmpties() {
 		depth = 60
 	}
 
+	pvs.stats.StartClock()
 	heur := -pvs.search(board, -beta, -alpha, depth)
+	pvs.stats.StopClock()
 
 	if heur < alpha {
 		heur = alpha
@@ -42,6 +56,8 @@ func (pvs *Pvs) Search(board othello.Board, alpha, beta, depth int) int {
 }
 
 func (pvs *Pvs) search(board othello.Board, alpha, beta, depth int) int {
+
+	pvs.stats.Nodes++
 
 	if depth == 0 {
 		return FastHeuristic(board)

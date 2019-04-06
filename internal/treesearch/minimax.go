@@ -5,7 +5,9 @@ import (
 )
 
 // MiniMax implements the minimax tree search algorithm
-type MiniMax struct{}
+type MiniMax struct {
+	stats Stats
+}
 
 // NewMinimax returns a new MiniMax
 func NewMinimax() *MiniMax {
@@ -17,6 +19,16 @@ func (minimax *MiniMax) Name() string {
 	return "minimax"
 }
 
+// GetStats returns the statistics for the latest search
+func (minimax MiniMax) GetStats() Stats {
+	return minimax.stats
+}
+
+// ResetStats resets the statistics for the latest search to zeroes
+func (minimax MiniMax) ResetStats() {
+	minimax.stats.Reset()
+}
+
 // Search searches for the the best move up to a certain depth
 func (minimax *MiniMax) Search(board othello.Board, alpha, beta, depth int) int {
 
@@ -24,7 +36,9 @@ func (minimax *MiniMax) Search(board othello.Board, alpha, beta, depth int) int 
 		depth = 60
 	}
 
+	minimax.stats.StartClock()
 	heur := -minimax.search(board, depth, true)
+	minimax.stats.StopClock()
 
 	if heur < alpha {
 		return alpha
@@ -43,6 +57,8 @@ func (minimax *MiniMax) ExactSearch(board othello.Board, alpha, beta int) int {
 }
 
 func (minimax *MiniMax) search(board othello.Board, depth int, maxPlayer bool) int {
+
+	minimax.stats.Nodes++
 
 	if depth == 0 {
 		heur := FastHeuristic(board)

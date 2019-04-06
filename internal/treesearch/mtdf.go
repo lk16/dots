@@ -2,33 +2,7 @@ package treesearch
 
 import (
 	"github.com/lk16/dots/internal/othello"
-	"time"
 )
-
-type stats struct {
-	Nodes     uint64
-	StartTime time.Time
-	Duration  time.Duration
-}
-
-func (s *stats) StartClock() {
-	s.StartTime = time.Now()
-}
-
-func (s *stats) StopClock() {
-	s.Duration += time.Now().Sub(s.StartTime)
-}
-
-func (s *stats) NodesPerSecond() float64 {
-
-	duration := s.Duration.Seconds()
-
-	if duration == 0.0 {
-		return 0.0
-	}
-
-	return float64(s.Nodes) / duration
-}
 
 type hashtableKey struct {
 	board othello.Board
@@ -46,7 +20,7 @@ type Mtdf struct {
 	high      int
 	low       int
 	hashtable map[hashtableKey]bounds
-	Stats     stats
+	stats     Stats
 }
 
 // NewMtdf returns a new Mtdf
@@ -58,6 +32,16 @@ func NewMtdf() *Mtdf {
 // Name returns the tree search algorithm name
 func (mtdf *Mtdf) Name() string {
 	return "mtdf"
+}
+
+// GetStats returns the statistics for the latest search
+func (mtdf Mtdf) GetStats() Stats {
+	return mtdf.stats
+}
+
+// ResetStats resets the statistics for the latest search to zeroes
+func (mtdf *Mtdf) ResetStats() {
+	mtdf.stats.Reset()
 }
 
 // ClearHashTable clears the Mtdf hash table
@@ -78,9 +62,9 @@ func (mtdf *Mtdf) Search(board othello.Board, alpha, beta, depth int) int {
 	}
 
 	mtdf.board = board
-	mtdf.Stats.StartClock()
+	mtdf.stats.StartClock()
 	heuristic := mtdf.slideWindow(depth)
-	mtdf.Stats.StopClock()
+	mtdf.stats.StopClock()
 	return heuristic
 }
 
@@ -193,7 +177,7 @@ func (mtdf *Mtdf) updateHashTable(alpha, depth, heur int) {
 
 func (mtdf *Mtdf) search(alpha, depth int) int {
 
-	mtdf.Stats.Nodes++
+	mtdf.stats.Nodes++
 
 	if depth == 0 {
 		return mtdf.polish(FastHeuristic(mtdf.board), alpha)

@@ -77,8 +77,10 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 		}
 	}
 
-	//bot.write("%d nodes in %.3f seconds = %dK nodes/second\n",
-	//	search.Stats.Nodes, search.Stats.Duration.Seconds(), int(search.Stats.NodesPerSecond())/1000)
+	stats := search.GetStats()
+
+	bot.write("%d nodes in %.3f seconds = %dK nodes/second\n",
+		stats.Nodes, stats.Duration.Seconds(), int(stats.NodesPerSecond())/1000)
 
 	bot.write("\n\n")
 	return &afterwards, nil

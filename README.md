@@ -45,14 +45,11 @@ golangci-lint run
     - [ ] cleaner error handling (after go 2 release)
 
 - [ ] bot
-    - [ ] bring pvs back
-    - [ ] SearchExact() is completely broken
     - [ ] treesearch test for SearchExact()
     - [ ] introduce SearchWinner()
     - [ ] use Board.potentialMoves() to create faster Moves() ?
     - [ ] allow faster killing of analysis go-routines
-    - [ ] fix pending bugs from treesearch
-        - [ ] unit test tree search using ffo test set
+    - [ ] unit test tree search using ffo test set
     - [ ] optimize analysis algorithm
         - [ ] parallel search with hash table in separate goroutine
         - [ ] create benchmarks like https://campoy.cat/blog/justforfunc-28-benchmarks/
