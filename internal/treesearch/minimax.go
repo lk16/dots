@@ -57,13 +57,16 @@ func (minimax *MiniMax) search(board othello.Board, depth int, maxPlayer bool) i
 
 	if !gen.HasMoves() {
 
-		child.SwitchTurn()
-
-		if child.Moves() == 0 {
-			return -ExactScoreFactor * child.ExactScore()
+		if board.OpponentMoves() == 0 {
+			heur := ExactScoreFactor * board.ExactScore()
+			if !maxPlayer {
+				heur = -heur
+			}
+			return heur
 		}
 
-		return minimax.search(child, depth, !maxPlayer)
+		board.SwitchTurn()
+		return minimax.search(board, depth, !maxPlayer)
 	}
 
 	if maxPlayer {

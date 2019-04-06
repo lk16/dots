@@ -58,7 +58,7 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 		depth = bot.searchDepth
 	}
 
-	search := NewMtdf()
+	search := NewPvs()
 
 	for i, child := range children {
 
@@ -77,8 +77,8 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 		}
 	}
 
-	bot.write("%d nodes in %.3f seconds = %dK nodes/second\n",
-		search.Stats.Nodes, search.Stats.Duration.Seconds(), int(search.Stats.NodesPerSecond())/1000)
+	//bot.write("%d nodes in %.3f seconds = %dK nodes/second\n",
+	//	search.Stats.Nodes, search.Stats.Duration.Seconds(), int(search.Stats.NodesPerSecond())/1000)
 
 	bot.write("\n\n")
 	return &afterwards, nil
