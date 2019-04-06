@@ -75,14 +75,11 @@ func (pvs *Pvs) search(board *othello.Board, alpha, beta, depth int) int {
 	if len(children) == 0 {
 
 		if board.OpponentMoves() == 0 {
-			heur := ExactScoreFactor * board.ExactScore()
-			return heur
+			return ExactScoreFactor * board.ExactScore()
 		}
 
 		board.SwitchTurn()
-		heur := -pvs.search(board, -beta, -alpha, depth)
-		board.SwitchTurn()
-		return heur
+		return -pvs.search(board, -beta, -alpha, depth)
 	}
 
 	if depth > 4 && pvs.sortPvs != nil {
@@ -131,8 +128,7 @@ func (pvs *Pvs) searchNullWindow(board *othello.Board, alpha, depth int) int {
 	if len(children) == 0 {
 
 		if board.OpponentMoves() == 0 {
-			heur := ExactScoreFactor * board.ExactScore()
-			return heur
+			return ExactScoreFactor * board.ExactScore()
 		}
 
 		board.SwitchTurn()
@@ -153,11 +149,9 @@ func (pvs *Pvs) searchNullWindow(board *othello.Board, alpha, depth int) int {
 	for _, child := range children {
 
 		heur := -pvs.searchNullWindow(&child.Board, -(alpha + 1), depth-1)
-
 		if heur > alpha {
 			return alpha + 1
 		}
-
 	}
 
 	return alpha
