@@ -53,14 +53,12 @@ func main() {
 	if *cpuprofile != "" {
 		profile(*cpuprofile, func() {
 			rand.Seed(0)
-			for i := 0; i < 1; i++ {
-				board := othello.NewXotBoard()
-				board.ASCIIArt(os.Stdout, false)
-				bot := treesearch.NewBot(os.Stdout, 12, 0)
-				_, err := bot.DoMove(board)
-				if err != nil {
-					log.Printf("error: %s", err)
-				}
+			board := othello.NewXotBoard()
+			board.ASCIIArt(os.Stdout, false)
+			bot := treesearch.NewBot(os.Stdout, 12, 0)
+			_, err := bot.DoMove(board)
+			if err != nil {
+				log.Printf("error: %s", err)
 			}
 		})
 		return

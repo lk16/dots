@@ -2,6 +2,7 @@ package treesearch
 
 import (
 	"github.com/lk16/dots/internal/othello"
+	"sort"
 )
 
 // Pvs implements the principal variation search algorithm
@@ -63,7 +64,7 @@ func (pvs *Pvs) search(board *othello.Board, alpha, beta, depth int) int {
 		return FastHeuristic(*board)
 	}
 
-	children := board.GetChildren()
+	children := board.GetSortableChildren()
 
 	if len(children) == 0 {
 
@@ -78,15 +79,24 @@ func (pvs *Pvs) search(board *othello.Board, alpha, beta, depth int) int {
 		return heur
 	}
 
+	if depth > 4 {
+		for i := range children {
+			children[i].Heur = pvs.Search(children[i].Board, MinHeuristic, MaxHeuristic, 2)
+		}
+		sort.Slice(children, func(i, j int) bool {
+			return children[i].Heur > children[j].Heur
+		})
+	}
+
 	for i, child := range children {
 
 		var heur int
 		if i == 0 {
-			heur = -pvs.search(&child, -beta, -alpha, depth-1)
+			heur = -pvs.search(&child.Board, -beta, -alpha, depth-1)
 		} else {
-			heur = -pvs.searchNullWindow(&child, -(alpha + 1), depth-1)
+			heur = -pvs.searchNullWindow(&child.Board, -(alpha + 1), depth-1)
 			if (alpha < heur) && (heur < beta) {
-				heur = -pvs.search(&child, -beta, -heur, depth-1)
+				heur = -pvs.search(&child.Board, -beta, -heur, depth-1)
 			}
 		}
 		if heur >= beta {

@@ -5,6 +5,7 @@ import (
 	"github.com/lk16/dots/internal/othello"
 	"io"
 	"log"
+	"sort"
 )
 
 // Bot is a bot that uses a Heuristic for choosing its moves
@@ -34,10 +35,10 @@ func (bot *Bot) write(format string, args ...interface{}) {
 // DoMove computes the best child of a Board
 func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 
-	children := board.GetChildren()
+	children := board.GetSortableChildren()
 
 	// prevent returning empty Board when bot cannot prevent losing all discs
-	afterwards := children[0]
+	afterwards := children[0].Board
 
 	if len(children) == 0 {
 		return nil, fmt.Errorf("no moves possible")
@@ -45,7 +46,7 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 
 	if len(children) == 1 {
 		bot.write("Only one move. Skipping evaluation.\n")
-		return &children[0], nil
+		return &children[0].Board, nil
 	}
 
 	alpha := MinHeuristic
@@ -60,20 +61,29 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 
 	search := NewPvs()
 
+	if depth > 4 {
+		for i := range children {
+			children[i].Heur = search.Search(children[i].Board, MinHeuristic, MaxHeuristic, 4)
+		}
+		sort.Slice(children, func(i, j int) bool {
+			return children[i].Heur > children[j].Heur
+		})
+	}
+
 	for i, child := range children {
 
 		var heur int
 		if board.CountEmpties() <= bot.exactDepth {
-			heur = search.ExactSearch(child, alpha, beta)
+			heur = search.ExactSearch(child.Board, alpha, beta)
 		} else {
-			heur = search.Search(child, alpha, beta, depth)
+			heur = search.Search(child.Board, alpha, beta, depth)
 		}
 
 		bot.write("Child %2d/%2d: %d\n", i+1, len(children), heur)
 
 		if heur > alpha {
 			alpha = heur
-			afterwards = child
+			afterwards = child.Board
 		}
 	}
 
