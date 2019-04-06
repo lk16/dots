@@ -44,6 +44,11 @@ func (s *Stats) Add(other Stats) {
 	s.Duration += other.Duration
 }
 
+func (s Stats) String() string {
+	return fmt.Sprintf("%5s nodes in %.3f seconds = %5s nodes/second",
+		FormatBigNumber(s.Nodes), s.Duration.Seconds(), FormatBigNumber(s.NodesPerSecond()))
+}
+
 func FormatBigNumber(number uint64) string {
 
 	if number < 1000 {

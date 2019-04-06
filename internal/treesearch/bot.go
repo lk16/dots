@@ -59,10 +59,7 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 		depth = bot.searchDepth
 	}
 
-	search := NewPvs()
-
-	stats := NewStats()
-	stats.StartClock()
+	search := Interface(NewPvs())
 
 	if depth > 4 {
 		for i := range children {
@@ -73,6 +70,12 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 		})
 	}
 
+	sortStats := search.GetStats()
+	bot.write("%12s %63s\n\n", "Sorting:", sortStats.String())
+	search.ResetStats()
+
+	totalStats := sortStats
+
 	for i, child := range children {
 
 		var heur int
@@ -82,7 +85,9 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 			heur = search.Search(child.Board, alpha, beta, depth)
 		}
 
-		bot.write("Child %2d/%2d: %d\n", i+1, len(children), heur)
+		bot.write("Child %2d/%2d: %6d        %s\n", i+1, len(children), heur, search.GetStats().String())
+		totalStats.Add(search.GetStats())
+		search.ResetStats()
 
 		if heur > alpha {
 			alpha = heur
@@ -90,12 +95,7 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 		}
 	}
 
-	stats.StopClock()
-
-	stats.Add(search.GetStats())
-
-	bot.write("%s nodes in %.3f seconds = %s nodes/second\n",
-		FormatBigNumber(stats.Nodes), stats.Duration.Seconds(), FormatBigNumber(stats.NodesPerSecond()))
+	bot.write("\n%12s %63s\n", "Total:", totalStats.String())
 
 	bot.write("\n\n")
 	return &afterwards, nil
