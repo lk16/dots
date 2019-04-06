@@ -79,8 +79,8 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 
 	stats := search.GetStats()
 
-	bot.write("%d nodes in %.3f seconds = %dK nodes/second\n",
-		stats.Nodes, stats.Duration.Seconds(), int(stats.NodesPerSecond())/1000)
+	bot.write("%s nodes in %.3f seconds = %s nodes/second\n",
+		FormatBigNumber(stats.Nodes), stats.Duration.Seconds(), FormatBigNumber(stats.NodesPerSecond()))
 
 	bot.write("\n\n")
 	return &afterwards, nil
