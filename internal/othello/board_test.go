@@ -377,8 +377,11 @@ func TestBoardAsciiArt(t *testing.T) {
 			moves := board.Moves()
 
 			clone := board
+
+			toMove := "○"
 			if swapDiscColors {
 				clone.SwitchTurn()
+				toMove = "●"
 			}
 
 			expected := new(bytes.Buffer)
@@ -404,7 +407,7 @@ func TestBoardAsciiArt(t *testing.T) {
 				expected.WriteString("|\n")
 			}
 
-			expected.WriteString("+-----------------+\nTo move: ○\n")
+			expected.WriteString("+-----------------+\nTo move: " + toMove + "\n")
 
 			got := new(bytes.Buffer)
 			clone = board
