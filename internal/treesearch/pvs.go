@@ -68,7 +68,7 @@ func (pvs *Pvs) Search(board othello.Board, alpha, beta, depth int) int {
 
 func (pvs *Pvs) search(board *othello.Board, alpha, beta, depth int) int {
 
-	if depth <= 7 || pvs.sortPvs == nil {
+	if depth <= 7 || pvs.sortPvs == nil || beta-alpha == 1 {
 		return pvs.searchNoSort(board, alpha, beta, depth)
 	}
 

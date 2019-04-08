@@ -10,9 +10,11 @@ import (
 
 // Bot is a bot that uses a Heuristic for choosing its moves
 type Bot struct {
-	searchDepth int
-	exactDepth  int
-	writer      io.Writer
+	searchDepth   int
+	exactDepth    int
+	writer        io.Writer
+	search        Interface
+	LifetimeStats Stats
 }
 
 // NewBot creates a new Bot
@@ -21,7 +23,8 @@ func NewBot(writer io.Writer, searchDepth, exactDepth int) *Bot {
 	return &Bot{
 		searchDepth: searchDepth,
 		exactDepth:  exactDepth,
-		writer:      writer}
+		writer:      writer,
+		search:      NewPvs()}
 }
 
 func (bot *Bot) write(format string, args ...interface{}) {
@@ -61,20 +64,18 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 		beta = MaxScore
 	}
 
-	search := Interface(NewPvs())
-
 	if depth > 6 {
 		for i := range children {
-			children[i].Heur = search.Search(children[i].Board, MinHeuristic, MaxHeuristic, 6)
+			children[i].Heur = bot.search.Search(children[i].Board, MinHeuristic, MaxHeuristic, 6)
 		}
 		sort.Slice(children, func(i, j int) bool {
 			return children[i].Heur > children[j].Heur
 		})
 	}
 
-	sortStats := search.GetStats()
+	sortStats := bot.search.GetStats()
 	bot.write("\n\n%12s %63s\n\n", "Sorting:", sortStats.String())
-	search.ResetStats()
+	bot.search.ResetStats()
 
 	totalStats := sortStats
 
@@ -82,14 +83,15 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 
 		var heur int
 		if board.CountEmpties() <= bot.exactDepth {
-			heur = search.ExactSearch(child.Board, alpha, beta)
+			heur = bot.search.ExactSearch(child.Board, alpha, beta)
 		} else {
-			heur = search.Search(child.Board, alpha, beta, depth)
+			heur = bot.search.Search(child.Board, alpha, beta, depth)
 		}
 
-		bot.write("Child %2d/%2d: %6d        %s\n", i+1, len(children), heur, search.GetStats().String())
-		totalStats.Add(search.GetStats())
-		search.ResetStats()
+		childStats := bot.search.GetStats()
+		bot.search.ResetStats()
+		totalStats.Add(childStats)
+		bot.write("Child %2d/%2d: %6d        %s\n", i+1, len(children), heur, childStats.String())
 
 		if heur > alpha {
 			alpha = heur
@@ -97,8 +99,8 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 		}
 	}
 
-	bot.write("\n%12s %63s\n", "Total:", totalStats.String())
+	bot.write("\n%12s %63s\n\n\n", "Total:", totalStats.String())
+	bot.LifetimeStats.Add(totalStats)
 
-	bot.write("\n\n")
 	return &afterwards, nil
 }

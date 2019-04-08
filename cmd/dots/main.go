@@ -5,6 +5,7 @@ import (
 	"github.com/lk16/dots/internal/othello"
 	"github.com/lk16/dots/internal/treesearch"
 	"github.com/lk16/dots/internal/web"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
@@ -53,12 +54,15 @@ func main() {
 	if *cpuprofile != "" {
 		profile(*cpuprofile, func() {
 			rand.Seed(0)
-			board := othello.NewXotBoard()
-			board.ASCIIArt(os.Stdout, false)
-			bot := treesearch.NewBot(os.Stdout, 12, 0)
-			_, err := bot.DoMove(board)
-			if err != nil {
-				log.Printf("error: %s", err)
+			bot := treesearch.NewBot(ioutil.Discard, 12, 0)
+			for i := 0; i < 10; i++ {
+				board := othello.NewXotBoard()
+				_, err := bot.DoMove(board)
+				if err != nil {
+					log.Printf("error: %s", err)
+					return
+				}
+				log.Printf("bot lifetime stats: %s\n", bot.LifetimeStats.String())
 			}
 		})
 		return
