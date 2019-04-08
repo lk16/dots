@@ -268,8 +268,9 @@ func (board Board) moves() uint64 {
 
 	for i := uint(0); i < 64; i++ {
 		clone := board
-		if (empties&(uint64(1)<<i) != 0) && clone.DoMove(uint64(1<<i)) != 0 {
-			moves |= uint64(1) << i
+		mask := uint64(1) << i
+		if (empties&mask != 0) && clone.DoMove(mask) != 0 {
+			moves |= mask
 		}
 	}
 	return moves
@@ -408,6 +409,7 @@ func TestBoardAsciiArt(t *testing.T) {
 			}
 
 			expected.WriteString("+-----------------+\nTo move: " + toMove + "\n")
+			expected.WriteString("Raw: " + fmt.Sprintf("%#v", board) + "\n")
 
 			got := new(bytes.Buffer)
 			clone = board

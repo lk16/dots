@@ -199,7 +199,9 @@ func (board Board) ASCIIArt(writer io.Writer, swapDiscColors bool) {
 		moveDisc = "○"
 	}
 
-	_, _ = buffer.WriteString("+-----------------+\nTo move: " + moveDisc + "\n")
+	_, _ = buffer.WriteString("+-----------------+\n")
+	_, _ = buffer.WriteString("To move: " + moveDisc + "\n")
+	_, _ = buffer.WriteString("Raw: " + fmt.Sprintf("%#v", board) + "\n")
 
 	_, err := writer.Write(buffer.Bytes())
 	if err != nil {
