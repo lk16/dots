@@ -730,13 +730,3 @@ func BenchmarkGetChildrenXot(b *testing.B) {
 	}
 	b.StopTimer()
 }
-
-func BenchmarkDoMoveSemiRandom(b *testing.B) {
-	board := NewBoard()
-	b.ResetTimer()
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		board.DoMove(uint64(i % 64))
-	}
-	b.StopTimer()
-}
