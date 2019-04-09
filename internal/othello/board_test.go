@@ -269,7 +269,7 @@ func (board Board) moves() uint64 {
 	for i := uint(0); i < 64; i++ {
 		clone := board
 		mask := uint64(1) << i
-		if (empties&mask != 0) && clone.DoMove(mask) != 0 {
+		if (empties&mask != 0) && clone.doMove(i) != 0 {
 			moves |= mask
 		}
 	}
@@ -727,6 +727,16 @@ func BenchmarkGetChildrenXot(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		dummyBoardSlice = board.GetChildren()
+	}
+	b.StopTimer()
+}
+
+func BenchmarkDoMoveSemiRandom(b *testing.B) {
+	board := NewBoard()
+	b.ResetTimer()
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		board.DoMove(uint64(i % 64))
 	}
 	b.StopTimer()
 }
