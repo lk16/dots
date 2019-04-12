@@ -53,7 +53,7 @@ func (minimax *MiniMax) Search(board othello.Board, alpha, beta, depth int) int 
 
 // ExactSearch searches for the best move without a depth limitation
 func (minimax *MiniMax) ExactSearch(board othello.Board, alpha, beta int) int {
-	return minimax.Search(board, alpha, beta, 60)
+	return minimax.Search(board, alpha*ExactScoreFactor, beta*ExactScoreFactor, 60) / ExactScoreFactor
 }
 
 func (minimax *MiniMax) search(board othello.Board, depth int, maxPlayer bool) int {

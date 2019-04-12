@@ -105,3 +105,59 @@ func TestTreeSearch(t *testing.T) {
 	}
 	fmt.Printf("\rTesting board %10d\n", len(testedBoards))
 }
+
+func TestTreeSearchExact(t *testing.T) {
+
+	internal := func(t *testing.T, board othello.Board, minimax, mtdf, pvs Interface, testedBoards int) {
+
+		minimaxResult := minimax.ExactSearch(board, MinHeuristic, MaxHeuristic)
+		mtdfResult := mtdf.ExactSearch(board, MinHeuristic, MaxHeuristic)
+		pvsResult := pvs.ExactSearch(board, MinHeuristic, MaxHeuristic)
+
+		if minimaxResult != mtdfResult || minimaxResult != pvsResult {
+			fmt.Printf("\nFailed at board %d\n", testedBoards)
+			msg := "Found inconsistent exact tree search results:\n"
+			msg += fmt.Sprintf("%10s: %5d\n", minimax.Name(), minimaxResult)
+			msg += fmt.Sprintf("%10s: %5d\n", pvs.Name(), pvsResult)
+			msg += fmt.Sprintf("%10s: %5d\n", mtdf.Name(), mtdfResult)
+
+			var buff bytes.Buffer
+			board.ASCIIArt(&buff, false)
+			msg += fmt.Sprintf("for this board at perfect depth\n\n%s\n", buff.String())
+			t.Error(msg)
+			t.FailNow()
+		}
+	}
+
+	rand.Seed(0)
+	testedBoards := make(map[othello.Board]struct{})
+
+	minimax := NewMinimax()
+	mtdf := NewMtdf()
+	pvs := NewPvs()
+
+	for i := 0; i < 2000; i++ {
+		for discs := 56; discs < 64; discs++ {
+
+			board, err := othello.RandomBoard(discs)
+			if err != nil {
+				t.Errorf("Failed to generate random board: %s", err)
+			}
+
+			normalized := board.Normalize()
+
+			if _, ok := testedBoards[normalized]; ok {
+				continue
+			}
+
+			testedBoards[normalized] = struct{}{}
+
+			if len(testedBoards)%10 == 0 {
+				fmt.Printf("\rTesting board %10d", len(testedBoards))
+			}
+
+			internal(t, *board, minimax, mtdf, pvs, len(testedBoards))
+		}
+	}
+	fmt.Printf("\rTesting board %10d\n", len(testedBoards))
+}
