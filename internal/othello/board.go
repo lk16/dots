@@ -802,9 +802,9 @@ func (board Board) Opp() uint64 {
 // Returns the flipped discs.
 func (board *Board) doMoveToHigherBits(line uint64) uint64 {
 	b := (^line | board.opp) + 1
-	lineMask := (b & -b & board.me) - 1
-	x := (lineMask >> 63) - 1
-	return x & lineMask & board.opp & line
+	potentiallyFlipped := (b & -b & board.me) - 1
+	x := (potentiallyFlipped >> 63) - 1
+	return x & potentiallyFlipped & board.opp & line
 }
 
 // Flips discs on a Board, given a flipping line.
@@ -812,10 +812,11 @@ func (board *Board) doMoveToHigherBits(line uint64) uint64 {
 // Returns the flipped discs.
 func (board *Board) doMoveToLowerBits(line uint64) uint64 {
 	lineMask := line & board.me
-	line &^= doMoveToLowerLookup[bits.Len64(lineMask)]
+	potentiallyFlipped := line &^ doMoveToLowerLookup[bits.Len64(lineMask)]
 
-	if line&board.opp != line {
+	if potentiallyFlipped&board.opp != potentiallyFlipped {
 		return 0
 	}
-	return line
+
+	return potentiallyFlipped
 }

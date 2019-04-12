@@ -373,7 +373,7 @@ func TestBoardGetChildren(t *testing.T) {
 func TestBoardAsciiArt(t *testing.T) {
 	for board := range genTestBoards() {
 
-		for _, swapDiscColors := range []bool{true, false} {
+		for _, swapDiscColors := range []bool{false, true} {
 
 			moves := board.Moves()
 
@@ -409,7 +409,7 @@ func TestBoardAsciiArt(t *testing.T) {
 			}
 
 			expected.WriteString("+-----------------+\nTo move: " + toMove + "\n")
-			expected.WriteString("Raw: " + fmt.Sprintf("%#v", board) + "\n")
+			expected.WriteString("Raw: " + fmt.Sprintf("%#v", clone) + "\n")
 
 			got := new(bytes.Buffer)
 			clone = board

@@ -40,7 +40,8 @@ var msb8tab = [256]uint64{
 
 //
 var doMoveToLowerLookup = [64]uint64{
-	^(uint64(0)), // no bits are flipped if
+	// no bits are flipped if player to move has no discs on the inspected line
+	^(uint64(0)),
 	(uint64(1) << 1) - 1,
 	(uint64(1) << 2) - 1,
 	(uint64(1) << 3) - 1,
