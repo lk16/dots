@@ -10790,6 +10790,6 @@ var xotBoards = []Board{
 
 // NewXotBoard returns a new xot board
 // http://berg.earthlingz.de/xot/aboutxot.php?lang=en
-func NewXotBoard() Board {
-	return xotBoards[rand.Intn(len(xotBoards))]
+func NewXotBoard() *Board {
+	return &xotBoards[rand.Intn(len(xotBoards))]
 }

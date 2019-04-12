@@ -54,13 +54,17 @@ func main() {
 	if *cpuprofile != "" {
 		profile(*cpuprofile, func() {
 			rand.Seed(0)
-			bot := treesearch.NewBot(ioutil.Discard, 12, 0)
-			for i := 0; i < 10; i++ {
+			exactDepth := 18
+			bot := treesearch.NewBot(ioutil.Discard, 2, exactDepth)
+			for i := 0; i < 1; i++ {
 				board := othello.NewXotBoard()
-				_, err := bot.DoMove(board)
-				if err != nil {
-					log.Printf("error: %s", err)
-					return
+				for board.CountEmpties() >= exactDepth {
+					var err error
+					board, err = bot.DoMove(*board)
+					if err != nil {
+						log.Printf("error: %s", err)
+						return
+					}
 				}
 				log.Printf("bot lifetime stats: %s\n", bot.LifetimeStats.String())
 			}

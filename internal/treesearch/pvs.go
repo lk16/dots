@@ -47,12 +47,16 @@ func (pvs *Pvs) ResetStats() {
 
 // Search searches for the the best move up to a certain depth
 func (pvs *Pvs) Search(board othello.Board, alpha, beta, depth int) int {
-	if depth >= board.CountEmpties() {
-		depth = 60
-	}
 
 	pvs.stats.StartClock()
-	heur := -pvs.search(&board, -beta, -alpha, depth)
+
+	var heur int
+	if depth >= board.CountEmpties() {
+		heur = -ExactScoreFactor * pvs.searchExact(&board, -beta, -alpha)
+	} else {
+		heur = -pvs.search(&board, -beta, -alpha, depth)
+	}
+
 	pvs.stats.StopClock()
 
 	if heur < alpha {
@@ -229,6 +233,88 @@ func (pvs *Pvs) searchNullWindowNoSort(board *othello.Board, alpha, depth int) i
 		heur := -pvs.searchNullWindowNoSort(board, -(alpha + 1), depth-1)
 		if heur > alpha {
 			gen.RestoreParent()
+			return alpha + 1
+		}
+	}
+
+	return alpha
+}
+
+func (pvs *Pvs) searchExact(board *othello.Board, alpha, beta int) int {
+
+	pvs.stats.Nodes++
+
+	children := board.GetSortableChildren()
+
+	if len(children) == 0 {
+
+		if board.OpponentMoves() == 0 {
+			return board.ExactScore()
+		}
+
+		board.SwitchTurn()
+		return -pvs.searchExact(board, -beta, -alpha)
+	}
+
+	/*for i := range children {
+		children[i].Heur = pvs.sortPvs.Search(children[i].Board, MinHeuristic, MaxHeuristic, 2)
+	}
+	sort.Slice(children, func(i, j int) bool {
+		return children[i].Heur > children[j].Heur
+	})*/
+
+	for i, child := range children {
+
+		var heur int
+		if i == 0 {
+			heur = -pvs.searchExact(&child.Board, -beta, -alpha)
+		} else {
+			heur = -pvs.searchExactNullWindow(&child.Board, -(alpha + 1))
+			if (alpha < heur) && (heur < beta) {
+				heur = -pvs.searchExact(&child.Board, -beta, -heur)
+			}
+		}
+		if heur >= beta {
+			return beta
+		}
+		if heur > alpha {
+			alpha = heur
+		}
+
+	}
+
+	return alpha
+}
+
+func (pvs *Pvs) searchExactNullWindow(board *othello.Board, alpha int) int {
+
+	pvs.stats.Nodes++
+
+	children := board.GetSortableChildren()
+
+	if len(children) == 0 {
+
+		if board.OpponentMoves() == 0 {
+			return board.ExactScore()
+		}
+
+		board.SwitchTurn()
+		heur := -pvs.searchExactNullWindow(board, -(alpha + 1))
+		board.SwitchTurn()
+		return heur
+	}
+
+	/*for i := range children {
+		children[i].Heur = pvs.sortPvs.Search(children[i].Board, MinHeuristic, MaxHeuristic, 2)
+	}
+	sort.Slice(children, func(i, j int) bool {
+		return children[i].Heur > children[j].Heur
+	})*/
+
+	for _, child := range children {
+
+		heur := -pvs.searchExactNullWindow(&child.Board, -(alpha + 1))
+		if heur > alpha {
 			return alpha + 1
 		}
 	}

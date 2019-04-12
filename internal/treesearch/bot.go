@@ -52,19 +52,9 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 		return &children[0].Board, nil
 	}
 
-	alpha := MinHeuristic
-	beta := MaxHeuristic
+	isExact := bot.exactDepth >= board.CountEmpties()
 
-	var depth int
-	if board.CountEmpties() <= bot.exactDepth {
-		depth = board.CountEmpties()
-	} else {
-		depth = bot.searchDepth
-		alpha = MinScore
-		beta = MaxScore
-	}
-
-	if depth > 6 {
+	if (!isExact) && (bot.searchDepth > 6) {
 		for i := range children {
 			children[i].Heur = bot.search.Search(children[i].Board, MinHeuristic, MaxHeuristic, 6)
 		}
@@ -79,13 +69,24 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 
 	totalStats := sortStats
 
+	var alpha, beta int
 	for i, child := range children {
 
+		if i == 0 {
+			if isExact {
+				alpha = MinScore
+				beta = MaxScore
+			} else {
+				alpha = MinHeuristic
+				beta = MaxHeuristic
+			}
+		}
+
 		var heur int
-		if board.CountEmpties() <= bot.exactDepth {
+		if isExact {
 			heur = bot.search.ExactSearch(child.Board, alpha, beta)
 		} else {
-			heur = bot.search.Search(child.Board, alpha, beta, depth)
+			heur = bot.search.Search(child.Board, alpha, beta, bot.searchDepth)
 		}
 
 		childStats := bot.search.GetStats()

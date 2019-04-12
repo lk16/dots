@@ -245,7 +245,7 @@ func (mws *moveWebSocket) sendGetXotReply() {
 	board := othello.NewXotBoard()
 
 	message := newWsMessage(&xotReply{
-		State: newState(board, 0)})
+		State: newState(*board, 0)})
 
 	err := mws.send(message)
 	if err != nil {
