@@ -8,6 +8,46 @@ import (
 	"testing"
 )
 
+func TestFormatBigNumber(t *testing.T) {
+
+	type testCase struct {
+		input          uint64
+		expectedOutput string
+	}
+
+	testCases := []testCase{
+		{0, "0"},
+		{1, "1"},
+		{12, "12"},
+		{123, "123"},
+		{1234, "1.23K"},
+		{123456, "123K"},
+		{1234567, "1.23M"},
+		{12345678, "12.3M"},
+		{123456789, "123M"},
+		{1234567890, "1.23G"},
+		{12345678901, "12.3G"},
+		{123456789012, "123G"},
+		{1234567890123, "1.23T"},
+		{12345678901234, "12.3T"},
+		{123456789012345, "123T"},
+		{1234567890123456, "1.23P"},
+		{12345678901234567, "12.3P"},
+		{123456789012345678, "123P"},
+		{1234567890123456789, "1.23E"},
+		{12345678901234567890, "12.3E"}}
+
+	for i := range testCases {
+		output := FormatBigNumber(testCases[i].input)
+
+		if output != testCases[i].expectedOutput {
+			t.Errorf("For input %d expected \"%s\", got \"%s\"",
+				testCases[i].input, testCases[i].expectedOutput, output)
+		}
+
+	}
+}
+
 func TestTreeSearch(t *testing.T) {
 
 	internal := func(t *testing.T, depth int, board othello.Board, minimax, mtdf, pvs Interface, testedBoards int) {

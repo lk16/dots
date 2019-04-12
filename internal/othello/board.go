@@ -45,6 +45,12 @@ type Board struct {
 	me, opp uint64
 }
 
+// SortableBoard is a board with associated heuristic estimation suitable for sorting
+type SortableBoard struct {
+	Board Board
+	Heur  int
+}
+
 // NewBoard returns a Board representing the initial state
 func NewBoard() *Board {
 	return &Board{
@@ -193,7 +199,9 @@ func (board Board) ASCIIArt(writer io.Writer, swapDiscColors bool) {
 		moveDisc = "○"
 	}
 
-	_, _ = buffer.WriteString("+-----------------+\nTo move: " + moveDisc + "\n")
+	_, _ = buffer.WriteString("+-----------------+\n")
+	_, _ = buffer.WriteString("To move: " + moveDisc + "\n")
+	_, _ = buffer.WriteString("Raw: " + fmt.Sprintf("%#v", board) + "\n")
 
 	_, err := writer.Write(buffer.Bytes())
 	if err != nil {
@@ -666,6 +674,24 @@ func (board Board) GetChildren() []Board {
 	return children
 }
 
+// GetSortableChildren returns a slice with all children of a Board
+// such that they can easily be sorted
+func (board Board) GetSortableChildren() []SortableBoard {
+
+	moves := board.Moves()
+	children := make([]SortableBoard, bits.OnesCount64(moves))
+
+	for i := range children {
+		moveBit := moves & (-moves)
+		moves &^= moveBit
+
+		children[i].Board = board
+		children[i].Board.DoMove(moveBit)
+		children[i].Heur = 0
+	}
+	return children
+}
+
 // UndoMove undoes a move
 func (board *Board) UndoMove(moveBit, flipped uint64) {
 	tmp := board.me
@@ -776,9 +802,9 @@ func (board Board) Opp() uint64 {
 // Returns the flipped discs.
 func (board *Board) doMoveToHigherBits(line uint64) uint64 {
 	b := (^line | board.opp) + 1
-	lineMask := (b & -b & board.me) - 1
-	x := (lineMask >> 63) - 1
-	return x & lineMask & board.opp & line
+	potentiallyFlipped := (b & -b & board.me) - 1
+	x := (potentiallyFlipped >> 63) - 1
+	return x & potentiallyFlipped & board.opp & line
 }
 
 // Flips discs on a Board, given a flipping line.
@@ -786,14 +812,11 @@ func (board *Board) doMoveToHigherBits(line uint64) uint64 {
 // Returns the flipped discs.
 func (board *Board) doMoveToLowerBits(line uint64) uint64 {
 	lineMask := line & board.me
-	if lineMask == 0 {
+	potentiallyFlipped := line &^ doMoveToLowerLookup[bits.Len64(lineMask)]
+
+	if potentiallyFlipped&board.opp != potentiallyFlipped {
 		return 0
 	}
-	bit := uint64(1) << uint(bits.Len64(lineMask)-1)
-	line &^= ((bit << 1) - 1)
 
-	if line&board.opp == line {
-		return line
-	}
-	return 0
+	return potentiallyFlipped
 }

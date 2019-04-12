@@ -268,8 +268,9 @@ func (board Board) moves() uint64 {
 
 	for i := uint(0); i < 64; i++ {
 		clone := board
-		if (empties&(uint64(1)<<i) != 0) && clone.DoMove(uint64(1<<i)) != 0 {
-			moves |= uint64(1) << i
+		mask := uint64(1) << i
+		if (empties&mask != 0) && clone.doMove(i) != 0 {
+			moves |= mask
 		}
 	}
 	return moves
@@ -372,13 +373,16 @@ func TestBoardGetChildren(t *testing.T) {
 func TestBoardAsciiArt(t *testing.T) {
 	for board := range genTestBoards() {
 
-		for _, swapDiscColors := range []bool{true, false} {
+		for _, swapDiscColors := range []bool{false, true} {
 
 			moves := board.Moves()
 
 			clone := board
+
+			toMove := "○"
 			if swapDiscColors {
 				clone.SwitchTurn()
+				toMove = "●"
 			}
 
 			expected := new(bytes.Buffer)
@@ -404,7 +408,8 @@ func TestBoardAsciiArt(t *testing.T) {
 				expected.WriteString("|\n")
 			}
 
-			expected.WriteString("+-----------------+\nTo move: ○\n")
+			expected.WriteString("+-----------------+\nTo move: " + toMove + "\n")
+			expected.WriteString("Raw: " + fmt.Sprintf("%#v", clone) + "\n")
 
 			got := new(bytes.Buffer)
 			clone = board

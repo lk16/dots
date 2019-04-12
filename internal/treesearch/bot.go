@@ -5,13 +5,16 @@ import (
 	"github.com/lk16/dots/internal/othello"
 	"io"
 	"log"
+	"sort"
 )
 
 // Bot is a bot that uses a Heuristic for choosing its moves
 type Bot struct {
-	searchDepth int
-	exactDepth  int
-	writer      io.Writer
+	searchDepth   int
+	exactDepth    int
+	writer        io.Writer
+	search        Interface
+	LifetimeStats Stats
 }
 
 // NewBot creates a new Bot
@@ -20,7 +23,8 @@ func NewBot(writer io.Writer, searchDepth, exactDepth int) *Bot {
 	return &Bot{
 		searchDepth: searchDepth,
 		exactDepth:  exactDepth,
-		writer:      writer}
+		writer:      writer,
+		search:      NewPvs()}
 }
 
 func (bot *Bot) write(format string, args ...interface{}) {
@@ -34,10 +38,10 @@ func (bot *Bot) write(format string, args ...interface{}) {
 // DoMove computes the best child of a Board
 func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 
-	children := board.GetChildren()
+	children := board.GetSortableChildren()
 
 	// prevent returning empty Board when bot cannot prevent losing all discs
-	afterwards := children[0]
+	afterwards := children[0].Board
 
 	if len(children) == 0 {
 		return nil, fmt.Errorf("no moves possible")
@@ -45,7 +49,7 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 
 	if len(children) == 1 {
 		bot.write("Only one move. Skipping evaluation.\n")
-		return &children[0], nil
+		return &children[0].Board, nil
 	}
 
 	alpha := MinHeuristic
@@ -56,32 +60,47 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 		depth = board.CountEmpties()
 	} else {
 		depth = bot.searchDepth
+		alpha = MinScore
+		beta = MaxScore
 	}
 
-	search := NewPvs()
+	if depth > 6 {
+		for i := range children {
+			children[i].Heur = bot.search.Search(children[i].Board, MinHeuristic, MaxHeuristic, 6)
+		}
+		sort.Slice(children, func(i, j int) bool {
+			return children[i].Heur > children[j].Heur
+		})
+	}
+
+	sortStats := bot.search.GetStats()
+	bot.write("\n\n%12s %63s\n\n", "Sorting:", sortStats.String())
+	bot.search.ResetStats()
+
+	totalStats := sortStats
 
 	for i, child := range children {
 
 		var heur int
 		if board.CountEmpties() <= bot.exactDepth {
-			heur = search.ExactSearch(child, alpha, beta)
+			heur = bot.search.ExactSearch(child.Board, alpha, beta)
 		} else {
-			heur = search.Search(child, alpha, beta, depth)
+			heur = bot.search.Search(child.Board, alpha, beta, depth)
 		}
 
-		bot.write("Child %2d/%2d: %d\n", i+1, len(children), heur)
+		childStats := bot.search.GetStats()
+		bot.search.ResetStats()
+		totalStats.Add(childStats)
+		bot.write("Child %2d/%2d: %6d        %s\n", i+1, len(children), heur, childStats.String())
 
 		if heur > alpha {
 			alpha = heur
-			afterwards = child
+			afterwards = child.Board
 		}
 	}
 
-	stats := search.GetStats()
+	bot.write("\n%12s %63s\n\n\n", "Total:", totalStats.String())
+	bot.LifetimeStats.Add(totalStats)
 
-	bot.write("%d nodes in %.3f seconds = %dK nodes/second\n",
-		stats.Nodes, stats.Duration.Seconds(), int(stats.NodesPerSecond())/1000)
-
-	bot.write("\n\n")
 	return &afterwards, nil
 }
