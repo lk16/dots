@@ -2,7 +2,6 @@ package treesearch
 
 import (
 	"github.com/lk16/dots/internal/othello"
-	"math/bits"
 )
 
 // Squared is a heuristic taken from a similar project with that name
@@ -11,8 +10,8 @@ func Squared(board othello.Board) int {
 
 	cornerDiff := board.CornerCountDifference()
 
-	meMoves := bits.OnesCount64(board.Moves())
-	oppMoves := bits.OnesCount64(board.OpponentMoves())
+	meMoves := board.Moves().Count()
+	oppMoves := board.OpponentMoves().Count()
 	moveDiff := meMoves - oppMoves
 
 	return (3 * cornerDiff) + moveDiff

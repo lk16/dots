@@ -7,7 +7,6 @@ import (
 	"github.com/lk16/dots/internal/othello"
 	"github.com/lk16/dots/internal/treesearch"
 	"log"
-	"math/bits"
 	"net/http"
 	"os"
 	"sort"
@@ -117,7 +116,7 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 
 	for i := range analyzedChildren {
 
-		move := bits.TrailingZeros64(board.Me() | board.Opp() ^ (children[i].Me() | children[i].Opp()))
+		move := board.GetMoveField(children[i])
 
 		analyzedChildren[i] = analyzedChild{
 			child: children[i],

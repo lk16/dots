@@ -100,21 +100,21 @@ func newBoardState(board othello.Board, turn int) boardState {
 
 func (s *boardState) getBoard() (*othello.Board, int, error) {
 
-	white := uint64(0)
-	black := uint64(0)
+	white := othello.BitSet(0)
+	black := othello.BitSet(0)
 
 	for _, w := range s.White {
 		if w < 0 || w >= 64 {
 			return nil, 0, fmt.Errorf("invalid white field value %d", w)
 		}
-		white |= uint64(1 << uint(w))
+		white.Set(w)
 	}
 
 	for _, b := range s.Black {
 		if b < 0 || b >= 64 {
 			return nil, 0, fmt.Errorf("invalid black field value %d", b)
 		}
-		black |= uint64(1 << uint(b))
+		black.Set(b)
 	}
 
 	if white&black != 0 {

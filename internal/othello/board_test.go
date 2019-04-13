@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"log"
-	"math/bits"
 	"math/rand"
 	"testing"
 )
@@ -42,7 +41,7 @@ func genTestBoards() chan Board {
 		for y := 0; y < 8; y++ {
 			for x := 0; x < 8; x++ {
 				board := Board{}
-				board.me |= uint64(1) << uint(y*8+x)
+				board.me.Set(y*8 + x)
 
 				// for each direction
 				for dy := -1; dy <= 1; dy++ {
@@ -66,7 +65,7 @@ func genTestBoards() chan Board {
 							qy := y + d*dy
 							qx := x + d*dx
 
-							board.opp |= uint64(1) << uint(qy*8+qx)
+							board.opp.Set(qy*8 + qx)
 
 							ch <- board
 						}
@@ -89,57 +88,9 @@ func genTestBoards() chan Board {
 			}
 		}
 
-		// random boards not necessarily reachable
-		for i := 0; i < 100; i++ {
-			board := Board{
-				me:  rand.Uint64(),
-				opp: rand.Uint64()}
-			board.opp &^= board.me
-			ch <- board
-		}
-
 		close(ch)
 	}()
 	return ch
-}
-
-func TestBoardIsValid(t *testing.T) {
-
-	type testCase struct {
-		board    Board
-		expected bool
-	}
-
-	startBoard := *NewBoard()
-	emptyBoard := Board{me: 0, opp: 0}
-
-	all := ^uint64(0)
-
-	startMask := startBoard.me | startBoard.opp
-	dupBoard := Board{me: startMask, opp: startMask}
-	winBoard := Board{me: all, opp: 0}
-	loseBoard := Board{me: 0, opp: all}
-	drawBoard := Board{me: all << 32, opp: all >> 32}
-
-	testCases := []testCase{
-		{emptyBoard, false},
-		{startBoard, true},
-		{dupBoard, false},
-		{winBoard, true},
-		{loseBoard, true},
-		{drawBoard, true}}
-
-	for _, testCase := range testCases {
-		expected := testCase.expected
-		board := testCase.board
-
-		got := boardIsValid(&board)
-
-		if expected != got {
-			t.Errorf("Expected %t, got %t for othello\n%s\n\n",
-				expected, got, board.asciiArtString(false))
-		}
-	}
 }
 
 func TestRandomBoard(t *testing.T) {
@@ -152,7 +103,7 @@ func TestRandomBoard(t *testing.T) {
 			t.Error(err)
 		}
 
-		got := bits.OnesCount64(board.me | board.opp)
+		got := (board.me | board.opp).Count()
 
 		if expected != got {
 			t.Fatalf("Expected disc count %d, got %d\n", expected, got)
@@ -174,65 +125,53 @@ func TestRandomBoard(t *testing.T) {
 	}
 }
 
-func TestBoardCustom(t *testing.T) {
+func TestBoardDoMove(t *testing.T) {
 
-	me := uint64(1)
-	opp := uint64(2)
-
-	board := NewCustomBoard(me, opp)
-
-	if board.me != me || board.opp != opp {
-		t.Errorf("Custom othello failed\n")
-	}
-
-}
-
-func (board *Board) doMove(index uint) uint64 {
-	if (board.me|board.opp)&(uint64(1)<<index) != 0 {
-		return 0
-	}
-	flipped := uint64(0)
-	for dx := -1; dx <= 1; dx++ {
-		for dy := -1; dy <= 1; dy++ {
-			if dx == 0 && dy == 0 {
-				continue
-			}
-			s := 1
-			for {
-				curx := int(index%8) + (dx * s)
-				cury := int(index/8) + (dy * s)
-				cur := uint(8*cury + curx)
-				if curx < 0 || curx >= 8 || cury < 0 || cury >= 8 {
-					break
+	doMove := func(board *Board, index uint) BitSet {
+		if (board.me | board.opp).Test(int(index)) {
+			return 0
+		}
+		flipped := BitSet(0)
+		for dx := -1; dx <= 1; dx++ {
+			for dy := -1; dy <= 1; dy++ {
+				if dx == 0 && dy == 0 {
+					continue
 				}
-				if board.opp&(uint64(1)<<cur) != 0 {
-					s++
-				} else {
-					if (board.me&(uint64(1)<<cur) != 0) && (s >= 2) {
-						for p := 1; p < s; p++ {
-							f := uint(int(index) + (p * (8*dy + dx)))
-							flipped |= uint64(1) << f
-						}
+				s := 1
+				for {
+					curx := int(index%8) + (dx * s)
+					cury := int(index/8) + (dy * s)
+					cur := 8*cury + curx
+					if curx < 0 || curx >= 8 || cury < 0 || cury >= 8 {
+						break
 					}
-					break
+					if board.opp.Test(cur) {
+						s++
+					} else {
+						if board.me.Test(cur) && (s >= 2) {
+							for p := 1; p < s; p++ {
+								f := int(index) + (p * (8*dy + dx))
+								flipped.Set(f)
+							}
+						}
+						break
+					}
 				}
 			}
 		}
+		board.me |= flipped
+		board.me.Set(int(index))
+		board.opp &= ^board.me
+		board.opp, board.me = board.me, board.opp
+		return flipped
 	}
-	board.me |= flipped
-	board.me |= uint64(1) << index
-	board.opp &= ^board.me
-	board.opp, board.me = board.me, board.opp
-	return flipped
-}
 
-func TestBoardDoMove(t *testing.T) {
 	for board := range genTestBoards() {
 		moves := board.Moves()
 		for i := uint(0); i < 64; i++ {
 
 			// othello.DoMove() should not be called for invalid moves
-			if moves&(uint64(1)<<i) == 0 {
+			if !moves.Test(int(i)) {
 				continue
 			}
 
@@ -242,11 +181,11 @@ func TestBoardDoMove(t *testing.T) {
 			}
 
 			clone := board
-			expectedReturn := clone.doMove(i)
+			expectedReturn := doMove(&clone, i)
 			expectedBoard := clone
 
 			clone = board
-			gotReturn := clone.DoMove(uint64(1 << i))
+			gotReturn := clone.DoMove(BitSet(1 << i))
 			gotBoard := clone
 
 			if (gotReturn != expectedReturn) || (gotBoard != expectedBoard) {
@@ -262,21 +201,21 @@ func TestBoardDoMove(t *testing.T) {
 	}
 }
 
-func (board Board) moves() uint64 {
-	moves := uint64(0)
-	empties := ^(board.me | board.opp)
-
-	for i := uint(0); i < 64; i++ {
-		clone := board
-		mask := uint64(1) << i
-		if (empties&mask != 0) && clone.doMove(i) != 0 {
-			moves |= mask
-		}
-	}
-	return moves
-}
-
 func TestBoardMoves(t *testing.T) {
+
+	boardMoves := func(board Board) BitSet {
+		moves := BitSet(0)
+		empties := ^(board.me | board.opp)
+
+		for i := 0; i < 64; i++ {
+			clone := board
+			if empties.Test(i) && clone.DoMove(1<<uint(i)) != 0 {
+				moves.Set(i)
+			}
+		}
+		return moves
+	}
+
 	for b := range genTestBoards() {
 
 		// create copy to silence warnings
@@ -287,7 +226,7 @@ func TestBoardMoves(t *testing.T) {
 		}
 
 		clone := board
-		expected := board.moves()
+		expected := boardMoves(board)
 
 		got := clone.Moves()
 		if expected != got {
@@ -304,9 +243,10 @@ func TestBoardMoves(t *testing.T) {
 
 func (board *Board) getChildren() []Board {
 	var children []Board
+	empties := board.me | board.opp
 	for i := uint(0); i < 64; i++ {
 		clone := *board
-		if clone.doMove(i) != 0 {
+		if clone.DoMove(1<<i) != 0 && !empties.Test(int(i)) {
 			children = append(children, clone)
 		}
 	}
@@ -389,16 +329,15 @@ func TestBoardAsciiArt(t *testing.T) {
 
 			expected.WriteString("+-a-b-c-d-e-f-g-h-+\n")
 
-			for y := uint(0); y < 8; y++ {
+			for y := 0; y < 8; y++ {
 				expected.WriteString(fmt.Sprintf("%d ", y+1))
 
-				for x := uint(0); x < 8; x++ {
-					mask := uint64(1) << (8*y + x)
-					if clone.me&mask != 0 {
+				for x := 0; x < 8; x++ {
+					if clone.me.Test(8*y + x) {
 						expected.WriteString("○ ")
-					} else if clone.opp&mask != 0 {
+					} else if clone.opp.Test(8*y + x) {
 						expected.WriteString("● ")
-					} else if moves&mask != 0 {
+					} else if moves.Test(8*y + x) {
 						expected.WriteString("- ")
 					} else {
 						expected.WriteString("  ")
@@ -486,7 +425,7 @@ func TestBoardSwitchTurn(t *testing.T) {
 
 func TestBoardCountDiscs(t *testing.T) {
 	for board := range genTestBoards() {
-		expected := bits.OnesCount64(board.me | board.opp)
+		expected := (board.me | board.opp).Count()
 
 		clone := board
 		got := clone.CountDiscs()
@@ -504,7 +443,7 @@ func TestBoardCountDiscs(t *testing.T) {
 
 func TestBoardCountEmpties(t *testing.T) {
 	for board := range genTestBoards() {
-		expected := 64 - bits.OnesCount64(board.me|board.opp)
+		expected := 64 - (board.me | board.opp).Count()
 
 		clone := board
 		got := clone.CountEmpties()
@@ -524,8 +463,8 @@ func TestBoardExactScore(t *testing.T) {
 	for board := range genTestBoards() {
 		var expected int
 
-		meCount := bits.OnesCount64(board.me)
-		oppCount := bits.OnesCount64(board.opp)
+		meCount := board.me.Count()
+		oppCount := board.opp.Count()
 		emptyCount := board.CountEmpties()
 
 		if meCount > oppCount {
@@ -594,8 +533,8 @@ func TestBoardNewBoard(t *testing.T) {
 	// B W
 
 	expected := Board{}
-	expected.me = uint64(1)<<(4*8+3) | uint64(1)<<(3*8+4)
-	expected.opp = uint64(1)<<(3*8+3) | uint64(1)<<(4*8+4)
+	expected.me = BitSet(1)<<(4*8+3) | BitSet(1)<<(3*8+4)
+	expected.opp = BitSet(1)<<(3*8+3) | BitSet(1)<<(4*8+4)
 
 	got := *NewBoard()
 
@@ -644,7 +583,7 @@ var dummy int
 
 func TestBoardCornerCountDifference(t *testing.T) {
 	for board := range genTestBoards() {
-		expected := bits.OnesCount64(board.Me()&cornerMask) - bits.OnesCount64(board.Opp()&cornerMask)
+		expected := (board.Me() & cornerMask).Count() - (board.Opp() & cornerMask).Count()
 		got := board.CornerCountDifference()
 
 		if expected != got {
@@ -666,7 +605,7 @@ func BenchmarkCornerCountDifference(b *testing.B) {
 
 func TestBoardXsquareCountDifference(t *testing.T) {
 	for board := range genTestBoards() {
-		expected := bits.OnesCount64(board.Me()&xSquareMask) - bits.OnesCount64(board.Opp()&xSquareMask)
+		expected := (board.Me() & xSquareMask).Count() - (board.Opp() & xSquareMask).Count()
 		got := board.XsquareCountDifference()
 		if expected != got {
 			t.Errorf("\n%s\n\nExpected: %d\nGot: %d\n", board.asciiArtString(false), expected, got)
@@ -687,7 +626,7 @@ func BenchmarkXsquareCountDifference(b *testing.B) {
 
 func TestBoardCsquareCountDifference(t *testing.T) {
 	for board := range genTestBoards() {
-		expected := bits.OnesCount64(board.Me()&cSquareMask) - bits.OnesCount64(board.Opp()&cSquareMask)
+		expected := (board.Me() & cSquareMask).Count() - (board.Opp() & cSquareMask).Count()
 		got := board.CsquareCountDifference()
 		if expected != got {
 			t.Errorf("\n%s\n\nExpected: %d\nGot: %d\n", board.asciiArtString(false), expected, got)

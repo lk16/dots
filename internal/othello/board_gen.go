@@ -2,9 +2,9 @@ package othello
 
 // UnsortedChildGenerator generates children in no particular order
 type UnsortedChildGenerator struct {
-	movesLeft   uint64
-	lastMove    uint64
-	lastFlipped uint64
+	movesLeft   BitSet
+	lastMove    BitSet
+	lastFlipped BitSet
 	child       *Board
 }
 
