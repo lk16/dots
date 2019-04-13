@@ -54,9 +54,9 @@ func main() {
 	if *cpuprofile != "" {
 		profile(*cpuprofile, func() {
 			rand.Seed(0)
-			exactDepth := 18
-			bot := treesearch.NewBot(ioutil.Discard, 2, exactDepth)
-			for i := 0; i < 1; i++ {
+			exactDepth := 16
+			bot := treesearch.NewBot(ioutil.Discard, 3, exactDepth)
+			for i := 0; i < 10; i++ {
 				board := othello.NewXotBoard()
 				for board.CountEmpties() >= exactDepth {
 					var err error

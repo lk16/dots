@@ -52,7 +52,7 @@ func (pvs *Pvs) Search(board othello.Board, alpha, beta, depth int) int {
 
 	var heur int
 	if depth >= board.CountEmpties() {
-		heur = -ExactScoreFactor * pvs.searchExact(&board, -beta, -alpha)
+		heur = -ExactScoreFactor * pvs.searchExact(&board, -beta/ExactScoreFactor, -alpha/ExactScoreFactor)
 	} else {
 		heur = -pvs.search(&board, -beta, -alpha, depth)
 	}
@@ -253,7 +253,9 @@ func (pvs *Pvs) searchExact(board *othello.Board, alpha, beta int) int {
 		}
 
 		board.SwitchTurn()
-		return -pvs.searchExact(board, -beta, -alpha)
+		heur := -pvs.searchExact(board, -beta, -alpha)
+		board.SwitchTurn()
+		return heur
 	}
 
 	/*for i := range children {
@@ -269,7 +271,7 @@ func (pvs *Pvs) searchExact(board *othello.Board, alpha, beta int) int {
 		if i == 0 {
 			heur = -pvs.searchExact(&child.Board, -beta, -alpha)
 		} else {
-			heur = -pvs.searchExactNullWindow(&child.Board, -(alpha + 1))
+			heur = -pvs.searchExact(&child.Board, -(alpha + 1), -alpha)
 			if (alpha < heur) && (heur < beta) {
 				heur = -pvs.searchExact(&child.Board, -beta, -heur)
 			}

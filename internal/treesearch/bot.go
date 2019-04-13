@@ -38,23 +38,36 @@ func (bot *Bot) write(format string, args ...interface{}) {
 // DoMove computes the best child of a Board
 func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 
-	children := board.GetSortableChildren()
+	isExact := bot.exactDepth >= board.CountEmpties()
 
-	// prevent returning empty Board when bot cannot prevent losing all discs
-	afterwards := children[0].Board
+	var depth int
+	if isExact {
+		depth = board.CountEmpties()
+	} else {
+		depth = bot.searchDepth
+	}
+
+	if isExact {
+		bot.write("Searching for exact solution at depth %d\n", depth)
+	} else {
+		bot.write("Searching with heuristic at depth %d\n", depth)
+	}
+
+	children := board.GetSortableChildren()
 
 	if len(children) == 0 {
 		return nil, fmt.Errorf("no moves possible")
 	}
+
+	// prevent returning empty Board when bot cannot prevent losing all discs
+	afterwards := children[0].Board
 
 	if len(children) == 1 {
 		bot.write("Only one move. Skipping evaluation.\n")
 		return &children[0].Board, nil
 	}
 
-	isExact := bot.exactDepth >= board.CountEmpties()
-
-	if (!isExact) && (bot.searchDepth > 6) {
+	if (!isExact) && (depth > 6) {
 		for i := range children {
 			children[i].Heur = bot.search.Search(children[i].Board, MinHeuristic, MaxHeuristic, 6)
 		}
@@ -70,17 +83,16 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 	totalStats := sortStats
 
 	var alpha, beta int
-	for i, child := range children {
 
-		if i == 0 {
-			if isExact {
-				alpha = MinScore
-				beta = MaxScore
-			} else {
-				alpha = MinHeuristic
-				beta = MaxHeuristic
-			}
-		}
+	if isExact {
+		alpha = MinScore
+		beta = MaxScore
+	} else {
+		alpha = MinHeuristic
+		beta = MaxHeuristic
+	}
+
+	for i, child := range children {
 
 		var heur int
 		if isExact {
@@ -92,11 +104,13 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 		childStats := bot.search.GetStats()
 		bot.search.ResetStats()
 		totalStats.Add(childStats)
-		bot.write("Child %2d/%2d: %6d        %s\n", i+1, len(children), heur, childStats.String())
-
 		if heur > alpha {
 			alpha = heur
 			afterwards = child.Board
+			bot.write("Child %2d/%2d: %8d%55s\n", i+1, len(children), heur, childStats.String())
+		} else {
+			bot.write("Child %2d/%2d: %8s%55s\n", i+1, len(children),
+				fmt.Sprintf("≤ %d", heur), childStats.String())
 		}
 	}
 
