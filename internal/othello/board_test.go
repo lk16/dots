@@ -81,7 +81,7 @@ func genTestBoards() chan Board {
 		// random reachable boards with 4-64 discs
 		for i := 0; i < 10; i++ {
 			for discs := 4; discs <= 64; discs++ {
-				board, err := RandomBoard(discs)
+				board, err := NewRandomBoard(discs)
 				if err != nil {
 					log.Printf("genTestBoards() breaking: %s", err)
 				}
@@ -147,7 +147,7 @@ func TestRandomBoard(t *testing.T) {
 
 		expected := discs
 
-		board, err := RandomBoard(discs)
+		board, err := NewRandomBoard(discs)
 		if err != nil {
 			t.Error(err)
 		}
@@ -163,12 +163,12 @@ func TestRandomBoard(t *testing.T) {
 		}
 	}
 
-	board, err := RandomBoard(3)
+	board, err := NewRandomBoard(3)
 	if err == nil {
 		t.Fatalf("Expected error, got nil\n%s\n\n", board.asciiArtString(false))
 	}
 
-	board, err = RandomBoard(65)
+	board, err = NewRandomBoard(65)
 	if err == nil {
 		t.Fatalf("Expected error, got nil\n%s\n\n", board.asciiArtString(false))
 	}
@@ -179,7 +179,7 @@ func TestBoardCustom(t *testing.T) {
 	me := uint64(1)
 	opp := uint64(2)
 
-	board := CustomBoard(me, opp)
+	board := NewCustomBoard(me, opp)
 
 	if board.me != me || board.opp != opp {
 		t.Errorf("Custom othello failed\n")

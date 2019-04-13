@@ -58,15 +58,15 @@ func NewBoard() *Board {
 		opp: 1<<27 | 1<<36}
 }
 
-// CustomBoard returns a Board with a custom state
-func CustomBoard(me, opp uint64) (board *Board) {
+// NewCustomBoard returns a Board with a custom state
+func NewCustomBoard(me, opp uint64) (board *Board) {
 	return &Board{
 		me:  me,
 		opp: opp}
 }
 
-// RandomBoard returns a random Board with a given number of discs
-func RandomBoard(discs int) (*Board, error) {
+// NewRandomBoard returns a random Board with a given number of discs
+func NewRandomBoard(discs int) (*Board, error) {
 
 	if discs < 4 || discs > 64 {
 		err := fmt.Errorf("cannot create random board with %d discs", discs)

@@ -69,9 +69,9 @@ func (s *boardState) getBoard() (*othello.Board, int, error) {
 
 	switch s.Turn {
 	case 0:
-		return othello.CustomBoard(black, white), s.Turn, nil
+		return othello.NewCustomBoard(black, white), s.Turn, nil
 	case 1:
-		return othello.CustomBoard(white, black), s.Turn, nil
+		return othello.NewCustomBoard(white, black), s.Turn, nil
 	default:
 		return nil, 0, fmt.Errorf("invalid turn value %d", s.Turn)
 	}

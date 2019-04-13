@@ -42,7 +42,6 @@ golangci-lint run
         - [ ] drop "log" import
         - [ ] redo genTestBoards()
     - [ ] cleaner error handling (after go 2 release)
-    - [ ] return (*Board, error) from othello.RandomBoard()
     - [ ] javascript code is a mess
 
 - [ ] bot

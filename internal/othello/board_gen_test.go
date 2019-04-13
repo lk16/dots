@@ -83,7 +83,7 @@ func TestBoardChildGenHasMoves(t *testing.T) {
 		t.Errorf("Expected initial othello has moves")
 	}
 
-	board, err := RandomBoard(64)
+	board, err := NewRandomBoard(64)
 	if err != nil {
 		t.Errorf("Error generating random full board: %s", err)
 	}
