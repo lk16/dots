@@ -113,7 +113,7 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 
 	children := board.GetChildren()
 	analyzedChildren := make([]analyzedChild, len(children))
-	evaluated := newState(board, turn)
+	evaluated := newBoardState(board, turn)
 
 	for i := range analyzedChildren {
 
@@ -229,7 +229,7 @@ func (mws *moveWebSocket) sendBotMoveReply(board othello.Board, turn int) {
 	}
 
 	message := newWsMessage(&botMoveReply{
-		State: newState(*bestMove, nextTurn)})
+		State: newBoardState(*bestMove, nextTurn)})
 
 	err = mws.send(message)
 	if err != nil {
@@ -246,7 +246,7 @@ func (mws *moveWebSocket) sendGetXotReply() {
 	board := othello.NewXotBoard()
 
 	message := newWsMessage(&xotReply{
-		State: newState(*board, 0)})
+		State: newBoardState(*board, 0)})
 
 	err := mws.send(message)
 	if err != nil {

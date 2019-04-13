@@ -35,8 +35,6 @@ golangci-lint run
 
 
 - [ ] cleaning
-    - [ ] move GameState from frontend to othello package
-    - [ ] move web.newState() and web.getBoard() to othello package
     - [ ] go linting
     - [ ] clean board tests:
         - [ ] drop "log" import

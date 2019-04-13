@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/ajstarks/svgo"
 	"github.com/gorilla/websocket"
-	"github.com/lk16/dots/internal/othello"
 	"github.com/lk16/dots/internal/treesearch"
 	"io/ioutil"
 	"log"
@@ -16,66 +15,6 @@ import (
 )
 
 var upgrader = websocket.Upgrader{}
-
-func newState(board othello.Board, turn int) boardState {
-
-	me := make([]int, 0)
-	opp := make([]int, 0)
-
-	for i := uint(0); i < 64; i++ {
-		if board.Me()&(1<<i) != 0 {
-			me = append(me, int(i))
-		}
-		if board.Opp()&(1<<i) != 0 {
-			opp = append(opp, int(i))
-		}
-	}
-
-	if turn == 0 {
-		return boardState{
-			Black: me,
-			White: opp,
-			Turn:  0}
-	}
-
-	return boardState{
-		White: me,
-		Black: opp,
-		Turn:  1}
-}
-
-func (s *boardState) getBoard() (*othello.Board, int, error) {
-
-	white := uint64(0)
-	black := uint64(0)
-
-	for _, w := range s.White {
-		if w < 0 || w >= 64 {
-			return nil, 0, fmt.Errorf("invalid white field value %d", w)
-		}
-		white |= uint64(1 << uint(w))
-	}
-
-	for _, b := range s.Black {
-		if b < 0 || b >= 64 {
-			return nil, 0, fmt.Errorf("invalid black field value %d", b)
-		}
-		black |= uint64(1 << uint(b))
-	}
-
-	if white&black != 0 {
-		return nil, 0, fmt.Errorf("white (%+v) and black (%+v) overlap", white, black)
-	}
-
-	switch s.Turn {
-	case 0:
-		return othello.NewCustomBoard(black, white), s.Turn, nil
-	case 1:
-		return othello.NewCustomBoard(white, black), s.Turn, nil
-	default:
-		return nil, 0, fmt.Errorf("invalid turn value %d", s.Turn)
-	}
-}
 
 func ws(w http.ResponseWriter, r *http.Request) {
 	mws, err := newMoveWebSocket(w, r)
