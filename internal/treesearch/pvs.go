@@ -242,6 +242,10 @@ func (pvs *Pvs) searchNullWindowNoSort(board *othello.Board, alpha, depth int) i
 
 func (pvs *Pvs) searchExact(board *othello.Board, alpha, beta int) int {
 
+	if board.CountEmpties() < 10 || beta-alpha == 1 {
+		return pvs.searchExactNoSort(board, alpha, beta)
+	}
+
 	pvs.stats.Nodes++
 
 	children := board.GetSortableChildren()
@@ -258,12 +262,12 @@ func (pvs *Pvs) searchExact(board *othello.Board, alpha, beta int) int {
 		return heur
 	}
 
-	/*for i := range children {
+	for i := range children {
 		children[i].Heur = pvs.sortPvs.Search(children[i].Board, MinHeuristic, MaxHeuristic, 2)
 	}
 	sort.Slice(children, func(i, j int) bool {
 		return children[i].Heur > children[j].Heur
-	})*/
+	})
 
 	for i, child := range children {
 
@@ -271,7 +275,7 @@ func (pvs *Pvs) searchExact(board *othello.Board, alpha, beta int) int {
 		if i == 0 {
 			heur = -pvs.searchExact(&child.Board, -beta, -alpha)
 		} else {
-			heur = -pvs.searchExact(&child.Board, -(alpha + 1), -alpha)
+			heur = -pvs.searchExactNullWindow(&child.Board, -(alpha + 1))
 			if (alpha < heur) && (heur < beta) {
 				heur = -pvs.searchExact(&child.Board, -beta, -heur)
 			}
@@ -290,6 +294,10 @@ func (pvs *Pvs) searchExact(board *othello.Board, alpha, beta int) int {
 
 func (pvs *Pvs) searchExactNullWindow(board *othello.Board, alpha int) int {
 
+	if board.CountEmpties() < 10 {
+		return pvs.searchExactNullWindowNoSort(board, alpha)
+	}
+
 	pvs.stats.Nodes++
 
 	children := board.GetSortableChildren()
@@ -306,17 +314,89 @@ func (pvs *Pvs) searchExactNullWindow(board *othello.Board, alpha int) int {
 		return heur
 	}
 
-	/*for i := range children {
+	for i := range children {
 		children[i].Heur = pvs.sortPvs.Search(children[i].Board, MinHeuristic, MaxHeuristic, 2)
 	}
 	sort.Slice(children, func(i, j int) bool {
 		return children[i].Heur > children[j].Heur
-	})*/
+	})
 
 	for _, child := range children {
 
 		heur := -pvs.searchExactNullWindow(&child.Board, -(alpha + 1))
 		if heur > alpha {
+			return alpha + 1
+		}
+	}
+
+	return alpha
+}
+
+func (pvs *Pvs) searchExactNoSort(board *othello.Board, alpha, beta int) int {
+
+	pvs.stats.Nodes++
+
+	gen := othello.NewUnsortedChildGenerator(board)
+
+	if !gen.HasMoves() {
+
+		if board.OpponentMoves() == 0 {
+			return board.ExactScore()
+		}
+
+		board.SwitchTurn()
+		heur := -pvs.searchExactNoSort(board, -beta, -alpha)
+		board.SwitchTurn()
+		return heur
+	}
+
+	for i := 0; gen.Next(); i++ {
+
+		var heur int
+		if i == 0 {
+			heur = -pvs.searchExactNoSort(board, -beta, -alpha)
+		} else {
+			heur = -pvs.searchExactNullWindowNoSort(board, -(alpha + 1))
+			if (alpha < heur) && (heur < beta) {
+				heur = -pvs.searchExactNoSort(board, -beta, -heur)
+			}
+		}
+		if heur >= beta {
+			gen.RestoreParent()
+			return beta
+		}
+		if heur > alpha {
+			alpha = heur
+		}
+
+	}
+
+	return alpha
+}
+
+func (pvs *Pvs) searchExactNullWindowNoSort(board *othello.Board, alpha int) int {
+
+	pvs.stats.Nodes++
+
+	gen := othello.NewUnsortedChildGenerator(board)
+
+	if !gen.HasMoves() {
+
+		if board.OpponentMoves() == 0 {
+			return board.ExactScore()
+		}
+
+		board.SwitchTurn()
+		heur := -pvs.searchExactNullWindowNoSort(board, -(alpha + 1))
+		board.SwitchTurn()
+		return heur
+	}
+
+	for gen.Next() {
+
+		heur := -pvs.searchExactNullWindowNoSort(board, -(alpha + 1))
+		if heur > alpha {
+			gen.RestoreParent()
 			return alpha + 1
 		}
 	}

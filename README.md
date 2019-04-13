@@ -43,11 +43,9 @@ golangci-lint run
         - [ ] redo genTestBoards()
     - [ ] cleaner error handling (after go 2 release)
     - [ ] return (*Board, error) from othello.RandomBoard()
-    - [ ] create BotHeuristic.write() that does error checking
     - [ ] javascript code is a mess
 
 - [ ] bot
-    - [ ] treesearch test for SearchExact()
     - [ ] introduce SearchWinner()
     - [ ] use Board.potentialMoves() to create faster Moves() ?
     - [ ] allow faster killing of analysis go-routines
