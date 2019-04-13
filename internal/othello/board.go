@@ -3,7 +3,6 @@ package othello
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"log"
 	"math/rand"
 )
@@ -147,17 +146,13 @@ func (board Board) Normalize() Board {
 	return normalized
 }
 
-// ASCIIArt writes ascii-art of a Board to a writer
-func (board Board) ASCIIArt(writer io.Writer, swapDiscColors bool) {
+// String returns an ASCII-art string representation of a board
+func (board Board) String() string {
 
 	buffer := new(bytes.Buffer)
 	_, _ = buffer.WriteString("+-a-b-c-d-e-f-g-h-+\n")
 
 	moves := board.Moves()
-
-	if swapDiscColors {
-		board.SwitchTurn()
-	}
 
 	for y := uint(0); y < 8; y++ {
 		_, _ = buffer.WriteString(fmt.Sprintf("%d ", y+1))
@@ -178,21 +173,16 @@ func (board Board) ASCIIArt(writer io.Writer, swapDiscColors bool) {
 		_, _ = buffer.WriteString("|\n")
 	}
 
-	var moveDisc string
-	if swapDiscColors {
-		moveDisc = "●"
-	} else {
-		moveDisc = "○"
-	}
-
 	_, _ = buffer.WriteString("+-----------------+\n")
-	_, _ = buffer.WriteString("To move: " + moveDisc + "\n")
+	_, _ = buffer.WriteString("To move: ○\n")
 	_, _ = buffer.WriteString("Raw: " + fmt.Sprintf("%#v", board) + "\n")
 
-	_, err := writer.Write(buffer.Bytes())
-	if err != nil {
-		log.Printf("board.ASCIIArt() error: %s", err)
-	}
+	return buffer.String()
+}
+
+// Log logs an ASCII-art representation of a board
+func (board Board) Log() {
+	log.Printf("%s", board.String())
 }
 
 // Moves returns a bitset of valid moves for a Board

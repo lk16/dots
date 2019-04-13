@@ -50,15 +50,13 @@ func TestBoardChildGenNext(t *testing.T) {
 			t.Errorf("Expected set (%d):\n", len(expectedSet))
 
 			for child := range expectedSet {
-				child.ASCIIArt(buff, false)
-				buff.WriteString("\n\n")
+				buff.WriteString(child.String() + "\n\n")
 			}
 			t.Errorf(buff.String())
 			buff.Reset()
 			t.Errorf("Got set (%d):\n", len(gotSet))
 			for child := range gotSet {
-				child.ASCIIArt(buff, false)
-				buff.WriteString("\n\n")
+				buff.WriteString(child.String() + "\n\n")
 			}
 			t.Errorf(buff.String())
 			break

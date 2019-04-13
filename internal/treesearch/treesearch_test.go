@@ -1,7 +1,6 @@
 package treesearch
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/lk16/dots/internal/othello"
 	"math/rand"
@@ -62,10 +61,7 @@ func TestTreeSearch(t *testing.T) {
 			msg += fmt.Sprintf("%10s: %5d\n", minimax.Name(), minimaxResult)
 			msg += fmt.Sprintf("%10s: %5d\n", pvs.Name(), pvsResult)
 			msg += fmt.Sprintf("%10s: %5d\n", mtdf.Name(), mtdfResult)
-
-			var buff bytes.Buffer
-			board.ASCIIArt(&buff, false)
-			msg += fmt.Sprintf("for this board at depth %d:\n\n%s\n", depth, buff.String())
+			msg += fmt.Sprintf("for this board at depth %d:\n\n%s\n", depth, board.String())
 			t.Error(msg)
 			t.FailNow()
 		}
@@ -120,10 +116,7 @@ func TestTreeSearchExact(t *testing.T) {
 			msg += fmt.Sprintf("%10s: %5d\n", minimax.Name(), minimaxResult)
 			msg += fmt.Sprintf("%10s: %5d\n", pvs.Name(), pvsResult)
 			msg += fmt.Sprintf("%10s: %5d\n", mtdf.Name(), mtdfResult)
-
-			var buff bytes.Buffer
-			board.ASCIIArt(&buff, false)
-			msg += fmt.Sprintf("for this board at perfect depth\n\n%s\n", buff.String())
+			msg += fmt.Sprintf("for this board at perfect depth\n\n%s\n", board.String())
 			t.Error(msg)
 			t.FailNow()
 		}

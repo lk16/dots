@@ -22,14 +22,6 @@ func boardIsValid(board *Board) bool {
 	return (board.me|board.opp)&startMask == startMask
 }
 
-// Helper for this testing file
-// Returns a string written by othello.AsciiArt()
-func (board Board) asciiArtString(swapDiscColors bool) string {
-	buffer := new(bytes.Buffer)
-	board.ASCIIArt(buffer, swapDiscColors)
-	return buffer.String()
-}
-
 // Test othello generator
 func genTestBoards() chan Board {
 	ch := make(chan Board)
@@ -110,18 +102,18 @@ func TestRandomBoard(t *testing.T) {
 		}
 
 		if !boardIsValid(board) {
-			t.Fatalf("Invalid othello:\n%s\n\n", board.asciiArtString(false))
+			t.Fatalf("Invalid othello:\n%s\n\n", board.String())
 		}
 	}
 
 	board, err := NewRandomBoard(3)
 	if err == nil {
-		t.Fatalf("Expected error, got nil\n%s\n\n", board.asciiArtString(false))
+		t.Fatalf("Expected error, got nil\n%s\n\n", board.String())
 	}
 
 	board, err = NewRandomBoard(65)
 	if err == nil {
-		t.Fatalf("Expected error, got nil\n%s\n\n", board.asciiArtString(false))
+		t.Fatalf("Expected error, got nil\n%s\n\n", board.String())
 	}
 }
 
@@ -190,11 +182,11 @@ func TestBoardDoMove(t *testing.T) {
 
 			if (gotReturn != expectedReturn) || (gotBoard != expectedBoard) {
 				t.Errorf("Doing move %c%d on othello\n%s\n", 'a'+i%8, (i/8)+1,
-					board.asciiArtString(false))
+					board.String())
 				t.Errorf("Expected return value:\n%s\n\nGot:\n%s\n\n",
 					BitSet(expectedReturn).String(), BitSet(gotReturn).String())
 				t.Errorf("Expected othello:\n%s\n\nGot:\n%s\n\n",
-					expectedBoard.asciiArtString(false), gotBoard.asciiArtString(false))
+					expectedBoard.String(), gotBoard.String())
 				t.FailNow()
 			}
 		}
@@ -230,13 +222,13 @@ func TestBoardMoves(t *testing.T) {
 
 		got := clone.Moves()
 		if expected != got {
-			t.Errorf("For othello\n%s", board.asciiArtString(false))
+			t.Errorf("For othello\n%s", board.String())
 			t.Fatalf("Expected:\n%s\n\nGot:\n%s\n\n",
 				BitSet(expected).String(), BitSet(got).String())
 		}
 		if clone != board {
 			t.Fatalf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
-				board.asciiArtString(false), clone.asciiArtString(false))
+				board.String(), clone.String())
 		}
 	}
 }
@@ -276,7 +268,7 @@ func TestBoardGetChildren(t *testing.T) {
 
 		if clone != board {
 			t.Fatalf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
-				board.asciiArtString(false), clone.asciiArtString(false))
+				board.String(), clone.String())
 		}
 
 		for _, child := range got {
@@ -292,7 +284,7 @@ func TestBoardGetChildren(t *testing.T) {
 
 			if !boardIsValid(&childCopy) {
 				t.Fatalf("Valid othello:\n%s\n\nInvalid child:\n%s\n\n",
-					board.asciiArtString(false), child.asciiArtString(false))
+					board.String(), child.String())
 			}
 
 		}
@@ -313,57 +305,49 @@ func TestBoardGetChildren(t *testing.T) {
 func TestBoardAsciiArt(t *testing.T) {
 	for board := range genTestBoards() {
 
-		for _, swapDiscColors := range []bool{false, true} {
+		moves := board.Moves()
 
-			moves := board.Moves()
+		clone := board
 
-			clone := board
+		expected := new(bytes.Buffer)
 
-			toMove := "○"
-			if swapDiscColors {
-				clone.SwitchTurn()
-				toMove = "●"
-			}
+		expected.WriteString("+-a-b-c-d-e-f-g-h-+\n")
 
-			expected := new(bytes.Buffer)
+		for y := 0; y < 8; y++ {
+			expected.WriteString(fmt.Sprintf("%d ", y+1))
 
-			expected.WriteString("+-a-b-c-d-e-f-g-h-+\n")
-
-			for y := 0; y < 8; y++ {
-				expected.WriteString(fmt.Sprintf("%d ", y+1))
-
-				for x := 0; x < 8; x++ {
-					if clone.me.Test(8*y + x) {
-						expected.WriteString("○ ")
-					} else if clone.opp.Test(8*y + x) {
-						expected.WriteString("● ")
-					} else if moves.Test(8*y + x) {
-						expected.WriteString("- ")
-					} else {
-						expected.WriteString("  ")
-					}
+			for x := 0; x < 8; x++ {
+				if clone.me.Test(8*y + x) {
+					expected.WriteString("○ ")
+				} else if clone.opp.Test(8*y + x) {
+					expected.WriteString("● ")
+				} else if moves.Test(8*y + x) {
+					expected.WriteString("- ")
+				} else {
+					expected.WriteString("  ")
 				}
-
-				expected.WriteString("|\n")
 			}
 
-			expected.WriteString("+-----------------+\nTo move: " + toMove + "\n")
-			expected.WriteString("Raw: " + fmt.Sprintf("%#v", clone) + "\n")
-
-			got := new(bytes.Buffer)
-			clone = board
-			clone.ASCIIArt(got, swapDiscColors)
-
-			if clone != board {
-				t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
-					board.asciiArtString(false), clone.asciiArtString(false))
-			}
-
-			if got.String() != expected.String() {
-				t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
-					expected.String(), got.String())
-			}
+			expected.WriteString("|\n")
 		}
+
+		expected.WriteString("+-----------------+\nTo move: ○\n")
+		expected.WriteString("Raw: " + fmt.Sprintf("%#v", clone) + "\n")
+
+		got := new(bytes.Buffer)
+		clone = board
+		got.WriteString(board.String())
+
+		if clone != board {
+			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
+				board.String(), clone.String())
+		}
+
+		if got.String() != expected.String() {
+			t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
+				expected.String(), got.String())
+		}
+
 	}
 }
 
@@ -381,7 +365,7 @@ func TestBoardDoRandomMove(t *testing.T) {
 			// no moves means no change
 			if clone != board {
 				t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
-					board.asciiArtString(false), clone.asciiArtString(false))
+					board.String(), clone.String())
 			}
 			continue
 		}
@@ -396,12 +380,12 @@ func TestBoardDoRandomMove(t *testing.T) {
 
 		if !found {
 			t.Errorf("Expected child of:\n%s\n\nGot:\n%s\n\n",
-				board.asciiArtString(false), clone.asciiArtString(false))
+				board.String(), clone.String())
 		}
 
 		if boardIsValid(&board) && !boardIsValid(&clone) {
 			t.Errorf("Found othello:\n%s\n\nWith invalid child:\n%s\n\n",
-				board.asciiArtString(false), clone.asciiArtString(false))
+				board.String(), clone.String())
 		}
 	}
 }
@@ -417,7 +401,7 @@ func TestBoardSwitchTurn(t *testing.T) {
 
 		if expected != got {
 			t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
-				expected.asciiArtString(false), got.asciiArtString(false))
+				expected.String(), got.String())
 			t.FailNow()
 		}
 	}
@@ -432,7 +416,7 @@ func TestBoardCountDiscs(t *testing.T) {
 
 		if clone != board {
 			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
-				board.asciiArtString(false), clone.asciiArtString(false))
+				board.String(), clone.String())
 		}
 
 		if expected != got {
@@ -450,7 +434,7 @@ func TestBoardCountEmpties(t *testing.T) {
 
 		if clone != board {
 			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
-				board.asciiArtString(false), clone.asciiArtString(false))
+				board.String(), clone.String())
 		}
 
 		if expected != got {
@@ -479,7 +463,7 @@ func TestBoardExactScore(t *testing.T) {
 		got := clone.ExactScore()
 		if clone != board {
 			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
-				board.asciiArtString(false), clone.asciiArtString(false))
+				board.String(), clone.String())
 		}
 
 		if expected != got {
@@ -497,7 +481,7 @@ func TestBoardMe(t *testing.T) {
 
 		if clone != board {
 			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
-				board.asciiArtString(false), clone.asciiArtString(false))
+				board.String(), clone.String())
 		}
 
 		if expected != got {
@@ -516,7 +500,7 @@ func TestBoardOpp(t *testing.T) {
 
 		if clone != board {
 			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
-				board.asciiArtString(false), clone.asciiArtString(false))
+				board.String(), clone.String())
 		}
 
 		if expected != got {
@@ -540,11 +524,11 @@ func TestBoardNewBoard(t *testing.T) {
 
 	if expected != got {
 		t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
-			expected.asciiArtString(false), got.asciiArtString(false))
+			expected.String(), got.String())
 	}
 
 	if !boardIsValid(&got) {
-		t.Errorf("Start othello is invalid:\n%s\n\n", got.asciiArtString(false))
+		t.Errorf("Start othello is invalid:\n%s\n\n", got.String())
 	}
 }
 
@@ -572,7 +556,7 @@ func TestBoardNormalize(t *testing.T) {
 
 			if expected != got {
 				t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
-					expected.asciiArtString(false), got.asciiArtString(false))
+					expected.String(), got.String())
 				t.FailNow()
 			}
 		}
@@ -587,7 +571,7 @@ func TestBoardCornerCountDifference(t *testing.T) {
 		got := board.CornerCountDifference()
 
 		if expected != got {
-			t.Errorf("\n%s\n\nExpected: %d\nGot: %d\n", board.asciiArtString(false), expected, got)
+			t.Errorf("\n%s\n\nExpected: %d\nGot: %d\n", board.String(), expected, got)
 			t.FailNow()
 		}
 	}
@@ -608,7 +592,7 @@ func TestBoardXsquareCountDifference(t *testing.T) {
 		expected := (board.Me() & xSquareMask).Count() - (board.Opp() & xSquareMask).Count()
 		got := board.XsquareCountDifference()
 		if expected != got {
-			t.Errorf("\n%s\n\nExpected: %d\nGot: %d\n", board.asciiArtString(false), expected, got)
+			t.Errorf("\n%s\n\nExpected: %d\nGot: %d\n", board.String(), expected, got)
 			t.FailNow()
 		}
 	}
@@ -629,7 +613,7 @@ func TestBoardCsquareCountDifference(t *testing.T) {
 		expected := (board.Me() & cSquareMask).Count() - (board.Opp() & cSquareMask).Count()
 		got := board.CsquareCountDifference()
 		if expected != got {
-			t.Errorf("\n%s\n\nExpected: %d\nGot: %d\n", board.asciiArtString(false), expected, got)
+			t.Errorf("\n%s\n\nExpected: %d\nGot: %d\n", board.String(), expected, got)
 			t.FailNow()
 		}
 	}
