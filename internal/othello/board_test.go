@@ -252,8 +252,8 @@ func TestBoardDoMove(t *testing.T) {
 			if (gotReturn != expectedReturn) || (gotBoard != expectedBoard) {
 				t.Errorf("Doing move %c%d on othello\n%s\n", 'a'+i%8, (i/8)+1,
 					board.asciiArtString(false))
-				t.Errorf("Expected return val:\n%s\n\nGot:\n%s\n\n",
-					bitsetASCIIArtString(expectedReturn), bitsetASCIIArtString(gotReturn))
+				t.Errorf("Expected return value:\n%s\n\nGot:\n%s\n\n",
+					BitSet(expectedReturn).String(), BitSet(gotReturn).String())
 				t.Errorf("Expected othello:\n%s\n\nGot:\n%s\n\n",
 					expectedBoard.asciiArtString(false), gotBoard.asciiArtString(false))
 				t.FailNow()
@@ -293,7 +293,7 @@ func TestBoardMoves(t *testing.T) {
 		if expected != got {
 			t.Errorf("For othello\n%s", board.asciiArtString(false))
 			t.Fatalf("Expected:\n%s\n\nGot:\n%s\n\n",
-				bitsetASCIIArtString(expected), bitsetASCIIArtString(got))
+				BitSet(expected).String(), BitSet(got).String())
 		}
 		if clone != board {
 			t.Fatalf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
@@ -563,7 +563,7 @@ func TestBoardMe(t *testing.T) {
 
 		if expected != got {
 			t.Errorf("Expected %s, got %s\n",
-				bitsetASCIIArtString(expected), bitsetASCIIArtString(got))
+				BitSet(expected).String(), BitSet(got).String())
 		}
 	}
 }
@@ -582,7 +582,7 @@ func TestBoardOpp(t *testing.T) {
 
 		if expected != got {
 			t.Errorf("Expected %v, got %v\n",
-				bitsetASCIIArtString(expected), bitsetASCIIArtString(got))
+				BitSet(expected).String(), BitSet(got).String())
 		}
 	}
 }

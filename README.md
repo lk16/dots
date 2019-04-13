@@ -32,15 +32,16 @@ golangci-lint run
     - [ ] reconnect websocket periodically if server goes down
     - [ ] redo index.html with templates
     - [ ] move web folder into best-practices location
+    - [ ] javascript code is a mess
 
 
 - [ ] cleaning
+    - [ ] fix comments that got corrupted by search/replace
     - [ ] go linting
     - [ ] clean board tests:
         - [ ] drop "log" import
         - [ ] redo genTestBoards()
     - [ ] cleaner error handling (after go 2 release)
-    - [ ] javascript code is a mess
 
 - [ ] bot
     - [ ] introduce SearchWinner()

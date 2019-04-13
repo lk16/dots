@@ -1,5 +1,11 @@
 package othello
 
+import (
+	"bytes"
+	"fmt"
+	"log"
+)
+
 // MostSignificantBit returns the most significant bit in a bitset
 func MostSignificantBit(x uint64) uint64 {
 
@@ -18,6 +24,38 @@ func MostSignificantBit(x uint64) uint64 {
 		shift += 8
 	}
 	return msb8tab[x] << shift
+}
+
+// BitSet contains 64 bits for efficient Board computations
+type BitSet uint64
+
+// String returns an ASCII-art string representation of a BitSet
+func (bs BitSet) String() string {
+	var buffer bytes.Buffer
+	_, _ = buffer.WriteString("+-a-b-c-d-e-f-g-h-+\n")
+
+	for y := uint(0); y < 8; y++ {
+		_, _ = buffer.WriteString(fmt.Sprintf("%d ", y+1))
+
+		for x := uint(0); x < 8; x++ {
+			f := y*8 + x
+			if uint64(bs)&uint64(1<<f) != 0 {
+				_, _ = buffer.WriteString("@ ")
+			} else {
+				_, _ = buffer.WriteString("- ")
+			}
+
+		}
+		_, _ = buffer.WriteString("|\n")
+	}
+	_, _ = buffer.WriteString("+-----------------+\n")
+
+	return buffer.String()
+}
+
+// Log logs an ASCII-art string representation of a BitSet
+func (bs BitSet) Log() {
+	log.Printf("%s", bs.String())
 }
 
 var msb8tab = [256]uint64{

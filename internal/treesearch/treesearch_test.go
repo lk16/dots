@@ -81,7 +81,7 @@ func TestTreeSearch(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		for discs := 4; discs < 64; discs++ {
 
-			board, err := othello.RandomBoard(discs)
+			board, err := othello.NewRandomBoard(discs)
 			if err != nil {
 				t.Errorf("Failed to generate random board: %s", err)
 			}
@@ -139,7 +139,7 @@ func TestTreeSearchExact(t *testing.T) {
 	for i := 0; i < 2000; i++ {
 		for discs := 56; discs < 64; discs++ {
 
-			board, err := othello.RandomBoard(discs)
+			board, err := othello.NewRandomBoard(discs)
 			if err != nil {
 				t.Errorf("Failed to generate random board: %s", err)
 			}

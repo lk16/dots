@@ -15,29 +15,6 @@ const (
 	cSquareMask = uint64(1<<1 | 1<<6 | 1<<8 | 1<<15 | 1<<48 | 1<<55 | 1<<57 | 1<<62)
 )
 
-func bitsetASCIIArtString(bs uint64) string {
-	buffer := new(bytes.Buffer)
-	_, _ = buffer.WriteString("+-a-b-c-d-e-f-g-h-+\n")
-
-	for y := uint(0); y < 8; y++ {
-		_, _ = buffer.WriteString(fmt.Sprintf("%d ", y+1))
-
-		for x := uint(0); x < 8; x++ {
-			f := y*8 + x
-			if bs&uint64(1<<f) != 0 {
-				_, _ = buffer.WriteString("@ ")
-			} else {
-				_, _ = buffer.WriteString("- ")
-			}
-
-		}
-		_, _ = buffer.WriteString("|\n")
-	}
-	_, _ = buffer.WriteString("+-----------------+\n")
-
-	return buffer.String()
-}
-
 // Board represents the state of an othello othello game.
 // It does not keep track which discs are white or black.
 // Instead it keeps track which discs are owned by the player to move.
