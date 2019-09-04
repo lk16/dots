@@ -102,9 +102,44 @@ func root(w http.ResponseWriter, _ *http.Request) {
 func svgField(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "image/svg+xml")
-	size := 64
 
 	query := r.URL.Query()
+	disc := query.Get("disc")
+
+	switch disc {
+	case "white":
+		w.Write([]byte(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="64" width="64">
+		<defs>
+		  <linearGradient id="grad1" x1="15%" y1="15%" x2="100%" y2="100%">
+			<stop offset="0%" style="stop-color: white;stop-opacity:1" />
+			<stop offset="100%" style="stop-color:rgb(150,150,150);stop-opacity:1" />
+		  </linearGradient>
+		</defs>
+		<rect x="0" y="0" width="64" height="64" fill='green' stroke-width='1' stroke='black' />
+		<circle cx="32" cy="32" r="25" fill="url(#grad1)" />
+		<circle cx="32" cy="32" r="25" stroke="white" stroke-width="4" fill="none" />
+		Sorry, your browser does not support inline SVG.
+	  </svg>
+	  `))
+		return
+	case "black":
+		w.Write([]byte(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="64" width="64">
+		<defs>
+		  <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+			<stop offset="0%" style="stop-color: rgb(120,120,120);stop-opacity:1" />
+			<stop offset="100%" style="stop-color: black;stop-opacity:1" />
+		  </linearGradient>
+		</defs>
+		<rect x="0" y="0" width="64" height="64" fill='green' stroke-width='1' stroke='black' />
+		<circle cx="32" cy="32" r="25" fill="url(#grad1)" />
+		<circle cx="32" cy="32" r="25" stroke="black" stroke-width="4" fill="none" />
+		Sorry, your browser does not support inline SVG.
+	  </svg>
+	  `))
+		return
+	}
+
+	size := 64
 
 	text := query.Get("text")
 	textInt, err := strconv.Atoi(text)
@@ -112,7 +147,6 @@ func svgField(w http.ResponseWriter, r *http.Request) {
 		text = "???"
 	}
 
-	disc := query.Get("disc")
 	move := query.Get("move")
 	textColor := query.Get("textcolor")
 
@@ -138,13 +172,6 @@ func svgField(w http.ResponseWriter, r *http.Request) {
 		if disc == "black" || textColor == "white" {
 			textStyleAttrs = append(textStyleAttrs, "fill='white'")
 		}
-	}
-
-	switch disc {
-	case "white":
-		canvas.Circle(size/2, size/2, 25, "fill='white'")
-	case "black":
-		canvas.Circle(size/2, size/2, 25, "fill='black'")
 	}
 
 	switch move {
