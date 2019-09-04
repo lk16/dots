@@ -117,7 +117,7 @@ func svgField(w http.ResponseWriter, r *http.Request) {
 		</defs>
 		<rect x="0" y="0" width="64" height="64" fill='green' stroke-width='1' stroke='black' />
 		<circle cx="32" cy="32" r="25" fill="url(#grad1)" />
-		<circle cx="32" cy="32" r="25" stroke="white" stroke-width="4" fill="none" />
+		<circle cx="32" cy="32" r="25" stroke="#DDDDDD" stroke-width="4" fill="none" />
 		Sorry, your browser does not support inline SVG.
 	  </svg>
 	  `))
@@ -132,7 +132,7 @@ func svgField(w http.ResponseWriter, r *http.Request) {
 		</defs>
 		<rect x="0" y="0" width="64" height="64" fill='green' stroke-width='1' stroke='black' />
 		<circle cx="32" cy="32" r="25" fill="url(#grad1)" />
-		<circle cx="32" cy="32" r="25" stroke="black" stroke-width="4" fill="none" />
+		<circle cx="32" cy="32" r="25" stroke="#222222" stroke-width="4" fill="none" />
 		Sorry, your browser does not support inline SVG.
 	  </svg>
 	  `))
