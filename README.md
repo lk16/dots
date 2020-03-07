@@ -25,6 +25,10 @@ golangci-lint run
 ```
 
 ### TODO
+- [ ] docker
+    - [ ] update docs to reflect docker usage
+    - [ ] use environment variables to configure frontend and bot
+
 - [ ] web front end
     - [ ] use css ids instead of class where appropriate
     - [ ] fix bug: last few moves don't show analysis in browser
