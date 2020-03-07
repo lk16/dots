@@ -2,13 +2,14 @@ package web
 
 import (
 	"fmt"
-	"github.com/ajstarks/svgo"
-	"github.com/gorilla/websocket"
-	"github.com/lk16/dots/internal/treesearch"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
+
+	svg "github.com/ajstarks/svgo"
+	"github.com/gorilla/websocket"
+	"github.com/lk16/dots/internal/treesearch"
 
 	// register profiling handlers
 	_ "net/http/pprof"
@@ -116,7 +117,7 @@ func Main() {
 	http.HandleFunc("/svg/field/", svgField)
 	http.HandleFunc("/svg/icon/", svgIcon)
 	http.HandleFunc("/", root)
-	addr := "localhost:8080"
+	addr := "0.0.0.0:8080"
 	log.Printf("Server running at %s", addr)
 	log.Fatal(http.ListenAndServe(addr, nil))
 }

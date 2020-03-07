@@ -5,3 +5,4 @@ pgn/
 
 .vscode/
 profile
+*.code-workspace
