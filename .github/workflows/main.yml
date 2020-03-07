@@ -1,15 +1,24 @@
-on: [push]
-
+name: Build and test Go
+on: [push, pull_request]
 jobs:
-  hello_world_job:
+  build:
+    name: Build
     runs-on: ubuntu-latest
-    name: A job to say hello
     steps:
-    - name: Hello world action step
-      id: hello
-      uses: actions/hello-world-docker-action@v1
-      with:
-        who-to-greet: 'Mona the Octocat'
-    # Use the output from the `hello` step
-    - name: Get the output time
-      run: echo "The time was ${{ steps.hello.outputs.time }}"
+      - name: Set up Go 1.13
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+
+      - name: Check out source code
+        uses: actions/checkout@v1
+
+      - name: Build
+        env:
+          GOPROXY: "https://proxy.golang.org"
+        run: go build ./cmd/dots
+
+      - name: Test
+        env:
+          GOPROXY: "https://proxy.golang.org"
+        run: go test -v ./...
