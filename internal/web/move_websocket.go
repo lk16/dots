@@ -3,14 +3,15 @@ package web
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/websocket"
-	"github.com/lk16/dots/internal/othello"
-	"github.com/lk16/dots/internal/treesearch"
 	"log"
 	"net/http"
 	"os"
 	"sort"
 	"sync"
+
+	"github.com/gorilla/websocket"
+	"github.com/lk16/dots/internal/othello"
+	"github.com/lk16/dots/internal/treesearch"
 )
 
 type moveWebSocket struct {
@@ -213,7 +214,7 @@ func (mws *moveWebSocket) handlebotMoveRequest(request interface{}) error {
 }
 
 func (mws *moveWebSocket) sendBotMoveReply(board othello.Board, turn int) {
-	bot := treesearch.NewBot(os.Stdout, 12, 18)
+	bot := treesearch.NewBot(os.Stdout, 8, 14)
 
 	bestMove, err := bot.DoMove(board)
 	if err != nil {

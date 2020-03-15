@@ -6,7 +6,7 @@ version: '3'
 services:
 
   # App Service
-  app:
+  dots:
     # Configuration for building the docker image for the service
     build:
       context: . # Use an image built from the specified dockerfile in the current directory.
@@ -14,3 +14,8 @@ services:
     ports:
       - "8080:8080" # Forward the exposed port 8080 on the container to port 8080 on the host machine
     restart: unless-stopped
+
+networks:
+  default:
+    external:
+      name: heyluuk_app-network
