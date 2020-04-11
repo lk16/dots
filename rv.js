@@ -10788,6 +10788,7 @@
   };
 }).call(this);
 
-// lk16:0 send keep-alive every 30 sec i:empty s:absent
+// lk16:0 send keep-alive every 30 sec i:[] s:absent
 // lk16:2 send keep-alive every 30 sec i:[2] s:absent
 // lk16:73 send leave room i:[73,room ID] s:absent
+// lk16:83 send sit down
