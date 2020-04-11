@@ -6,3 +6,4 @@ coverage.out
 .vscode/
 profile
 *.code-workspace
+.env
