@@ -46,6 +46,7 @@ type Bot struct {
 	windowGe  string
 	browser   *http.Client
 	websocket *websocket.Conn
+	playok    *state
 }
 
 // NewBot initializes a new bot
@@ -66,6 +67,7 @@ func NewBot(userName, password string) *Bot {
 			CheckRedirect: redirectHandler,
 			Jar:           cookieJar,
 		},
+		playok: newState(),
 	}
 }
 
@@ -219,8 +221,6 @@ func (bot *Bot) getInitMessage() *Message {
 		bot.windowGe,     // scraped JS value window.ge
 	)
 
-	log.Printf("firstArg = %s", firstArg)
-
 	nowMilli := time.Now().UnixNano() / 1000000
 
 	message := &Message{
@@ -252,13 +252,188 @@ func (bot *Bot) websocketLoop() error {
 	}
 
 	for {
-		_, bytes, err := bot.websocket.ReadMessage()
+		messageType, bytes, err := bot.websocket.ReadMessage()
 		if err != nil {
-			log.Printf("err is of type %T", err)
 			return errors.Wrap(err, "read message error")
 		}
-		log.Printf("RECV %s", string(bytes))
+
+		if messageType != websocket.TextMessage {
+			log.Printf("RECV ignoring message with type %d: %s", messageType, string(bytes))
+		}
+
+		if err = bot.handleMessage(bytes); err != nil {
+			return errors.Wrap(err, "message handling error")
+		}
+
+		fmt.Printf("----\n%s", bot.playok.String())
 	}
+}
+
+func (bot *Bot) handleConnect(message Message) error {
+	bot.playok.userName = message.S[0]
+	if bot.playok.userName != bot.userName {
+		return errors.New("received unexpected username from server")
+	}
+
+	_ = message.I[1] // TODO
+	_ = message.I[2] // TODO
+
+	return nil
+}
+
+func (bot *Bot) handleRating(message Message) error {
+	bot.playok.rating = message.I[1]
+	return nil
+}
+
+func (bot *Bot) handleInitUsers(message Message) error {
+	expectedIlength := len(message.S)*3 + 3
+	if len(message.I) != expectedIlength {
+		return fmt.Errorf("expected len(message.I)==%d, got %d", expectedIlength, len(message.I))
+	}
+
+	_ = message.I[1] // TODO
+	_ = message.I[2] // TODO
+
+	for i, playerName := range message.S {
+		offset := 3 + 3*i
+
+		_ = message.I[offset+0] // TODO
+		_ = message.I[offset+1] // TODO
+		rating := message.I[offset+2]
+
+		bot.playok.players[playerName] = player{
+			rating: rating,
+		}
+	}
+
+	return nil
+}
+
+func (bot *Bot) handleUpdateUser(message Message) error {
+
+	_ = message.I[0] // TODO
+	_ = message.I[1] // TODO
+	rating := message.I[2]
+
+	playerName := message.S[0]
+
+	bot.playok.players[playerName] = player{
+		rating: rating,
+	}
+
+	return nil
+}
+
+func (bot *Bot) handleInitTables(message Message) error {
+	roomCount := len(message.S) / 3
+	expectedIlength := 4*roomCount + 3
+	if len(message.I) != expectedIlength {
+		return fmt.Errorf("expected len(message.I)==%d, got %d", expectedIlength, len(message.I))
+	}
+
+	_ = message.I[1] // TODO
+	_ = message.I[2] // TODO
+
+	for i := 0; i < roomCount; i++ {
+		IOffset := 4*i + 3
+		SOffset := 3 * i
+
+		tableID := message.I[IOffset]
+		_ = message.I[IOffset+1] // TODO
+		_ = message.I[IOffset+2] // TODO
+		_ = message.I[IOffset+3] // TODO
+
+		rules := message.S[SOffset]
+		players := [2]string{
+			message.S[SOffset+1],
+			message.S[SOffset+2],
+		}
+
+		bot.playok.tables[tableID] = table{
+			rules:   rules,
+			players: players,
+		}
+	}
+
+	return nil
+}
+
+func (bot *Bot) handlePlayerLogout(message Message) error {
+	username := message.S[0]
+
+	if _, ok := bot.playok.players[username]; !ok {
+		errors.New("received logout for player that's already logged out")
+	}
+
+	delete(bot.playok.players, username)
+	return nil
+}
+
+func (bot *Bot) handleUpdateTable(message Message) error {
+
+	tableID := message.I[1]
+	_ = message.I[2] // TODO
+	_ = message.I[3] // TODO
+	_ = message.I[4] // TODO
+
+	rules := message.S[0]
+	players := [2]string{
+		message.S[1],
+		message.S[2],
+	}
+
+	bot.playok.tables[tableID] = table{
+		rules:   rules,
+		players: players,
+	}
+
+	return nil
+}
+
+func (bot *Bot) handleMessage(messageBytes []byte) error {
+
+	var message Message
+	if err := json.Unmarshal(messageBytes, &message); err != nil {
+		return err
+	}
+
+	ignore := func(Message) error {
+		return nil
+	}
+
+	todo := func(message Message) error {
+		log.Printf("TODO [%d] %s", message.I[0], messageBytes)
+		return nil
+	}
+
+	messageHandlers := map[int]func(Message) error{
+		1:  todo,
+		18: bot.handleConnect,
+		20: ignore, // frontend stuff
+		22: todo,
+		23: ignore, // unused options
+		24: bot.handlePlayerLogout,
+		25: bot.handleUpdateUser,
+		27: bot.handleInitUsers,
+		28: ignore, // friends
+		30: ignore, // frontend stuff
+		31: ignore, // frontend stuff
+		32: ignore, // frontend stuff: room list
+		33: bot.handleRating,
+		51: ignore, // frontend translations
+		70: bot.handleUpdateTable,
+		71: bot.handleInitTables,
+		72: todo,
+	}
+
+	handler, ok := messageHandlers[message.I[0]]
+	if !ok {
+		log.Printf("WARN [%d] unknown %s", message.I[0], messageBytes)
+		return nil
+	}
+
+	return handler(message)
 }
 
 // Run is the entrypoint of the Bot
