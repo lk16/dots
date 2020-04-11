@@ -1,25 +1,33 @@
 package playok
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"regexp"
 	"strings"
+	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 )
 
 const (
-	playokURL        = "https://www.playok.com/"
-	playokLoginURL   = "https://www.playok.com/en/login.phtml"
-	playokReversiURL = "https://www.playok.com/en/reversi/"
-	userAgent        = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36"
+	playokURL          = "https://www.playok.com/"
+	playokLoginURL     = "https://www.playok.com/en/login.phtml"
+	playokReversiURL   = "https://www.playok.com/en/reversi/"
+	playokWebsocketURL = "wss://x.playok.com:17003/ws/"
+	userAgent          = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36"
 )
 
 var (
 	playokParsedURL *url.URL
+	windowApRegex   = regexp.MustCompile("window.ap = (.*);")
+	windowGeRegex   = regexp.MustCompile("window.ge = (.*);")
 )
 
 func init() {
@@ -32,9 +40,12 @@ func init() {
 
 // Bot contains the state of an automated player on playok.com
 type Bot struct {
-	userName string
-	password string
-	browser  *http.Client
+	userName  string
+	password  string
+	windowAp  string
+	windowGe  string
+	browser   *http.Client
+	websocket *websocket.Conn
 }
 
 // NewBot initializes a new bot
@@ -151,7 +162,103 @@ func (bot *Bot) visitReversiPage() error {
 		return err
 	}
 
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return errors.Wrap(err, "failed to read body")
+	}
+
+	windowAp := windowApRegex.FindSubmatch(body)
+	windowGe := windowGeRegex.FindSubmatch(body)
+
+	if windowAp == nil || windowGe == nil {
+		return errors.New("failed to regex match js vars")
+	}
+
+	bot.windowAp = string(windowAp[1])
+	bot.windowGe = string(windowGe[1])
+
 	return nil
+}
+
+func (bot *Bot) connectWebSocket() error {
+
+	headers := make(http.Header)
+	headers.Add("Origin", "https://www.playok.com")
+	headers.Add("User-Agent", userAgent)
+
+	dialer := *websocket.DefaultDialer
+	dialer.Jar = bot.browser.Jar
+	conn, _, err := dialer.Dial(playokWebsocketURL, headers)
+
+	if err != nil {
+		return errors.Wrap(err, "connecting failed")
+	}
+
+	bot.websocket = conn
+	return nil
+}
+
+func (bot *Bot) getInitMessage() *Message {
+
+	var kSessionCookie string
+	for _, cookie := range bot.browser.Jar.Cookies(playokParsedURL) {
+		if cookie.Name == "ksession" {
+			kSessionCookie = cookie.Value
+		}
+	}
+
+	if kSessionCookie == "" {
+		log.Printf("warning: could not find ksession cookie")
+	}
+
+	splitKSession := strings.Split(kSessionCookie, ":")
+
+	firstArg := fmt.Sprintf("%s+|%s|%s",
+		splitKSession[0], // part of a cookie
+		bot.windowAp,     // scraped JS value window.ap
+		bot.windowGe,     // scraped JS value window.ge
+	)
+
+	log.Printf("firstArg = %s", firstArg)
+
+	nowMilli := time.Now().UnixNano() / 1000000
+
+	message := &Message{
+		I: []int{1713},
+		S: []string{
+			firstArg,                                 // see above
+			"en",                                     // language
+			"b",                                      // ???
+			"",                                       // ???
+			userAgent,                                // user-agent
+			fmt.Sprintf("/%d/1", nowMilli),           // timestamp
+			"w",                                      // ???
+			"2560x1440 1",                            // screen size
+			"ref:https://www.playok.com/en/reversi/", // referer
+			"ver:233",                                // client version (TODO scrape this)
+		},
+	}
+
+	return message
+}
+
+func (bot *Bot) websocketLoop() error {
+
+	initMessage := bot.getInitMessage()
+	initMessageBytes, _ := json.Marshal(initMessage)
+	err := bot.websocket.WriteMessage(websocket.TextMessage, initMessageBytes)
+	if err != nil {
+		return errors.Wrap(err, "write json error")
+	}
+
+	for {
+		_, bytes, err := bot.websocket.ReadMessage()
+		if err != nil {
+			log.Printf("err is of type %T", err)
+			return errors.Wrap(err, "read message error")
+		}
+		log.Printf("RECV %s", string(bytes))
+	}
 }
 
 // Run is the entrypoint of the Bot
@@ -165,9 +272,13 @@ func (bot *Bot) Run() error {
 		return errors.Wrap(err, "visit reversi page failed")
 	}
 
-	// connect to ws
+	if err := bot.connectWebSocket(); err != nil {
+		return errors.Wrap(err, "connecting to websocket failed")
+	}
 
-	// play games
+	if err := bot.websocketLoop(); err != nil {
+		return errors.Wrap(err, "websocket loop failed")
+	}
 
-	return errors.New("not implemented")
+	return nil
 }

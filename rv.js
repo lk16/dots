@@ -1,5 +1,5 @@
 'use strict';
-(function() {
+(function () {
   /**
    * @param {string} p
    * @param {string} c
@@ -23,9 +23,9 @@
       c = c(i);
       if (c != i && null != c) {
         defineProperty(obj, p, {
-          configurable : true,
-          writable : true,
-          value : c
+          configurable: true,
+          writable: true,
+          value: c
         });
       }
     }
@@ -93,7 +93,7 @@
      * @param {number} a
      * @return {?}
      */
-    window.onerror = function(m, b, a) {
+    window.onerror = function (m, b, a) {
       if (!b || !a || d || -1 == b.indexOf("/j/")) {
         return false;
       }
@@ -182,7 +182,7 @@
       this.Ab = this.Qa = true;
     }
     $(document.getElementsByTagName("head")[0], "style", {
-      type : "text/css"
+      type: "text/css"
     }, window.k2style || "");
     this.a = document.getElementById("appcont") || $(document.body, "div", {});
     callback(this.a, "k2base");
@@ -200,14 +200,14 @@
     /**
      * @return {?}
      */
-    this.a.onselectstart = function() {
+    this.a.onselectstart = function () {
       return false;
     };
     if (this.G) {
       /**
        * @return {undefined}
        */
-      this.a.ontouchstart = function() {
+      this.a.ontouchstart = function () {
       };
     }
     this.H = document.getElementById("prehead") || $(this.a, "div");
@@ -217,12 +217,12 @@
     callback(this.H, "anav");
     callback(this.H, "usno");
     extend(this.H, {
-      zIndex : cluezIndex
+      zIndex: cluezIndex
     });
     /**
      * @return {?}
      */
-    this.H.ontouchmove = function() {
+    this.H.ontouchmove = function () {
       return false;
     };
     this.B = document.getElementById("precont") || $(this.a, "div");
@@ -230,16 +230,16 @@
     callback(this.B, "bsbb");
     if (this.Pb) {
       extend(this.a.parentNode, {
-        overflow : "hidden"
+        overflow: "hidden"
       });
       callback(this.a, "asizing");
       /** @type {boolean} */
       var dark = false;
       this.Rd = $(this.a, "div", {
-        className : "szpan"
+        className: "szpan"
       }, [$("button", {
-        className : "bmax",
-        onclick : function() {
+        className: "bmax",
+        onclick: function () {
           if (880 <= data.wa - 100) {
             data.wa -= 100;
           }
@@ -248,22 +248,22 @@
           return false;
         }
       }, "-"), $("button", {
-        className : "bmax",
-        onclick : function() {
+        className: "bmax",
+        onclick: function () {
           data.wa += 100;
           data.na();
           this.blur();
           return false;
         }
       }, "+"), $("button", {
-        className : "bmax",
-        style : {
-          background : "#444",
-          color : "#888"
+        className: "bmax",
+        style: {
+          background: "#444",
+          color: "#888"
         },
-        onclick : function() {
+        onclick: function () {
           extend(document.body, {
-            background : dark ? "#fff" : "#222"
+            background: dark ? "#fff" : "#222"
           });
           /** @type {boolean} */
           dark = !dark;
@@ -277,14 +277,14 @@
     /**
      * @return {undefined}
      */
-    window.onhashchange = function() {
+    window.onhashchange = function () {
       _init(data);
     };
     /**
      * @param {!Event} event
      * @return {undefined}
      */
-    window.onkeydown = function(event) {
+    window.onkeydown = function (event) {
       if (27 == event.keyCode && data.va && data.Qb) {
         success(data);
       }
@@ -302,14 +302,14 @@
           StatusBar.backgroundColorByHexString("#000");
         }
       }
-      document.addEventListener("resume", function() {
+      document.addEventListener("resume", function () {
         /** @type {number} */
         data.We = Date.now();
         if (data.Se) {
           find(data, true);
         }
       }, false);
-      document.addEventListener("backbutton", function() {
+      document.addEventListener("backbutton", function () {
         if (data.va && data.Qb) {
           success(data);
         } else {
@@ -322,7 +322,7 @@
     /**
      * @return {undefined}
      */
-    window.onresize = function() {
+    window.onresize = function () {
       if (options.fb) {
         /** @type {boolean} */
         options.Td = true;
@@ -335,7 +335,7 @@
         /** @type {boolean} */
         options.Td = false;
         /** @type {number} */
-        options.fb = setTimeout(function() {
+        options.fb = setTimeout(function () {
           /** @type {number} */
           options.fb = 0;
           if (options.Td || window_w != window.innerWidth || inner_height != window.innerHeight || options.G) {
@@ -345,7 +345,7 @@
       }
     };
     if (!this.P && "hidden" in document) {
-      document.addEventListener("visibilitychange", function() {
+      document.addEventListener("visibilitychange", function () {
         /** @type {number} */
         options.Id = document.hidden ? Date.now() : 0;
       }, false);
@@ -355,12 +355,12 @@
        * @param {string} params
        * @return {undefined}
        */
-      var _initialize = function(params) {
+      var _initialize = function (params) {
         if (data.Sb) {
           clearTimeout(data.Sb);
         }
         /** @type {number} */
-        data.Sb = setTimeout(function() {
+        data.Sb = setTimeout(function () {
           /** @type {number} */
           data.Sb = 0;
           if (data.ua) {
@@ -372,7 +372,7 @@
       /** @type {number} */
       this.Sb = 0;
       if (this.$e) {
-        document.addEventListener("visibilitychange", function() {
+        document.addEventListener("visibilitychange", function () {
           if (options.ua) {
             options.send(document.hidden ? [below_centered] : [ia], null);
           }
@@ -381,13 +381,13 @@
         /**
          * @return {?}
          */
-        window.onblur = function() {
+        window.onblur = function () {
           return _initialize(false);
         };
         /**
          * @return {?}
          */
-        window.onfocus = function() {
+        window.onfocus = function () {
           return _initialize(true);
         };
       }
@@ -395,7 +395,7 @@
     /**
      * @return {undefined}
      */
-    window.onbeforeunload = function() {
+    window.onbeforeunload = function () {
       /** @type {boolean} */
       options.Ad = true;
     };
@@ -403,9 +403,9 @@
       createHPipe(this);
     } else {
       this.Bd = new ready({
-        host : this.Bc,
-        ports : window.k2hcons || ["wss:17003", "wss:443", "https:443"],
-        Xc : function(value) {
+        host: this.Bc,
+        ports: window.k2hcons || ["wss:17003", "wss:443", "https:443"],
+        Xc: function (value) {
           if (!options.Ad) {
             if (value == encoding || value == or) {
               if (!options.Ka && options.o.hd) {
@@ -422,23 +422,23 @@
                   find(options, true);
                 } else {
                   generate(options, {
-                    connect : true
+                    connect: true
                   });
                 }
               }
             } else {
               if (value == runlist) {
                 generate(options, {
-                  sf : true
+                  sf: true
                 });
               }
             }
           }
         },
-        ee : function() {
+        ee: function () {
           return !(options.Id && 6E4 < Date.now() - options.Id);
         },
-        de : function(m, z) { // lk16:1713 send i:[1713] s:[ua data]
+        de: function (m, z) { // lk16:1713 send i:[1713] s:[ua data]
           /** @type {string} */
           var host = (window.ap ? "|" + window.ap : "") + (window.ge ? "|" + window.ge : "");
           /** @type {number} */
@@ -446,11 +446,21 @@
           /** @type {number} */
           var maxH = screen.height;
           return {
-            J : [options.o.zf],
-            O : [wrapped(options) + host, options.Qd, window.k2beta ? "b" : options.Gd ? "m" : "", options.Bb, window.navigator.userAgent || "", "/" + z + "/" + m, options.S ? "" : "w", (options.Fd && maxH <= maxW ? maxH + "x" + maxW : maxW + "x" + maxH) + " " + Math.round(100 * getUnderlineBackgroundPositionY()) / 100, "ref:" + window.location.href, "ver:" + window.k2ver + (options.S ? "/app" : "")]
+            J: [options.o.zf],
+            O: [
+              wrapped(options) + host,
+              options.Qd,
+              window.k2beta ? "b" : options.Gd ? "m" : "",
+              options.Bb,
+              window.navigator.userAgent || "", "/" + z + "/" + m,
+              options.S ? "" : "w",
+              (options.Fd && maxH <= maxW ? maxH + "x" + maxW : maxW + "x" + maxH) + " " + Math.round(100 * getUnderlineBackgroundPositionY()) / 100,
+              "ref:" + window.location.href,
+              "ver:" + window.k2ver + (options.S ? "/app" : "")
+            ]
           };
         },
-        Ye : function(a, b) {
+        Ye: function (a, b) {
           return options.xc(a, b);
         }
       });
@@ -476,7 +486,7 @@
    * @return {undefined}
    */
   function cb(item, name, v) {
-    (item.ac[name] || []).forEach(function(flatten) {
+    (item.ac[name] || []).forEach(function (flatten) {
       if ("function" === typeof flatten) {
         flatten(v);
       } else {
@@ -490,20 +500,20 @@
    */
   function display(self) {
     self.La = $(self.a, "div", {
-      className : "noth",
-      style : {
-        display : "none",
-        zIndex : default_zIndex,
-        position : "fixed",
-        top : 0,
-        left : 0,
-        right : 0,
-        bottom : 0,
-        width : "100%",
-        height : "100%",
-        background : "rgba(0,0,0,0.4)"
+      className: "noth",
+      style: {
+        display: "none",
+        zIndex: default_zIndex,
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: "100%",
+        height: "100%",
+        background: "rgba(0,0,0,0.4)"
       },
-      onclick : function(event) {
+      onclick: function (event) {
         if (!self.Qb) {
           return false;
         }
@@ -514,10 +524,10 @@
         return false;
       }
     }, self.Cd = $("div", {
-      style : {
-        display : "table-cell",
-        verticalAlign : "middle",
-        textAlign : "center"
+      style: {
+        display: "table-cell",
+        verticalAlign: "middle",
+        textAlign: "center"
       }
     }));
   }
@@ -534,14 +544,14 @@
     }
     var self = {};
     self.D = $(value.Cd, "div", {
-      className : "bsbb bs",
-      style : {
-        display : "none",
-        background : "#fff",
-        textAlign : "left",
-        minWidth : "260px",
-        padding : ".3em 0",
-        borderRadius : "4px"
+      className: "bsbb bs",
+      style: {
+        display: "none",
+        background: "#fff",
+        textAlign: "left",
+        minWidth: "260px",
+        padding: ".3em 0",
+        borderRadius: "4px"
       }
     });
     if (data) {
@@ -549,32 +559,32 @@
     }
     if (!(opts && opts.noclose)) {
       self.Qf = $(self.D, "button", {
-        onclick : function() {
+        onclick: function () {
           return success(value);
         },
-        style : {
-          cssFloat : "right",
-          width : "3.4em",
-          height : "3.4em",
-          margin : 0,
-          padding : 0,
-          color : "#ccc",
-          background : "transparent",
-          border : "none",
-          fontWeight : "normal",
-          cursor : "pointer"
+        style: {
+          cssFloat: "right",
+          width: "3.4em",
+          height: "3.4em",
+          margin: 0,
+          padding: 0,
+          color: "#ccc",
+          background: "transparent",
+          border: "none",
+          fontWeight: "normal",
+          cursor: "pointer"
         }
       }, "X");
     }
     self.title = $(self.D, "p", {
-      className : "fb",
-      style : {
-        padding : "0 15px"
+      className: "fb",
+      style: {
+        padding: "0 15px"
       }
     }, [md]);
     self.Ma = $(self.D, "div", opts && opts.nopad ? {} : {
-      style : {
-        padding : "0 15px"
+      style: {
+        padding: "0 15px"
       }
     });
     return self;
@@ -594,11 +604,11 @@
         resolve(options.title, [name]);
       }
       extend(options.D, {
-        display : "inline-block"
+        display: "inline-block"
       });
       callback(o.La, "usno", !d || !d.okselect);
       extend(o.La, {
-        display : "table"
+        display: "table"
       });
       /** @type {!Object} */
       o.va = options;
@@ -611,10 +621,10 @@
   function success(o) {
     if (o.va) {
       extend(o.La, {
-        display : "none"
+        display: "none"
       });
       extend(o.va.D, {
-        display : "none"
+        display: "none"
       });
       /** @type {null} */
       o.va = null;
@@ -715,16 +725,16 @@
       text(data, "status");
     }
     resolve(data.sc.f, $("table", $("td", [opts.sf ? $("p", $("div", {
-      className : "loader"
+      className: "loader"
     })) : null, opts.gd ? $("p", {
-      className : "fb"
+      className: "fb"
     }, opts.gd) : null, opts.connect ? $("p", $("button", {
-      className : "minwd ttup",
-      onclick : function() {
+      className: "minwd ttup",
+      onclick: function () {
         find(data);
       }
     }, data.j("t_recn", "connect"))) : null, opts.link ? $("p", {
-      className : "ttup"
+      className: "ttup"
     }, $("a", opts.link, opts.mf || "-")) : null])));
     _init(data);
   }
@@ -742,7 +752,7 @@
     var href = "/" + options.lang;
     /** @type {string} */
     var g = "&r=" + Date.now();
-    switch(type) {
+    switch (type) {
       case "login":
         return QUERY_PREFIX + (isFriend ? "/login.phtml" : href + "/login.phtml") + "?js=1" + g;
       case "register":
@@ -908,7 +918,7 @@
    */
   function _init(item) {
     if (-1 == item.xa) {
-      setTimeout(function() {
+      setTimeout(function () {
         return item.na();
       }, 0);
     } else {
@@ -923,16 +933,16 @@
         }
         if (item.C && item.C != state) {
           extend(item.C, {
-            display : "none"
+            display: "none"
           });
         }
         if (item.Pb) {
           var data = item.Yd;
           extend(item.a, {
-            maxWidth : data.Af + "px",
-            height : (opts.yd ? data.gf : data.ff) + "px",
-            minHeight : 0,
-            top : data.top + "px"
+            maxWidth: data.Af + "px",
+            height: (opts.yd ? data.gf : data.ff) + "px",
+            minHeight: 0,
+            top: data.top + "px"
           });
           callback(item.a, "dosize", opts.yf && 0 < data.top || false);
         }
@@ -954,18 +964,18 @@
         }
         if (item.yb && item.yb != data) {
           extend(item.yb, {
-            display : "none"
+            display: "none"
           });
         }
         if (item.yb != data && (item.yb = data)) {
           extend(data, {
-            display : vert ? "block" : "inline-block"
+            display: vert ? "block" : "inline-block"
           });
         }
         item.C = state;
         cb(item, "nav", total);
         if (!_contextIsSetGet && (extend(state, {
-          display : "block"
+          display: "block"
         }), item.oa || ((document.scrollingElement || document.documentElement).scrollTop = 0), "function" === typeof opts.onshow)) {
           opts.onshow();
         }
@@ -1020,15 +1030,15 @@
       self.Gc = create(self, "-");
     }
     resolve(self.Gc.Ma, $("p", [$("button", {
-      className : "minw",
-      onclick : function() {
+      className: "minw",
+      onclick: function () {
         success(self);
         self.send([event, 0], [name]);
         return false;
       }
     }, self.j("tu_bcan")), $("button", {
-      className : "minw",
-      onclick : function() {
+      className: "minw",
+      onclick: function () {
         success(self);
         self.send([workerId], ["/boot " + name]);
         return false;
@@ -1047,31 +1057,31 @@
       self.Dc = create(self, "-");
     }
     resolve(self.Dc.Ma, [$("p", [$("button", {
-      className : "minw",
-      onclick : function() {
+      className: "minw",
+      onclick: function () {
         success(self);
         self.send([action], [name]);
         return false;
       }
     }, "info"), $("button", {
-      className : "minw",
-      disabled : 0 != fmt,
-      onclick : function() {
+      className: "minw",
+      disabled: 0 != fmt,
+      onclick: function () {
         success(self);
         self.send([event, 1], [name]);
         return false;
       }
     }, self.j("tu_bacc"))]), $("p", [$("button", {
-      className : "minw",
-      disabled : !(0 <= fmt),
-      onclick : function() {
+      className: "minw",
+      disabled: !(0 <= fmt),
+      onclick: function () {
         success(self);
         self.send([event, 0], [name]);
         return false;
       }
     }, self.j("tu_bcan")), $("button", {
-      className : "minw",
-      onclick : function() {
+      className: "minw",
+      onclick: function () {
         success(self);
         self.send([workerId], ["/boot " + name]);
         return false;
@@ -1172,20 +1182,20 @@
     var selector = input && 0 < input.length;
     if (messages) {
       resolve(messages, $("div", {
-        className : "alrt dcpd"
+        className: "alrt dcpd"
       }, [$("div", {
-        className : "mbsp"
+        className: "mbsp"
       }, name), $("button", {
-        className : "minw",
-        onclick : function() {
+        className: "minw",
+        onclick: function () {
           if (list) {
             self.send(list, result);
           }
           do_export(self);
         }
       }, self.j(selector ? "bl_yes" : "bl_ok")), " ", selector ? $("button", {
-        className : "minw",
-        onclick : function() {
+        className: "minw",
+        onclick: function () {
           self.send(input || [], text);
           do_export(self);
         }
@@ -1206,7 +1216,7 @@
    * @return {undefined}
    */
   function drawTextCss(component) {
-    Object.keys(component.A).forEach(function(i) {
+    Object.keys(component.A).forEach(function (i) {
       attr(component.A[i]);
       delete component.A[i];
     }, component);
@@ -1218,7 +1228,7 @@
   function rebuildModelFromFields(keys) {
     /** @type {number} */
     var results = 0;
-    Object.keys(keys.I).forEach(function(i) {
+    Object.keys(keys.I).forEach(function (i) {
       if (0 != keys.I[i].Oa) {
         results++;
       }
@@ -1254,7 +1264,7 @@
          * @param {!Event} event
          * @return {?}
          */
-        options.qc.D.onselectstart = function(event) {
+        options.qc.D.onselectstart = function (event) {
           event.stopPropagation();
           return true;
         };
@@ -1282,7 +1292,7 @@
       index = 0;
       for (; index < s.length - j; index++) {
         var value = result[messageKey + index];
-        switch(s[j + index]) {
+        switch (s[j + index]) {
           case 0:
             data[0] = value;
             break;
@@ -1315,73 +1325,73 @@
       var inputEl;
       var entry;
       resolve(options.qc.Ma, ["undefined" != typeof t ? $("p", {
-        className : "fb mbh",
-        style : {
-          marginTop : "-0.25em"
+        className: "fb mbh",
+        style: {
+          marginTop: "-0.25em"
         }
       }, [newNodeLists[0], " ", $("div", {
-        className : "r" + merge(options, t)
+        className: "r" + merge(options, t)
       }), $("br"), newNodeLists[1]]) : null, s = $("p", {
-        style : {
-          margin : ".5em 0",
-          width : "220px",
-          padding : ".2em 0",
-          wordWrap : "break-word",
-          overflowY : "auto"
+        style: {
+          margin: ".5em 0",
+          width: "220px",
+          padding: ".2em 0",
+          wordWrap: "break-word",
+          overflowY: "auto"
         }
       }, [$("div", {
-        style : {
-          cssFloat : "left",
-          marginTop : "3px",
-          marginRight : ".5em",
-          width : "52px",
-          height : "52px",
-          border : "solid 1px #aaa",
-          overflow : "hidden"
+        style: {
+          cssFloat: "left",
+          marginTop: "3px",
+          marginRight: ".5em",
+          width: "52px",
+          height: "52px",
+          border: "solid 1px #aaa",
+          overflow: "hidden"
         }
       }, $("img", {
-        src : options.Kd + "//" + options.Jd + (result && "/" != result[0] ? "/" : "") + result
+        src: options.Kd + "//" + options.Jd + (result && "/" != result[0] ? "/" : "") + result
       })), $("div", j), $("div", data), $("div", b)]), options.S ? null : $("p", {
-        className : "mbh"
+        className: "mbh"
       }, $("a", {
-        className : "lbut minwd",
-        target : "_blank",
-        href : toString(get(options, "stat"), encodeURIComponent(id)),
-        onclick : function() {
+        className: "lbut minwd",
+        target: "_blank",
+        href: toString(get(options, "stat"), encodeURIComponent(id)),
+        onclick: function () {
           success(options);
         }
       }, options.j("ui_stats"))), $("p", {
-        className : "mbh"
+        className: "mbh"
       }, [$("button", {
-        className : "minw",
-        disabled : 0 == v,
-        onclick : function() {
+        className: "minw",
+        disabled: 0 == v,
+        onclick: function () {
           success(options);
           server(options, v);
         }
       }, 0 < v ? "#" + v : "#000"), 0 == options.Ga ? $("a", {
-        href : "",
-        title : options.j("bl_whisper"),
-        className : "spbb",
-        onclick : function() {
+        href: "",
+        title: options.j("bl_whisper"),
+        className: "spbb",
+        onclick: function () {
           success(options);
           each(options, id);
           return false;
         },
-        style : {
-          margin : "0 1em"
+        style: {
+          margin: "0 1em"
         }
       }) : null]), $("div", {
-        className : "dtline"
+        className: "dtline"
       }), 0 == options.Ga ? $("p", [inputEl = $("input", {
-        type : "checkbox",
-        checked : checked
+        type: "checkbox",
+        checked: checked
       }), options.j("bl_buds"), " ", entry = $("input", {
-        type : "checkbox",
-        checked : status
+        type: "checkbox",
+        checked: status
       }), options.j("ui_block")]) : null, $("p", $("button", {
-        className : "minw",
-        onclick : function() {
+        className: "minw",
+        onclick: function () {
           success(options);
           if (inputEl && inputEl.checked != checked) {
             options.X((inputEl.checked ? "/buddy" : "/unbuddy") + " " + id);
@@ -1394,7 +1404,7 @@
       }, options.j("bl_ok")))]);
       write(s);
       filter(options, options.qc, id, {
-        okselect : true
+        okselect: true
       });
     }
   }
@@ -1403,10 +1413,10 @@
    */
   function addRoomButton() {
     var options = {
-      uf : e
+      uf: e
     };
     var b = document.getElementById("appcont") || $(document.body, "div", {
-      id : "appcont"
+      id: "appcont"
     });
     options = new (options.uf || Object.constructor)(options.Pf || {});
     resolve(b, options.f);
@@ -1421,11 +1431,11 @@
     /** @type {!Object} */
     this.Sc = options;
     this.app = {
-      af : function() {
+      af: function () {
         return 0;
       },
-      Yd : {
-        top : 1
+      Yd: {
+        top: 1
       }
     };
     /** @type {string} */
@@ -1451,46 +1461,46 @@
     /** @type {!Array} */
     this.B = [];
     $(document.getElementsByTagName("head")[0], "style", {
-      type : "text/css"
+      type: "text/css"
     }, "button { font: inherit; background: none; color: inherit; border-width: 1px; padding: .3em; outline: 0; } button { touch-action: manipulation; } a { text-decoration: none; color: inherit; } .usno { user-select: none; -webkit-user-select: none; }.noth { -webkit-tap-highlight-color: rgba(0,0,0,0); }.bsbb { box-sizing: border-box; } .bcont { position: absolute; left: 0; top: 0; width: 100%; height: 100%; } .rbcont { position: relative; }\t.rbratio { padding-top: 95%; } .rmcont { min-height: 5em; } .rmcont { word-wrap: break-word; } .rmcont span { cursor: pointer; } @media (min-width: 570px) { \t.rbcont { margin-right: 32%; }\t.rbratio { padding-top: 82%; } \t.rmcont { padding: 0 10px; overflow-y: auto; position: absolute; width: 32%; right: 0; top: 0; bottom: 0; box-sizing: border-box; }   .rmcbg { background: rgba(0,0,0,.02); }}");
     var values = this;
     this.f = $("div", {
-      tabIndex : "0",
-      style : {
-        position : "relative",
-        outline : 0
+      tabIndex: "0",
+      style: {
+        position: "relative",
+        outline: 0
       }
     }, [t = $("div", {
-      className : "rbcont"
+      className: "rbcont"
     }, [$("div", {
-      className : "rbratio"
+      className: "rbratio"
     })]), $("div", {
-      className : "rmcont rmcbg"
+      className: "rmcont rmcbg"
     }, [$("p", [$("button", {
-      onclick : function() {
+      onclick: function () {
         if (0 < values.Y) {
           require(values, values.Y - 1);
         }
       },
-      style : {
-        minWidth : "4em"
+      style: {
+        minWidth: "4em"
       }
     }, "<"), " ", $("button", {
-      onclick : function() {
+      onclick: function () {
         if (values.Y < values.a.length - 1) {
           require(values, values.Y + 1);
         }
       },
-      style : {
-        minWidth : "4em"
+      style: {
+        minWidth: "4em"
       }
     }, ">"), " ", this.M = $("span", {
-      style : {
-        whiteSpace : "nowrap"
+      style: {
+        whiteSpace: "nowrap"
       }
     })]), this.L = $("p", ["-"]), this.N = $("p", {}), this.H = $("p", {})])]);
-    (window != window.top ? this.f : window).addEventListener("keydown", function(event) {
-      switch(event.keyCode) {
+    (window != window.top ? this.f : window).addEventListener("keydown", function (event) {
+      switch (event.keyCode) {
         case 37:
         case 38:
           if (0 < c.Y) {
@@ -1522,31 +1532,31 @@
     }
     if ("undefined" != typeof this.u.jf) {
       $(t, "a", {
-        onclick : function() {
+        onclick: function () {
           /** @type {number} */
           values.u.qe = values.u.jf ? 0 : 1;
         },
-        style : {
-          cursor : "pointer",
-          color : "rgba(0,0,0,0.25)",
-          position : "absolute",
-          left : 0,
-          top : 0,
-          padding : "2px 8px",
-          zIndex : 1E3
+        style: {
+          cursor: "pointer",
+          color: "rgba(0,0,0,0.25)",
+          position: "absolute",
+          left: 0,
+          top: 0,
+          padding: "2px 8px",
+          zIndex: 1E3
         }
       }, "\u25be");
     }
     /**
      * @return {?}
      */
-    window.onresize = function() {
+    window.onresize = function () {
       return c.na();
     };
     /**
      * @return {undefined}
      */
-    window.onhashchange = function() {
+    window.onhashchange = function () {
       var selector = search();
       if (selector.Xb != c.A) {
         update(c, selector.Xb, selector.Cb);
@@ -1585,8 +1595,8 @@
       a = 1;
     }
     return {
-      Xb : a,
-      Cb : val
+      Xb: a,
+      Cb: val
     };
   }
   /**
@@ -1600,8 +1610,8 @@
       self.G = window.location.href;
       self.S = self.Y;
       resolve(self.H, [$("a", {
-        href : "",
-        onclick : function() {
+        href: "",
+        onclick: function () {
           if (self.G) {
             if (window.history.replaceState) {
               try {
@@ -1617,20 +1627,20 @@
           createElement(self, false);
           return false;
         },
-        style : {
-          color : "#c22"
+        style: {
+          color: "#c22"
         }
       }, "RESET"), " | ", $("a", {
-        href : "",
-        onclick : function() {
+        href: "",
+        onclick: function () {
           window.prompt("LINK", window.location.href);
           return false;
         }
       }, "LINK")]);
     } else {
       resolve(self.H, window.k2pback.gdata ? $("a", {
-        target : "_blank",
-        href : window.k2pback.gdata
+        target: "_blank",
+        href: window.k2pback.gdata
       }, "TXT") : []);
     }
   }
@@ -1682,7 +1692,7 @@
        * @param {!Event} event
        * @return {?}
        */
-      self.f.onclick = function(event) {
+      self.f.onclick = function (event) {
         if (!self.ia) {
           return false;
         }
@@ -1698,10 +1708,10 @@
     if (self.V || self.kb) {
       if (self.V) {
         extend(self.f, {
-          touchAction : "none"
+          touchAction: "none"
         });
       }
-      self.f.addEventListener(self.V ? "pointerdown" : "mousedown", function(event) {
+      self.f.addEventListener(self.V ? "pointerdown" : "mousedown", function (event) {
         if (!self.ia || "BUTTON" == event.target.tagName) {
           return true;
         }
@@ -1721,7 +1731,7 @@
         }
         return 0 == self.Ba || "IMG" != event.target.tagName ? true : log(self, event.target, event.clientX, event.clientY) ? (self.V && (self.a = val, self.f.setPointerCapture(val)), event.stopPropagation(), event.preventDefault(), false) : true;
       }, false);
-      self.f.addEventListener(self.V ? "pointermove" : "mousemove", function(event) {
+      self.f.addEventListener(self.V ? "pointermove" : "mousemove", function (event) {
         if (!self.ia) {
           return true;
         }
@@ -1747,7 +1757,7 @@
         self.Zc(event.x, event.y, !self.ia || self.ca);
         return false;
       }, false);
-      self.f.addEventListener(self.V ? "pointerup" : "mouseup", function(event) {
+      self.f.addEventListener(self.V ? "pointerup" : "mouseup", function (event) {
         if (!self.ia) {
           return true;
         }
@@ -1769,7 +1779,7 @@
         }
         return true;
       }, false);
-      self.f.addEventListener(self.V ? "pointerout" : "mouseout", function(event) {
+      self.f.addEventListener(self.V ? "pointerout" : "mouseout", function (event) {
         if (!self.ia) {
           return false;
         }
@@ -1794,7 +1804,7 @@
      * @param {!Object} event
      * @return {?}
      */
-    e.f.ontouchstart = function(event) {
+    e.f.ontouchstart = function (event) {
       if (!e.ia || !event.touches || 1 != event.touches.length) {
         return true;
       }
@@ -1817,7 +1827,7 @@
      * @param {!Event} evt
      * @return {?}
      */
-    e.f.ontouchmove = function(evt) {
+    e.f.ontouchmove = function (evt) {
       if (!e.ia || !evt.changedTouches) {
         return true;
       }
@@ -1852,7 +1862,7 @@
      * @param {!Event} evt
      * @return {?}
      */
-    e.f.ontouchend = function(evt) {
+    e.f.ontouchend = function (evt) {
       if (!e.ia || !evt.changedTouches) {
         return true;
       }
@@ -1906,12 +1916,12 @@
         split("ERR " + window.k2url.game + " PI/NULL/0 " + (element ? element.x + "," + element.y : "p=null") + ", s.x,y=" + o.K.x + "," + o.K.y + ", act:" + o.wb);
       }
       extend(o.K.Z.a, {
-        zIndex : 25
+        zIndex: 25
       });
     }
     if (o.K = element) {
       extend(o.K.Z.a, {
-        zIndex : 50
+        zIndex: 50
       });
       /** @type {string} */
       element.a = value;
@@ -2022,7 +2032,7 @@
        * @param {!Event} event
        * @return {?}
        */
-      data.f.ownerDocument.onmousemove = function(event) {
+      data.f.ownerDocument.onmousemove = function (event) {
         startDrag(data, event.clientX, event.clientY);
         return false;
       };
@@ -2030,7 +2040,7 @@
        * @param {!Event} event
        * @return {?}
        */
-      data.f.ownerDocument.onmouseup = function(event) {
+      data.f.ownerDocument.onmouseup = function (event) {
         notify(data, event.clientX, event.clientY, false);
         return false;
       };
@@ -2075,7 +2085,7 @@
        * @param {!Event} event
        * @return {?}
        */
-      e.f.ownerDocument.onmousemove = function(event) {
+      e.f.ownerDocument.onmousemove = function (event) {
         getMousePosition(e.f, event.clientX, event.clientY);
         return false;
       };
@@ -2083,7 +2093,7 @@
        * @param {!Event} event
        * @return {?}
        */
-      e.f.ownerDocument.onmouseup = function(event) {
+      e.f.ownerDocument.onmouseup = function (event) {
         getMousePosition(e.f, event.clientX, event.clientY);
         replace(e);
         return false;
@@ -2129,7 +2139,7 @@
   function isArray(o) {
     if (!o.vd && 0 < o.hb && 0 < o.gb) {
       /** @type {number} */
-      o.vd = setTimeout(function() {
+      o.vd = setTimeout(function () {
         /** @type {number} */
         o.vd = 0;
         o.ic();
@@ -2156,9 +2166,9 @@
     item.f.appendChild(c.a);
     item.Da.push(c);
     extend(c.a, {
-      position : "absolute",
-      zIndex : 25,
-      display : "none"
+      position: "absolute",
+      zIndex: 25,
+      display: "none"
     });
     return c;
   }
@@ -2216,64 +2226,64 @@
     this.o = options;
     this.f = $(res, "div", options.He);
     this.a = $(this.f, "div", options.Wd || {
-      style : {
-        position : "absolute",
-        padding : "3px 4px 3px 8px",
-        top : 0,
-        left : 0,
-        right : 0,
-        bottom : "2.5em",
-        overflowY : "scroll",
-        WebkitOverflowScrolling : "touch"
+      style: {
+        position: "absolute",
+        padding: "3px 4px 3px 8px",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: "2.5em",
+        overflowY: "scroll",
+        WebkitOverflowScrolling: "touch"
       }
     });
     extend(this.a, {
-      wordWrap : "break-word",
-      background : "#fff"
+      wordWrap: "break-word",
+      background: "#fff"
     });
     /**
      * @param {!Event} event
      * @return {?}
      */
-    this.a.onselectstart = function(event) {
+    this.a.onselectstart = function (event) {
       event.stopPropagation();
       return true;
     };
     el = $(this.f, "form", options.Xe || {});
     res = $(el, "div", {
-      style : {
-        display : "table",
-        width : "100%"
+      style: {
+        display: "table",
+        width: "100%"
       }
     });
     if (!options.Wd) {
       extend(res, {
-        position : "absolute",
-        bottom : 0
+        position: "absolute",
+        bottom: 0
       });
     }
     res = $(res, "div", {
-      style : {
-        display : "table-cell"
+      style: {
+        display: "table-cell"
       }
     });
     this.ab = $(res, "input", options.Kf || {
-      className : "bsbb",
-      style : {
-        width : "100%",
-        margin : 0
+      className: "bsbb",
+      style: {
+        width: "100%",
+        margin: 0
       }
     });
     Object.assign(this.ab, {
-      name : "somename",
-      type : "text",
-      autocomplete : "off",
-      autocapitalize : "off"
+      name: "somename",
+      type: "text",
+      autocomplete: "off",
+      autocapitalize: "off"
     });
     /**
      * @return {?}
      */
-    el.onsubmit = function() {
+    el.onsubmit = function () {
       var a = state.ab.value.trim();
       /** @type {string} */
       state.ab.value = "";
@@ -2302,29 +2312,29 @@
     this.A = this.o.fc + (this.o.Rc ? 1 : 0);
     var self = this;
     this.f = $(transform, "div", {
-      style : {
-        position : "absolute",
-        width : "100%",
-        height : "100%"
+      style: {
+        position: "absolute",
+        width: "100%",
+        height: "100%"
       }
     });
     this.sa = $(this.f, "div", {
-      style : {
-        position : "absolute",
-        left : 0,
-        right : 0,
-        top : 0,
-        bottom : 0,
-        overflowY : "scroll",
-        WebkitOverflowScrolling : "touch",
-        background : "#fff"
+      style: {
+        position: "absolute",
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+        overflowY: "scroll",
+        WebkitOverflowScrolling: "touch",
+        background: "#fff"
       }
     });
     this.a = $(this.sa, "table", {
-      className : "br",
-      style : {
-        width : "100%",
-        borderCollapse : "collapse"
+      className: "br",
+      style: {
+        width: "100%",
+        borderCollapse: "collapse"
       }
     });
     if (this.o.Va || this.o.ad) {
@@ -2334,7 +2344,7 @@
          * @param {string} e
          * @return {?}
          */
-        this.a.onclick = function(e) {
+        this.a.onclick = function (e) {
           e = e.target;
           if ("TD" == e.tagName && e.cellIndex >= self.o.Ta) {
             /** @type {number} */
@@ -2347,33 +2357,33 @@
         };
       }
       marker = $(this.f, "div", {
-        className : "lh1s",
-        style : {
-          position : "absolute",
-          left : 0,
-          right : 0,
-          bottom : 0
+        className: "lh1s",
+        style: {
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 0
         }
       });
       if (this.o.ad) {
         $(marker, [$("button", {
-          className : "minw",
-          onclick : function() {
+          className: "minw",
+          onclick: function () {
             self.tab.send([94, self.tab.F], null);
           }
         }, this.o.ad), " "]);
       }
       if (this.o.Va) {
         $(marker, [$("button", {
-          className : "minw",
-          onclick : function() {
+          className: "minw",
+          onclick: function () {
             if (0 <= self.b - 1) {
               close(self.tab, self.b - 1);
             }
           }
         }, "<"), " ", $("button", {
-          className : "minw",
-          onclick : function() {
+          className: "minw",
+          onclick: function () {
             if (self.b + 1 < self.g) {
               close(self.tab, self.b + 1);
             }
@@ -2417,11 +2427,11 @@
         i = i + (o.A - 1);
       } else {
         if (0 == o.g % o.A && (containerTR = o.a.insertRow(-1), line = i + o.A < v.length ? v[i + 2] : "", p = "=" == line ? 2 : "_" == line ? 1 : 0, o.o.Ta && containerTR && (resolve(line = containerTR.insertCell(-1), [1 + Math.floor(o.g / o.A) + ""]), 1 == o.a.rows.length && (line.width = o.B))), o.g++, containerTR =
-        o.a.rows[o.a.rows.length - 1]) {
+          o.a.rows[o.a.rows.length - 1]) {
           resolve(line = containerTR.insertCell(-1), [serialize(v[i])]);
           if (o.o.Va) {
             extend(line, {
-              cursor : "pointer"
+              cursor: "pointer"
             });
           }
           if (1 == o.a.rows.length) {
@@ -2500,17 +2510,17 @@
     this.L = false;
     var self = this;
     this.f = document.getElementById("pretl") || $(this.app.B, "div", {
-      style : {
-        display : "none"
+      style: {
+        display: "none"
       }
     });
     extend(this.f, {
-      display : "none"
+      display: "none"
     });
     callback(this.f, "tblobby");
     callback(this.f, "usno");
     this.S = $(this.f, "div", {
-      className : "tbvusers"
+      className: "tbvusers"
     });
     this.A = document.getElementById("pretabs") || $(this.f, "div");
     callback(this.A, "tbvtabs");
@@ -2519,76 +2529,76 @@
     var elem;
     var node;
     html(this.f, data = $("div", {
-      className : "newtab2 dcpd"
+      className: "newtab2 dcpd"
     }), this.f.firstChild);
     $(data, [inputElements = $("button", {
-      className : "minwd",
-      onclick : function() {
+      className: "minwd",
+      onclick: function () {
         self.app.send([payload], null);
       }
     }, this.app.j("bl_newtab")), " ", $("div", {
-      className : "selcwr mro"
+      className: "selcwr mro"
     }, [buttonIndex = $("button", {
-      className : "selcbt min85"
+      className: "selcbt min85"
     }, $("div", "-")), elem = $("select", {
-      className : "selcsl",
-      onchange : function(event) {
+      className: "selcsl",
+      onchange: function (event) {
         if (event = event.target.options[event.target.selectedIndex]) {
           self.app.X("/join " + event.text.split(" ")[0]);
         }
       }
     })]), $("div", {
-      className : "ib mro"
+      className: "ib mro"
     }, [$("button", {
-      className : "ubut",
-      onclick : function() {
+      className: "ubut",
+      onclick: function () {
         debug(self.app, self.app.N + (self.L ? "" : "/p"));
         return false;
       }
     }, $("div", {
-      className : "uicon"
+      className: "uicon"
     }))]), node = $("span", {
-      className : "tuinfo",
-      style : {
-        color : "gray"
+      className: "tuinfo",
+      style: {
+        color: "gray"
       }
     }, "-")]);
-    expect(this.app, "rooms", function(self) {
+    expect(this.app, "rooms", function (self) {
       /** @type {number} */
       elem.options.length = 0;
-      $(elem, self.list.map(function(body, state) {
+      $(elem, self.list.map(function (body, state) {
         return $("option", state == self.rb ? {
-          selected : true
+          selected: true
         } : {}, body);
       }));
       resolve(buttonIndex, [self.list[0 <= self.rb ? self.rb : 0].split(" ")[0] || "-"]);
     });
-    expect(this.app, "tumode", function(value) {
+    expect(this.app, "tumode", function (value) {
       extend(inputElements, {
-        display : value ? "none" : "inline-block"
+        display: value ? "none" : "inline-block"
       });
     });
-    expect(this.app, "tuinfo", function(ease) {
+    expect(this.app, "tuinfo", function (ease) {
       return resolve(node, [ease || "-"]);
     });
     $(this.A, "div", {
-      className : "tldeco"
+      className: "tldeco"
     });
     this.M = $(this.A, "div");
     this.G = $(this.A, "div", {
-      className : "chpan dcpd"
+      className: "chpan dcpd"
     });
     $(this.G, "div", {
-      className : "chtop"
+      className: "chtop"
     }, [this.I = $("select", {
-      className : "chgrlist minwd",
-      onchange : function(event) {
+      className: "chgrlist minwd",
+      onchange: function (event) {
         var NEGATIVE = event.target.selectedIndex;
         self.app.X("/g " + (0 == NEGATIVE ? "-" : 1 == NEGATIVE ? "+" : event.target.value.split(" ")[0]));
       }
     }), $("input", {
-      type : "checkbox",
-      onchange : function() {
+      type: "checkbox",
+      onchange: function () {
         var c = this.checked;
         callback(self.G, "chopen", c);
         if (c) {
@@ -2597,32 +2607,32 @@
       }
     }), this.app.j("bl_whisper"), " ", this.ba = $("span")]);
     data = $(this.G, "div", {
-      className : "chsub"
+      className: "chsub"
     });
     this.g = new Controller(this.app, data, {
-      Zd : function(left) {
+      Zd: function (left) {
         self.app.X(left);
       },
-      He : {
-        style : {
-          display : "block",
-          position : "relative",
-          width : "100%",
-          maxWidth : "640px",
-          height : "140px"
+      He: {
+        style: {
+          display: "block",
+          position: "relative",
+          width: "100%",
+          maxWidth: "640px",
+          height: "140px"
         }
       }
     });
     extend(this.g.a, {
-      border : "solid 1px rgba(0,0,0,0.3)"
+      border: "solid 1px rgba(0,0,0,0.3)"
     });
-    expect(this.app, "chmode", function(a) {
+    expect(this.app, "chmode", function (a) {
       return callback(fr.f, "chmode", !!a);
     });
     this.C = $(this.A, "div", {
-      className : "tlst"
+      className: "tlst"
     });
-    expect(this.app, "tumode", function(server) {
+    expect(this.app, "tumode", function (server) {
       /** @type {number} */
       server = server ? 0 : 1;
       if (server != self.B) {
@@ -2631,28 +2641,28 @@
       }
     });
     var s = $(this.S, "div", {
-      className : "ulpan",
-      style : {
-        display : "none"
+      className: "ulpan",
+      style: {
+        display: "none"
       }
     }, [$("button", {
-      onclick : function() {
+      onclick: function () {
         var sandbox = self.H;
         ok(sandbox, sandbox.Ra ? 0 : 1);
         return false;
       }
     }, this.app.j("tu_bcan"))]);
-    expect(this.app, "urole", function(i) {
+    expect(this.app, "urole", function (i) {
       extend(s, {
-        display : i == cursel ? "block" : "none"
+        display: i == cursel ? "block" : "none"
       });
     });
     var fProduction = this.app.o.ob;
     this.H = new Color(this.app, this.S, {
-      oe : true,
-      cols : fProduction ? [file, -1] : [F, file],
-      ud : false,
-      Pc : function(data, sandbox) {
+      oe: true,
+      cols: fProduction ? [file, -1] : [F, file],
+      ud: false,
+      Pc: function (data, sandbox) {
         var name = data.name;
         var expectedChecksum = self.app.gc;
         if (1 == sandbox.Ra && expectedChecksum == cursel || ed) {
@@ -2666,10 +2676,10 @@
           }
         }
       },
-      Ue : true
+      Ue: true
     });
     logger(this.app, this.H);
-    expect(this.app, "tumode", function(result) {
+    expect(this.app, "tumode", function (result) {
       var opts = self.H;
       /** @type {!Array} */
       var cols = 0 != result ? [value, F] : fProduction ? [file, -1] : [F, file];
@@ -2705,7 +2715,7 @@
         key.unshift("-", "START");
         /** @type {number} */
         data.I.options.length = 0;
-        $(data.I, key.map(function(body) {
+        $(data.I, key.map(function (body) {
           return $("option", {}, body);
         }));
         if (0 <= x) {
@@ -2729,15 +2739,15 @@
     var to = 0;
     if (1 == options.N) {
       var el = $("div", {
-        className : "tplone tavail"
+        className: "tplone tavail"
       }, [$("div", {
-        className : "tpllist"
+        className: "tpllist"
       }, data.O[position + 0] || "-"), $("div", {
-        className : "tpar0"
+        className: "tpar0"
       }, data.O[0])]);
     } else {
       el = $("div", {
-        className : "tplbl"
+        className: "tplbl"
       });
       /** @type {number} */
       i = data.nd - 1;
@@ -2746,38 +2756,38 @@
         var value = data.O[position + i];
         var r = process(options.app, value);
         html(el, $("div", {
-          className : number ? "tplemp" : "" != value ? "tplnorm" : "tplunav"
+          className: number ? "tplemp" : "" != value ? "tplnorm" : "tplunav"
         }, [$("div", {
-          className : r ? "r" + merge(options.app, r.g) : "rnone"
+          className: r ? "r" + merge(options.app, r.g) : "rnone"
         }), value || "\u2013", $("span", {
-          className : "tplrn snum"
+          className: "tplrn snum"
         }, r ? 0 != (r.a & arg) ? "X" : exec(options.app, r.g) : "-")]), number || "" == value ? null : el.firstChild);
         if (number) {
           to++;
         }
       }
       $(el, "div", {
-        className : "tpar0"
+        className: "tpar0"
       }, [$("div", {
-        className : "rnone"
+        className: "rnone"
       }), data.O[0]]);
     }
     return fn(options.C, $("a", {
-      className : "awrap dcpd" + (0 < to ? " tavail" : ""),
-      onclick : function() {
+      className: "awrap dcpd" + (0 < to ? " tavail" : ""),
+      onclick: function () {
         server(options.app, data.F);
         return false;
       }
     }, $("div", {
-      className : "tmaxw"
+      className: "tmaxw"
     }, [$("div", {
-      className : "tnum"
+      className: "tnum"
     }, 2 == data.J[2] ? "-" : "#" + data.F), $("div", {
-      className : "tpar1"
+      className: "tpar1"
     }, data.O[0]), el, 1 < options.N ? $("div", {
-      className : "tjoin"
+      className: "tjoin"
     }, $("button", {
-      className : "butbl"
+      className: "butbl"
     }, ">>")) : null])), template);
   }
   /**
@@ -2790,7 +2800,7 @@
     if (!req.a.hasOwnProperty(data[1])) {
       data = new Node(req.app, data, options);
       req.a[data.F] = {
-        Ua : data
+        Ua: data
       };
       data.D = parse(req, data);
       error(req, data);
@@ -2864,7 +2874,7 @@
       }
       var a = new Node(b.app, data.slice(i - 1, i - 1 + offset + 1), items.slice(index, index + count));
       b.a[a.F] = {
-        Ua : a
+        Ua: a
       };
       a.D = parse(b, a);
       error(b, a);
@@ -2919,7 +2929,7 @@
    * @return {undefined}
    */
   function plugin(f) {
-    Object.keys(f.a).forEach(function(index) {
+    Object.keys(f.a).forEach(function (index) {
       var c = this.a[index].Ua;
       if (c.D) {
         this.C.removeChild(c.D);
@@ -2996,7 +3006,7 @@
       /**
        * @return {?}
        */
-      window.onkeypress = function() {
+      window.onkeypress = function () {
         return true;
       };
     }
@@ -3007,49 +3017,49 @@
    */
   function fail(obj) {
     $(obj.f, "div", {
-      className : "thnavcont usno tama"
+      className: "thnavcont usno tama"
     }, [$("button", {
-      className : "xbut hdhei",
-      style : {
-        zIndex : cluezIndex + 1,
-        right : 0,
-        width : "44px"
+      className: "xbut hdhei",
+      style: {
+        zIndex: cluezIndex + 1,
+        right: 0,
+        width: "44px"
       },
-      onclick : function() {
+      onclick: function () {
         copy(obj);
       }
     }, "X"), $("button", {
-      className : "cmenubut hdhei",
-      style : {
-        zIndex : cluezIndex + 1,
-        right : "38px",
-        width : "44px"
+      className: "cmenubut hdhei",
+      style: {
+        zIndex: cluezIndex + 1,
+        right: "38px",
+        width: "44px"
       },
-      onclick : function() {
+      onclick: function () {
         this.blur();
         _(obj, !transform(obj.f, "sbdropvis"));
       }
     }, $("div", {
-      className : "cmenu"
+      className: "cmenu"
     }))]);
     var w = $(obj.f, "div", {
-      className : "thead bsbb usno hdhei",
-      style : {
-        zIndex : cluezIndex
+      className: "thead bsbb usno hdhei",
+      style: {
+        zIndex: cluezIndex
       }
     });
     w = $(w, "div", {
-      style : {
-        display : "table",
-        width : "100%",
-        height : "100%"
+      style: {
+        display: "table",
+        width: "100%",
+        height: "100%"
       }
     });
     w = $(w, "div", {
-      style : {
-        display : "table-cell",
-        verticalAlign : "middle",
-        textAlign : "center"
+      style: {
+        display: "table-cell",
+        verticalAlign: "middle",
+        textAlign: "center"
       }
     });
     open(obj, w);
@@ -3060,7 +3070,7 @@
    * @return {undefined}
    */
   function open(item, hash) {
-    expect(item.app, "tabplayers", function() {
+    expect(item.app, "tabplayers", function () {
       if (0 >= item.F) {
         resolve(hash, []);
       } else {
@@ -3091,16 +3101,16 @@
           /** @type {number} */
           var gridX = 2 < cell_amount ? 2 : 1;
           message = $("div", {
-            className : nameMatch ? "tabmaxmed" : "tabany",
-            style : 1 < gridX ? {
-              margin : "0 auto",
-              fontSize : "13px",
-              lineHeight : "1.2",
-              paddingRight : "8px"
+            className: nameMatch ? "tabmaxmed" : "tabany",
+            style: 1 < gridX ? {
+              margin: "0 auto",
+              fontSize: "13px",
+              lineHeight: "1.2",
+              paddingRight: "8px"
             } : {
-              margin : "0 auto",
-              paddingRight : "8px"
-            }
+                margin: "0 auto",
+                paddingRight: "8px"
+              }
           });
           /** @type {number} */
           i = 0;
@@ -3108,19 +3118,19 @@
             /** @type {number} */
             var size = i + (1 == gridX && null == args.name[i] ? 1 : 0);
             var x = $(message, "div", {
-              style : {
-                display : "table-cell",
-                textAlign : 1 > i ? "right" : "left",
-                width : "50%",
-                padding : "0 .4em",
-                whiteSpace : "nowrap"
+              style: {
+                display: "table-cell",
+                textAlign: 1 > i ? "right" : "left",
+                width: "50%",
+                padding: "0 .4em",
+                whiteSpace: "nowrap"
               }
             });
             var node = $(x, "div", {
-              className : "ib",
-              style : {
-                textAlign : "left",
-                marginRight : ".4em"
+              className: "ib",
+              style: {
+                textAlign: "left",
+                marginRight: ".4em"
               }
             });
             /** @type {number} */
@@ -3133,21 +3143,21 @@
               }
               if (args.Sa && args.R) {
                 $(node, "div", {
-                  className : "ib",
-                  style : {
-                    width : "3px",
-                    height : ".8em",
-                    background : args.Sa[index],
-                    marginRight : "3px"
+                  className: "ib",
+                  style: {
+                    width: "3px",
+                    height: ".8em",
+                    background: args.Sa[index],
+                    marginRight: "3px"
                   }
                 });
               }
               $(node, "b", {}, [args.R && args.Eb ? args.R[index] : "#" + (index + 1)]);
             }
             node = $(x, "div", {
-              className : "ib",
-              style : {
-                textAlign : "right"
+              className: "ib",
+              style: {
+                textAlign: "right"
               }
             });
             /** @type {number} */
@@ -3166,10 +3176,10 @@
         }
         if (nameMatch || labelMatch) {
           masterPageName = $("div", {
-            className : labelMatch ? "fs15xs" : "minmed",
-            style : {
-              textAlign : "center",
-              paddingRight : "21px"
+            className: labelMatch ? "fs15xs" : "minmed",
+            style: {
+              textAlign: "center",
+              paddingRight: "21px"
             }
           });
           /** @type {number} */
@@ -3177,26 +3187,26 @@
           for (; i < cell_amount; i++) {
             if (null != args.name[i]) {
               node = $(masterPageName, "div", {
-                className : "ib",
-                style : {
-                  margin : "0 .4em"
+                className: "ib",
+                style: {
+                  margin: "0 .4em"
                 }
               });
               if (args.Sa) {
                 $(node, "div", {
-                  className : "ib",
-                  style : {
-                    width : "4px",
-                    height : ".8em",
-                    background : args.Sa[i],
-                    marginRight : "4px",
-                    verticalAlign : "middle"
+                  className: "ib",
+                  style: {
+                    width: "4px",
+                    height: ".8em",
+                    background: args.Sa[i],
+                    marginRight: "4px",
+                    verticalAlign: "middle"
                   }
                 });
               }
               $(node, "b", {
-                style : {
-                  marginRight : ".4em"
+                style: {
+                  marginRight: ".4em"
                 }
               }, [args.R && args.Eb ? args.R[i] : "#" + (i + 1)]);
               if (args.time) {
@@ -3216,57 +3226,57 @@
   function done(obj) {
     var b;
     obj.xa = $(obj.f, "div", {
-      className : "bsbb tsb sbclrd"
+      className: "bsbb tsb sbclrd"
     });
     var one = $(obj.xa, "div", {
-      className : "tsbinner bsbb"
+      className: "tsbinner bsbb"
     });
     $(one, "div", {
-      className : "ttlcont"
+      className: "ttlcont"
     }, [$("div", {
-      className : "ttlnav"
+      className: "ttlnav"
     }, [b = $("button", {
-      className : "butsys butlh",
-      onclick : function() {
+      className: "butsys butlh",
+      onclick: function () {
         then(obj.app);
       }
     }, "\u2013"), $("button", {
-      className : "butsys butlh",
-      onclick : function() {
+      className: "butsys butlh",
+      onclick: function () {
         copy(obj);
       }
     }, "X")]), obj.ba = $("div", ["-"])]);
-    expect(obj.app, "chatalert", function(a) {
+    expect(obj.app, "chatalert", function (a) {
       return callback(b, "alert", a);
     });
-    expect(obj.app, "tabopen", function() {
+    expect(obj.app, "tabopen", function () {
       return resolve(obj.ba, [upload(obj)]);
     });
-    expect(obj.app, "tabstatus", function() {
+    expect(obj.app, "tabstatus", function () {
       return resolve(obj.ba, [upload(obj)]);
     });
     createOption(obj, one);
     var t = $(one, "div", {
-      className : "tsinsb lh1s",
-      style : {
-        textAlign : "center",
-        background : "#f21",
-        color : "#fff",
-        paddingLeft : ".5em",
-        paddingRight : ".5em"
+      className: "tsinsb lh1s",
+      style: {
+        textAlign: "center",
+        background: "#f21",
+        color: "#fff",
+        paddingLeft: ".5em",
+        paddingRight: ".5em"
       }
     });
     obj.va = $(t, "div", {
-      className : "tstatlabl nowrel"
+      className: "tstatlabl nowrel"
     }, "-");
     $(t, "div", {
-      className : "tstatstrl"
+      className: "tstatstrl"
     }, [$("button", {
-      className : "butwb",
-      style : {
-        minWidth : "8em"
+      className: "butwb",
+      style: {
+        minWidth: "8em"
       },
-      onclick : function() {
+      onclick: function () {
         obj.send([85, obj.F], null);
         return false;
       }
@@ -3282,7 +3292,7 @@
   function createOption(value, label) {
     var input_container = $(label, "div");
     anonymous(value, input_container);
-    expect(value.app, "tabplayers", function() {
+    expect(value.app, "tabplayers", function () {
       return anonymous(value, input_container);
     });
   }
@@ -3300,11 +3310,11 @@
     options = self.b;
     if (!self.a.ke) {
       self.history = new draw(self, options.pb, {
-        fc : self.a.pe,
-        Va : !self.a.me,
-        ad : self.a.Wb,
-        Rc : self.a.Ff ? true : false,
-        Ta : self.a.le ? 0 : 1
+        fc: self.a.pe,
+        Va: !self.a.me,
+        ad: self.a.Wb,
+        Rc: self.a.Ff ? true : false,
+        Ta: self.a.le ? 0 : 1
       });
       self.oa = options.add(self.app.P ? self.j("sw_history") : null, self.history.f);
     }
@@ -3318,48 +3328,48 @@
    */
   function factory(module, url) {
     module = {
-      Vc : {},
-      Na : {},
-      pf : module.app.G,
-      ha : function(callback) {
+      Vc: {},
+      Na: {},
+      pf: module.app.G,
+      ha: function (callback) {
         this.f = $(callback, "div", {
-          className : "tcrdcont"
+          className: "tcrdcont"
         }, [$("div", {
-          className : "tcrdtabcont"
+          className: "tcrdtabcont"
         }, this.sa = $("div", {
-          className : "tcrdtab"
+          className: "tcrdtab"
         })), this.pb = $("div", {
-          className : "tcrdpan"
+          className: "tcrdpan"
         })]);
       },
-      add : function(a, b) {
+      add: function (a, b) {
         var c = this;
         /** @type {number} */
         var p = Object.keys(this.Na).length;
         /** @type {!Object} */
         this.Na[p] = b;
         extend(b, {
-          visibility : p ? "hidden" : "inherit"
+          visibility: p ? "hidden" : "inherit"
         });
         if (a) {
           $(this.sa, "div", {
-            className : "tcrdcell"
+            className: "tcrdcell"
           }, this.Vc[p] = $("button", {
-            className : p ? "" : "active",
-            onclick : function() {
+            className: p ? "" : "active",
+            onclick: function () {
               return c.show(p);
             }
           }, [a]));
         }
         return p;
       },
-      show : function(i) {
-        Object.keys(this.Vc).forEach(function(item) {
+      show: function (i) {
+        Object.keys(this.Vc).forEach(function (item) {
           callback(this.Vc[item], "active", i == item);
         }, this);
-        Object.keys(this.Na).forEach(function(sub_id) {
+        Object.keys(this.Na).forEach(function (sub_id) {
           extend(this.Na[sub_id], {
-            visibility : i == sub_id ? "inherit" : "hidden"
+            visibility: i == sub_id ? "inherit" : "hidden"
           });
         }, this);
         if (this.pf) {
@@ -3368,7 +3378,7 @@
           this.Na[i].firstChild.scrollTop = contentScrollTop;
         }
       },
-      qf : function() {
+      qf: function () {
         this.pb.insertBefore(this.Na[0], null);
       }
     };
@@ -3382,27 +3392,27 @@
   function createServer(options) {
     if (!options.H) {
       options.H = create(options.app, options.j("bl_invite"), {
-        width : "81%",
-        minWidth : "280px",
-        maxWidth : "320px"
+        width: "81%",
+        minWidth: "280px",
+        maxWidth: "320px"
       }, {
-        nopad : true
+        nopad: true
       });
       options.pa = new Color(options.app, options.H.Ma, {
-        oe : true,
-        cols : [F, file],
-        vf : file,
-        ud : true,
-        Pc : function(catalogs) {
+        oe: true,
+        cols: [F, file],
+        vf: file,
+        ud: true,
+        Pc: function (catalogs) {
           success(options.app);
           options.send([95, options.F, 0], [catalogs.name]);
         },
-        Ie : {
-          className : "ovysct",
-          style : {
-            width : "100%",
-            height : "300px",
-            borderTop : "solid 1px #ddd"
+        Ie: {
+          className: "ovysct",
+          style: {
+            width: "100%",
+            height: "300px",
+            borderTop: "solid 1px #ddd"
           }
         }
       });
@@ -3416,46 +3426,46 @@
    */
   function page(params) {
     params.La = $(params.u.f, "div", {
-      className : "tsinbo bsbb",
-      style : {
-        position : "absolute",
-        width : "100%",
-        height : "100%",
-        textAlign : "center",
-        zIndex : 70
+      className: "tsinbo bsbb",
+      style: {
+        position: "absolute",
+        width: "100%",
+        height: "100%",
+        textAlign: "center",
+        zIndex: 70
       }
     });
     var element = $(params.La, "div", {
-      style : {
-        display : "table-cell",
-        verticalAlign : "middle"
+      style: {
+        display: "table-cell",
+        verticalAlign: "middle"
       }
     });
     element = $(element, "div", {
-      className : "bsbb bs ib",
-      style : {
-        textAlign : "center",
-        maxWidth : "80%",
-        minWidth : "35%",
-        padding : "0.75em 2em",
-        border : "solid 3px #fff",
-        background : "#e21",
-        color : "#fff"
+      className: "bsbb bs ib",
+      style: {
+        textAlign: "center",
+        maxWidth: "80%",
+        minWidth: "35%",
+        padding: "0.75em 2em",
+        border: "solid 3px #fff",
+        background: "#e21",
+        color: "#fff"
       }
     });
     params.qa = $(element, "div", {
-      className : "tstatlabl fb"
+      className: "tstatlabl fb"
     }, "");
     element = $(element, "div", {
-      className : "tstatstrl"
+      className: "tstatstrl"
     });
     $(element, "button", {
-      className : "butwb",
-      style : {
-        marginTop : ".25em",
-        minWidth : "8em"
+      className: "butwb",
+      style: {
+        marginTop: ".25em",
+        minWidth: "8em"
       },
-      onclick : function() {
+      onclick: function () {
         params.send([85, params.F], null);
         return false;
       }
@@ -3527,39 +3537,39 @@
     var watchable = [];
     if (data.a.cf) {
       watchable.push(data.Lc = $("button", {
-        className : "minw",
-        onclick : function() {
+        className: "minw",
+        onclick: function () {
           randomColor(data, 1, 1);
         }
       }, data.j("bl_draw")), " ");
     }
     if (data.a.ne) {
       watchable.push(data.Nc = $("button", {
-        className : "minw",
-        onclick : function() {
+        className: "minw",
+        onclick: function () {
           data.ka.show(2);
         }
       }, data.j("bl_resign")), " ");
     }
     if (data.a.$c) {
       watchable.push(data.Oc = $("button", {
-        className : "minw",
-        onclick : function() {
+        className: "minw",
+        onclick: function () {
           randomColor(data, 1, 2);
         }
       }, data.j("bl_undo")), " ");
     }
     if (data.a.Hf) {
       watchable.push(data.I = $("button", {
-        onclick : function() {
+        onclick: function () {
           randomColor(data, 1, 10);
         }
       }, data.j("bl_resign") + ": 1"), " ", data.L = $("button", {
-        onclick : function() {
+        onclick: function () {
           randomColor(data, 1, 11);
         }
       }, "2"), " ", data.M = $("button", {
-        onclick : function() {
+        onclick: function () {
           randomColor(data, 1, 12);
         }
       }, "3"));
@@ -3574,50 +3584,50 @@
   function apply(data, options) {
     if (data.a.$c || data.a.cf || data.a.ne) {
       data.ka = new Layer(options, {
-        className : "trqcont lh1s",
-        style : {
-          position : "relative"
+        className: "trqcont lh1s",
+        style: {
+          position: "relative"
         }
       });
       data.ka.add(0, {
-        className : "nowrel"
+        className: "nowrel"
       }, bind(data));
       data.ka.add(1, {
-        className : "trqans dsp1 nowrel",
-        style : {
-          display : "none"
+        className: "trqans dsp1 nowrel",
+        style: {
+          display: "none"
         }
       }, [$("button", {
-        className : "minw",
-        onclick : function() {
+        className: "minw",
+        onclick: function () {
           randomColor(data, 2, data.Ya);
           loop(data, 0);
         }
       }, data.j("bl_yes")), " ", $("button", {
-        className : "minw",
-        onclick : function() {
+        className: "minw",
+        onclick: function () {
           randomColor(data, 3, data.Ya);
           loop(data, 0);
         }
       }, data.j("bl_no")), " ", data.ua = $("span", ["..."])]);
       data.ka.add(2, {
-        className : "nowrel",
-        style : {
-          display : "none"
+        className: "nowrel",
+        style: {
+          display: "none"
         }
       }, [$("button", {
-        className : "minw",
-        onclick : function() {
+        className: "minw",
+        onclick: function () {
           randomColor(data, 4);
           data.ka.show(0);
         }
       }, data.j("bl_yes")), " ", $("button", {
-        className : "minw",
-        onclick : function() {
+        className: "minw",
+        onclick: function () {
           data.ka.show(0);
         }
       }, data.j("bl_no")), " ", $("span", {
-        className : "ttup"
+        className: "ttup"
       }, data.j("bl_resign"))]);
     }
   }
@@ -3637,7 +3647,7 @@
       function callback() {
         /** @type {number} */
         var selected = 0;
-        hooksWithName.forEach(function(radioItem) {
+        hooksWithName.forEach(function (radioItem) {
           if (radioItem.checked) {
             selected++;
           }
@@ -3649,9 +3659,9 @@
        * @return {undefined}
        */
       function update() {
-        var text = hooksWithName.filter(function(radioItem) {
+        var text = hooksWithName.filter(function (radioItem) {
           return radioItem.checked;
-        }).map(function(select_ele) {
+        }).map(function (select_ele) {
           return select_ele.value;
         });
         if (0 < text.length) {
@@ -3661,48 +3671,48 @@
       var _this = this;
       if (!this.rd) {
         this.rd = create(this.app, this.j("t_rpin") || "-", {
-          width : "80%",
-          minHeight : "0",
-          minWidth : "280px",
-          maxWidth : "600px"
+          width: "80%",
+          minHeight: "0",
+          minWidth: "280px",
+          maxWidth: "600px"
         }, {
-          nopad : true
+          nopad: true
         });
       }
       var button;
-      var hooksWithName = k.map(function(command_module_id, premadeCommentListId) {
+      var hooksWithName = k.map(function (command_module_id, premadeCommentListId) {
         return $("input", {
-          type : "checkbox",
-          value : command_module_id,
-          id : "_chrep" + premadeCommentListId,
-          onchange : function() {
+          type: "checkbox",
+          value: command_module_id,
+          id: "_chrep" + premadeCommentListId,
+          onchange: function () {
             return callback();
           }
         });
       });
       resolve(this.rd.Ma, [$("div", {
-        className : "bsbb",
-        style : {
-          width : "100%",
-          height : "220px",
-          padding : "0 15px",
-          borderTop : "solid 1px #ddd",
-          borderBottom : "solid 1px #ddd",
-          overflowY : "scroll"
+        className: "bsbb",
+        style: {
+          width: "100%",
+          height: "220px",
+          padding: "0 15px",
+          borderTop: "solid 1px #ddd",
+          borderBottom: "solid 1px #ddd",
+          overflowY: "scroll"
         }
-      }, 0 == hooksWithName.length ? $("p", "-") : hooksWithName.map(function(props) {
+      }, 0 == hooksWithName.length ? $("p", "-") : hooksWithName.map(function (props) {
         return $("p", {}, [props, " ", $("label", {
-          htmlFor : props.id
+          htmlFor: props.id
         }, props.value)]);
       })), $("p", {
-        className : "bsbb",
-        style : {
-          padding : "0 15px"
+        className: "bsbb",
+        style: {
+          padding: "0 15px"
         }
       }, button = $("button", {
-        disabled : true,
-        className : "minw",
-        onclick : function() {
+        disabled: true,
+        className: "minw",
+        onclick: function () {
           success(_this.app);
           update.call(_this);
         }
@@ -3713,78 +3723,78 @@
     var f;
     var scope = (window.k2prechat || "").split(" ");
     content = $(content, "div", {
-      style : {
-        position : "absolute",
-        width : "100%",
-        height : "100%"
+      style: {
+        position: "absolute",
+        width: "100%",
+        height: "100%"
       }
     }, [target = $("div", {
-      className : "bsbb mb1s",
-      style : {
-        position : "absolute",
-        top : 0,
-        bottom : 0,
-        left : 0,
-        right : 0,
-        background : "#fff",
-        padding : "2px 4px 3px 8px"
+      className: "bsbb mb1s",
+      style: {
+        position: "absolute",
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        background: "#fff",
+        padding: "2px 4px 3px 8px"
       }
     }), $("div", {
-      className : "h1s",
-      style : {
-        position : "absolute",
-        bottom : 0,
-        left : 0,
-        right : 0,
-        paddingTop : "4px"
+      className: "h1s",
+      style: {
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        paddingTop: "4px"
       }
     }, [$("form", {
-      onsubmit : function() {
+      onsubmit: function () {
         data.X(f.value.trim());
         /** @type {string} */
         f.value = "";
         return false;
       }
     }, f = $("input", {
-      className : "bsbb",
-      name : "somename",
-      type : "text",
-      autocomplete : "off",
-      autocapitalize : "off",
-      style : {
-        width : "100%",
-        border : "none"
+      className: "bsbb",
+      name: "somename",
+      type: "text",
+      autocomplete: "off",
+      autocapitalize: "off",
+      style: {
+        width: "100%",
+        border: "none"
       }
     }))]), $("div", {
-      className : "bsbb",
-      style : {
-        position : "absolute",
-        top : "100%",
-        width : "100%",
-        margin : "-2px 0 4px"
+      className: "bsbb",
+      style: {
+        position: "absolute",
+        top: "100%",
+        width: "100%",
+        margin: "-2px 0 4px"
       }
     }, [$("button", {
-      className : "ddbut butlh",
-      onclick : function(event) {
+      className: "ddbut butlh",
+      onclick: function (event) {
         if (!data.app.G) {
           event.target.focus();
         }
       },
-      style : {
-        position : "absolute",
-        top : 0,
-        background : "#f8f8f8",
-        border : "none",
-        borderRadius : 0
+      style: {
+        position: "absolute",
+        top: 0,
+        background: "#f8f8f8",
+        border: "none",
+        borderRadius: 0
       }
     }, "..."), $("div", {
-      className : "ddcont bsbb bs dsp1",
-      onmousedown : function(event) {
+      className: "ddcont bsbb bs dsp1",
+      onmousedown: function (event) {
         if (data.app.lf && event.target.onclick) {
           event.target.onclick();
         }
       },
-      ontouchend : function(event) {
+      ontouchend: function (event) {
         if (data.app.G) {
           if (event.target.onclick) {
             event.target.onclick();
@@ -3792,84 +3802,84 @@
           return false;
         }
       },
-      style : {
-        position : "absolute",
-        bottom : 0,
-        width : "100%",
-        background : "#f8f8f8",
-        paddingTop : "1em"
+      style: {
+        position: "absolute",
+        bottom: 0,
+        width: "100%",
+        background: "#f8f8f8",
+        paddingTop: "1em"
       }
     }, [$("p", {}, [$("button", {
-      onclick : function() {
+      onclick: function () {
         return render.call(data);
       },
-      style : {
-        color : "red",
-        borderColor : "red"
+      style: {
+        color: "red",
+        borderColor: "red"
       }
     }, data.j("t_rpin"))]), $("p", {}, [$("input", {
-      type : "checkbox",
-      checked : true,
-      ontouchend : function(e) {
+      type: "checkbox",
+      checked: true,
+      ontouchend: function (e) {
         if (data.app.G) {
           /** @type {boolean} */
           e.target.checked = !e.target.checked;
           e.target.onchange(e);
         }
       },
-      onchange : function(b) {
+      onchange: function (b) {
         b = b.target.checked;
         data.X(b ? "/chat1" : "/chat0");
         if (!b) {
           data.ta.reset();
         }
       }
-    }), " ", data.j("sw_chat")]), $("p", {}, "\ud83d\ude00 \ud83d\ude02 \u2639\ufe0f \ud83e\udd14 \ud83d\ude2d \ud83d\ude34 \ud83e\udd10 \ud83d\udc4d \ud83d\udc4e".split(" ").map(function(version) {
+    }), " ", data.j("sw_chat")]), $("p", {}, "\ud83d\ude00 \ud83d\ude02 \u2639\ufe0f \ud83e\udd14 \ud83d\ude2d \ud83d\ude34 \ud83e\udd10 \ud83d\udc4d \ud83d\udc4e".split(" ").map(function (version) {
       return $("span", {
-        className : "emo",
-        style : {
-          cursor : "pointer",
-          marginRight : "1px"
+        className: "emo",
+        style: {
+          cursor: "pointer",
+          marginRight: "1px"
         },
-        onclick : function() {
+        onclick: function () {
           return data.X(version);
         }
       }, version);
     })), scope ? $("p", {
-      style : {}
-    }, scope.map(function(version) {
+      style: {}
+    }, scope.map(function (version) {
       return $("span", {
-        style : {
-          cursor : "pointer",
-          marginRight : ".5em",
-          padding : ".4em 0"
+        style: {
+          cursor: "pointer",
+          marginRight: ".5em",
+          padding: ".4em 0"
         },
-        onclick : function() {
+        onclick: function () {
           return data.X(version);
         }
       }, version);
     })) : null])])]);
     extend(target, {
-      wordWrap : "break-word",
-      overflowY : "scroll",
-      WebkitOverflowScrolling : "touch"
+      wordWrap: "break-word",
+      overflowY: "scroll",
+      WebkitOverflowScrolling: "touch"
     });
     /**
      * @param {!Event} event
      * @return {?}
      */
-    target.onselectstart = function(event) {
+    target.onselectstart = function (event) {
       event.stopPropagation();
       return true;
     };
     /** @type {!Array} */
     var k = [];
-    expect(data.app, "tabchat", function(a) {
+    expect(data.app, "tabchat", function (a) {
       if (0 != a.indexOf(element)) {
         k.push(a);
       }
     });
-    expect(data.app, "tabopen", function(a) {
+    expect(data.app, "tabopen", function (a) {
       if (0 == a) {
         /** @type {!Array} */
         k = [];
@@ -3877,8 +3887,8 @@
     });
     var iConfig = data.a.Cf || 0;
     data.ta = {
-      f : content,
-      append : function(a) {
+      f: content,
+      append: function (a) {
         /** @type {boolean} */
         var c = target.scrollTop + 2 >= target.scrollHeight - target.clientHeight;
         for (; 0 < iConfig && target.children.length > iConfig && target.firstChild;) {
@@ -3886,7 +3896,7 @@
         }
         var b = 0 != a.indexOf(element) ? a.indexOf(":") : 0;
         a = $(target, "div", {
-          className : "tind"
+          className: "tind"
         }, 0 < b ? [$("b", [a.substring(0, b)]), a.substring(b)] : a);
         write(a);
         if (c) {
@@ -3894,13 +3904,13 @@
           target.scrollTop = target.scrollHeight - target.clientHeight + 1;
         }
       },
-      reset : function() {
+      reset: function () {
         /** @type {string} */
         target.innerHTML = "";
         /** @type {string} */
         f.value = "";
       },
-      Aa : function() {
+      Aa: function () {
         /** @type {number} */
         target.scrollTop = target.scrollHeight - target.clientHeight + 1;
       }
@@ -3913,16 +3923,16 @@
    */
   function activate(self, state) {
     var type = $(state.pb, "div", {
-      style : {
-        position : "absolute",
-        width : "100%",
-        height : "100%"
+      style: {
+        position: "absolute",
+        width: "100%",
+        height: "100%"
       }
     });
     self.cb = new Color(self.app, type, {
-      cols : [F, -1],
-      ud : true,
-      Pc : function(b, act) {
+      cols: [F, -1],
+      ud: true,
+      Pc: function (b, act) {
         if (1 != act.Ra) {
           self.app.send([action], [b.name]);
         } else {
@@ -3930,27 +3940,27 @@
           self.X("/boot " + b.name);
         }
       },
-      Ie : {
-        className : "mb1s ulwp ovysct"
+      Ie: {
+        className: "mb1s ulwp ovysct"
       }
     });
     state.add(self.j("sw_users"), type);
     $(type, "div", {
-      className : "lh1s nowrel",
-      style : {
-        position : "absolute",
-        left : 0,
-        right : 0,
-        bottom : 0
+      className: "lh1s nowrel",
+      style: {
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: 0
       }
     }, [self.Mc = $("button", {
-      className : "minw",
-      onclick : function() {
+      className: "minw",
+      onclick: function () {
         createServer(self);
       }
     }, self.j("bl_invite")), " ", self.Kc = $("button", {
-      className : "minw",
-      onclick : function() {
+      className: "minw",
+      onclick: function () {
         var cb = self.cb;
         var el = cb.Ra;
         if (!(0 != el && 1 != el)) {
@@ -3958,7 +3968,7 @@
         }
       }
     }, self.j("bl_boot")), null, " ", self.W = $("span", {
-      className : "mlh"
+      className: "mlh"
     }, ["-"])]);
   }
   /**
@@ -4028,24 +4038,24 @@
    */
   function check(self, state) {
     var c = $(state.pb, "div", {
-      className : "bsbb dsp1",
-      style : {
-        background : "#fff",
-        position : "absolute",
-        top : "0",
-        width : "100%",
-        height : "100%"
+      className: "bsbb dsp1",
+      style: {
+        background: "#fff",
+        position: "absolute",
+        top: "0",
+        width: "100%",
+        height: "100%"
       }
     });
     var node = $(c, "div", {
-      style : {
-        width : "50%",
-        cssFloat : "left",
-        marginTop : ".75em"
+      style: {
+        width: "50%",
+        cssFloat: "left",
+        marginTop: ".75em"
       }
     });
     var wrapper = $(node, "div", {
-      className : "mbsp"
+      className: "mbsp"
     });
     /** @type {!Array} */
     var navLinksArr = [];
@@ -4059,54 +4069,54 @@
     }
     navLinksArr.push(self.j("tb_ttprv"));
     self.S = $(wrapper, "select", {
-      onchange : function() {
+      onchange: function () {
         var lastSelected = this.selectedIndex;
         setTimeout(self, "ttype", self.app.W && 0 < lastSelected ? 8 <= lastSelected ? 2 : lastSelected + 2 : 2 * lastSelected);
       }
-    }, navLinksArr.map(function(mei) {
+    }, navLinksArr.map(function (mei) {
       return $("option", mei);
     }));
     wrapper = $(node, "div", {
-      className : "mbsp"
+      className: "mbsp"
     });
     $(wrapper, "div", {}, self.j("tb_tr_game"));
     self.Xa.push(self.G = $(wrapper, "select", {
-      onchange : function() {
+      onchange: function () {
         try {
           setTimeout(self, "tg", self.a.Ef ? -(this.selectedIndex + 1) : this.options[this.selectedIndex].text);
         } catch (m) {
         }
       }
-    }, self.app.Hd.map(function(mei) {
+    }, self.app.Hd.map(function (mei) {
       return $("option", mei);
     })));
     if (self.a.bf) {
       self.Xa.push(self.A = $(wrapper, "select", {
-        onchange : function() {
+        onchange: function () {
           try {
             setTimeout(self, "tm", this.options[this.selectedIndex].text);
           } catch (m) {
           }
         }
-      }, self.app.Md.map(function(mei) {
+      }, self.app.Md.map(function (mei) {
         return $("option", mei);
       })));
     }
     if (self.a.$c && "undefined" == typeof self.a.Gf) {
       $(node, "div", {
-        className : "mbsp"
+        className: "mbsp"
       }, [self.C = $("input", {
-        type : "checkbox",
-        onchange : function() {
+        type: "checkbox",
+        onchange: function () {
           setTimeout(self, "ud", this.checked ? 1 : 0);
         }
       }), self.j("tb_noundo")]);
       self.Xa.push(self.C);
     }
     $(node, "div", {}, [$("input", {
-      type : "checkbox",
-      checked : self.app.qa,
-      onchange : function() {
+      type: "checkbox",
+      checked: self.app.qa,
+      onchange: function () {
         var original = this.checked;
         var input = self.app;
         input.qa = original;
@@ -4117,24 +4127,24 @@
       }
     }), self.j("p_bp")]);
     node = $(c, "div", {
-      style : {
-        width : "50%",
-        cssFloat : "right",
-        marginTop : ".75em"
+      style: {
+        width: "50%",
+        cssFloat: "right",
+        marginTop: ".75em"
       }
     });
     $(node, "div", {
-      className : "mbsp nowrel"
+      className: "mbsp nowrel"
     }, [self.g = $("input", {
-      type : "checkbox",
-      onchange : function() {
+      type: "checkbox",
+      onchange: function () {
         setTimeout(self, "gtype", this.checked ? 0 : 1);
       }
     }), self.j("tb_gtnrt") + " (x)"]);
     self.Ge(node);
     if (!self.app.P && self.history) {
       $(node, "div", $("button", {
-        onclick : function() {
+        onclick: function () {
           self.b.show(self.oa);
         }
       }, [self.j("sw_history")]));
@@ -4218,7 +4228,7 @@
       then(args.app);
       /** @type {number} */
       args.F = -1;
-      setTimeout(function() {
+      setTimeout(function () {
         if (-1 == args.F) {
           args.reset();
         }
@@ -4314,161 +4324,161 @@
   function anonymous(e, container) {
     var options = e.T;
     var A = $("div", {
-      className : "tplcont",
-      style : {
-        overflowY : "auto"
+      className: "tplcont",
+      style: {
+        overflowY: "auto"
       }
     });
     /** @type {number} */
     var i = 0;
     for (; i < options.ea; i++) {
       var node = $(A, "div", {
-        style : {
-          cssFloat : 0 == i % 2 ? "left" : "right",
-          width : "49.5%",
-          overflowX : "hidden",
-          marginTop : 2 <= i ? e.app.P ? "8px" : "4px" : 0
+        style: {
+          cssFloat: 0 == i % 2 ? "left" : "right",
+          width: "49.5%",
+          overflowX: "hidden",
+          marginTop: 2 <= i ? e.app.P ? "8px" : "4px" : 0
         }
       });
       var show = $(node, "div", {
-        className : "f12",
-        style : {
-          verticalAlign : "middle",
-          lineHeight : "12px",
-          background : "rgba(0,0,0,0.8)",
-          color : "rgba(255,255,255,0.95)",
-          fontWeight : "bold",
-          padding : "0 5px"
+        className: "f12",
+        style: {
+          verticalAlign: "middle",
+          lineHeight: "12px",
+          background: "rgba(0,0,0,0.8)",
+          color: "rgba(255,255,255,0.95)",
+          fontWeight: "bold",
+          padding: "0 5px"
         }
       });
       if (options.Sa) {
         $(show, "div", {
-          style : {
-            display : "inline-block",
-            width : "7px",
-            height : "7px",
-            background : options.Sa[(i + (options.bd ? 1 : 0)) % options.ea],
-            marginRight : "5px"
+          style: {
+            display: "inline-block",
+            width: "7px",
+            height: "7px",
+            background: options.Sa[(i + (options.bd ? 1 : 0)) % options.ea],
+            marginRight: "5px"
           }
         });
       }
       $(show, ["#" + (i + 1)]);
       if (!e.a.od && options.R) {
         $(show, "div", {
-          style : {
-            display : "inline-block",
-            marginLeft : "4px",
-            width : 0,
-            height : 0,
-            borderLeft : "solid 4px transparent",
-            borderRight : "solid 4px transparent",
-            borderTop : "solid 7px rgba(255,255,255,0.9)",
-            visibility : e.ga == i ? "inherit" : "hidden"
+          style: {
+            display: "inline-block",
+            marginLeft: "4px",
+            width: 0,
+            height: 0,
+            borderLeft: "solid 4px transparent",
+            borderRight: "solid 4px transparent",
+            borderTop: "solid 7px rgba(255,255,255,0.9)",
+            visibility: e.ga == i ? "inherit" : "hidden"
           }
         });
       }
       var overlay = $(node, "div", {
-        style : {
-          position : "relative"
+        style: {
+          position: "relative"
         }
       });
       var ANCHOR = options.a[i];
       /** @type {boolean} */
       show = 0 == ANCHOR;
       $(overlay, "button", {
-        className : "butsys butsit",
-        disabled : 1 != ANCHOR,
-        style : {
-          display : show ? "none" : "block",
-          position : "absolute",
-          width : "100%",
-          height : "100%"
+        className: "butsys butsit",
+        disabled: 1 != ANCHOR,
+        style: {
+          display: show ? "none" : "block",
+          position: "absolute",
+          width: "100%",
+          height: "100%"
         },
-        onclick : function(b) {
-          return function() {
+        onclick: function (b) {
+          return function () {
             e.send([83, e.F, b], null);
           };
         }(i)
       }, ["#" + (i + 1)]);
       overlay = $(overlay, "div", {
-        style : {
-          background : "#fff",
-          padding : "6px 6px 6px 0",
-          visibility : show ? "inherit" : "hidden"
+        style: {
+          background: "#fff",
+          padding: "6px 6px 6px 0",
+          visibility: show ? "inherit" : "hidden"
         }
       });
       $(overlay, "button", {
-        style : {
-          display : 0 != (options.pc & 1 << i) && null != options.name[i] ? "block" : "none",
-          cssFloat : "right",
-          border : 0,
-          padding : "2px 6px",
-          fontWeight : "bold",
-          margin : "1px 0",
-          background : "#bbb",
-          color : "#fff"
+        style: {
+          display: 0 != (options.pc & 1 << i) && null != options.name[i] ? "block" : "none",
+          cssFloat: "right",
+          border: 0,
+          padding: "2px 6px",
+          fontWeight: "bold",
+          margin: "1px 0",
+          background: "#bbb",
+          color: "#fff"
         },
-        onclick : function(b) {
-          return function() {
+        onclick: function (b) {
+          return function () {
             e.send([84, e.F, b], null);
           };
         }(i)
       }, ["X"]);
       $(overlay, "div", {
-        className : "nowrel",
-        style : {
-          fontSize : "115%",
-          color : options.focus[i] ? "inherit" : "#aaa",
-          padding : "2px 6px"
+        className: "nowrel",
+        style: {
+          fontSize: "115%",
+          color: options.focus[i] ? "inherit" : "#aaa",
+          padding: "2px 6px"
         }
       }, [show ? options.name[i] || "--" : "-"]);
       node = $(node, "div", {
-        className : "tplext",
-        style : {
-          marginTop : "6px",
-          width : "100%"
+        className: "tplext",
+        style: {
+          marginTop: "6px",
+          width: "100%"
         }
       });
       if (options.R && options.Eb) {
         $(node, "div", {
-          style : {
-            display : "table-cell",
-            width : "52%",
-            textAlign : "center"
+          style: {
+            display: "table-cell",
+            width: "52%",
+            textAlign: "center"
           }
         }, $("div", {
-          style : {
-            background : "#fff",
-            opacity : ".7",
-            fontWeight : "bold",
-            padding : "1px 0 2px"
+          style: {
+            background: "#fff",
+            opacity: ".7",
+            fontWeight: "bold",
+            padding: "1px 0 2px"
           }
         }, [options.R[i]]));
       }
       if (options.time) {
         $(node, "div", {
-          style : {
-            display : "table-cell",
-            verticalAlign : "middle",
-            textAlign : options.Eb ? "center" : "left"
+          style: {
+            display: "table-cell",
+            verticalAlign: "middle",
+            textAlign: options.Eb ? "center" : "left"
           }
         }, [options.time[i], e.a.od || options.R ? null : $("div", {
-          style : {
-            marginLeft : "8px",
-            display : "inline-block",
-            width : 0,
-            height : 0,
-            borderLeft : "4px solid transparent",
-            borderRight : "4px solid transparent",
-            borderBottom : "solid 8px rgba(0,0,0,0.8)",
-            visibility : i == e.ga ? "inherit" : "hidden"
+          style: {
+            marginLeft: "8px",
+            display: "inline-block",
+            width: 0,
+            height: 0,
+            borderLeft: "4px solid transparent",
+            borderRight: "4px solid transparent",
+            borderBottom: "solid 8px rgba(0,0,0,0.8)",
+            visibility: i == e.ga ? "inherit" : "hidden"
           }
         })]);
       }
       if (!options.time) {
         $(node, "div", {
-          style : {
-            display : "table-cell"
+          style: {
+            display: "table-cell"
           }
         });
       }
@@ -4725,7 +4735,7 @@
    */
   function render(data, result, value) {
     if (!(2 > result.length)) {
-      switch(result[0]) {
+      switch (result[0]) {
         case 92: // lk16:92 recv move i:[92,table ID,move] s:absent move=(white?64:0)+(8*row)+column
           reset(data, result, value);
           break;
@@ -4841,37 +4851,37 @@
           }
           if (!data.B) {
             data.B = create(data.app, data.a.Wb || "-", {
-              width : "80%",
-              minHeight : "0",
-              minWidth : "280px",
-              maxWidth : "600px"
+              width: "80%",
+              minHeight: "0",
+              minWidth: "280px",
+              maxWidth: "600px"
             }, {
-              nopad : true
+              nopad: true
             });
             /**
              * @param {!Event} event
              * @return {?}
              */
-            data.B.Ma.onselectstart = function(event) {
+            data.B.Ma.onselectstart = function (event) {
               event.stopPropagation();
               return true;
             };
           }
           resolve(data.B.Ma, $("textarea", {
-            value : value[0],
-            className : "bsbb taplain",
-            style : {
-              width : "100%",
-              height : "280px",
-              borderTop : "solid 1px #ddd",
-              padding : "4px 15px",
-              fontFamily : "monospace"
+            value: value[0],
+            className: "bsbb taplain",
+            style: {
+              width: "100%",
+              height: "280px",
+              borderTop: "solid 1px #ddd",
+              padding: "4px 15px",
+              fontFamily: "monospace"
             },
-            spellcheck : false,
-            readOnly : true
+            spellcheck: false,
+            readOnly: true
           }));
           filter(data.app, data.B, null, {
-            okselect : true
+            okselect: true
           });
           break;
         case 84:
@@ -4984,7 +4994,7 @@
    * @return {?}
    */
   function g(a, c, b) {
-    switch(c) {
+    switch (c) {
       case 1:
         return a.j("bl_draw");
       case 2:
@@ -5150,7 +5160,7 @@
    * @return {?}
    */
   function length(o, type) {
-    switch(type) {
+    switch (type) {
       case h:
         return o.b;
       case F:
@@ -5211,7 +5221,7 @@
     this.g = [];
     this.f = $(b, "div", options.Ie || {});
     this.a = $(this.f, "table", {
-      className : "ul " + (options.Ue ? "uls2" : "uls1")
+      className: "ul " + (options.Ue ? "uls2" : "uls1")
     });
     this.B = options.oe ? overlay(this, null) : null;
   }
@@ -5293,7 +5303,7 @@
   function matches(result, value) {
     if (!result.b.hasOwnProperty(value.name)) {
       result.b[value.name] = {
-        Ua : value
+        Ua: value
       };
       result.b[value.name].D = load(result, value);
       push(result, value, result.g.length);
@@ -5327,10 +5337,10 @@
    */
   function func(a, item) {
     a.reset();
-    Object.keys(item || {}).forEach(function(value) {
+    Object.keys(item || {}).forEach(function (value) {
       value = item[value];
       this.b[value.name] = {
-        Ua : value
+        Ua: value
       };
       this.b[value.name].D = load(this, value);
       push(this, value, this.g.length);
@@ -5344,27 +5354,27 @@
    */
   function overlay(x, b) {
     var el = $("tr", {
-      className : "ulhead"
+      className: "ulhead"
     });
     $(el, "td", {
-      onclick : function() {
+      onclick: function () {
         forward(x, 0);
         return false;
       }
     }, $("div", {
-      className : "darr"
+      className: "darr"
     }));
     /** @type {number} */
     var i = 0;
     for (; i < x.cols.length; i++) {
       $(el, "td", {
-        onclick : function(i) {
-          return function() {
+        onclick: function (i) {
+          return function () {
             forward(x, x.cols[i]);
           };
         }(i)
       }, $("div", {
-        className : "darr"
+        className: "darr"
       }));
     }
     fn(x.a, el, b);
@@ -5379,32 +5389,32 @@
   function load(self, options, template) {
     var all = self.o.ud && options.A != "(" + self.app.lang + ")";
     all = $("tr", {
-      onclick : function() {
+      onclick: function () {
         self.o.Pc(options, self);
         return false;
       }
     }, [$("td", {}, [0 != (options.a & DIRECTION_HORIZONTAL) || 0 != (options.a & arg) ? $("div", {
-      className : "ulsym",
-      style : {
-        cssFloat : "right"
+      className: "ulsym",
+      style: {
+        cssFloat: "right"
       }
     }, 0 != (options.a & arg) ? "X" : 0 != (options.a & DIRECTION_HORIZONTAL) ? "\u2605" : "") : null, $("div", {
-      className : "ulnm"
+      className: "ulnm"
     }, [$("div", {
-      className : "r" + merge(self.app, options.g)
+      className: "r" + merge(self.app, options.g)
     }), options.name, $("span", {
-      className : "ulla" + (all ? "" : " ulla0")
+      className: "ulla" + (all ? "" : " ulla0")
     }, options.A)])]), $("td", {
-      className : "m1ac"
+      className: "m1ac"
     }, $("button", {
-      className : "ulbx"
+      className: "ulbx"
     }, "X"))]);
     /** @type {number} */
     var i = 0;
     for (; 2 > i; i++) {
       var key = self.cols[i];
       var span = {
-        className : "m0ac ulnu"
+        className: "m0ac ulnu"
       };
       if (key == h) {
         $(all, "td", span, val(options.b));
@@ -5417,8 +5427,8 @@
           } else {
             if (key == file) {
               $(all, "td", {
-                className : "m0ac ulnu",
-                title : val(options.b)
+                className: "m0ac ulnu",
+                title: val(options.b)
               }, 0 != options.b ? "#" : "");
             }
           }
@@ -5463,7 +5473,7 @@
         init();
       } else {
         t = window.k2snd["a.mp3"];
-        context.decodeAudioData(function(string) {
+        context.decodeAudioData(function (string) {
           /** @type {number} */
           var size = string.length / 4 * 3;
           string = window.atob(string);
@@ -5477,10 +5487,10 @@
             u8arr[n] = string.charCodeAt(n);
           }
           return array;
-        }(t.substring(t.indexOf(",") + 1)), function(userElem) {
+        }(t.substring(t.indexOf(",") + 1)), function (userElem) {
           /** @type {string} */
           target = userElem;
-        }, function() {
+        }, function () {
           init();
         });
       }
@@ -5537,7 +5547,7 @@
       /**
        * @return {undefined}
        */
-      var start = function() {
+      var start = function () {
         document.removeEventListener(type, start, true);
         if (context) {
           var source = context.createBufferSource();
@@ -5586,7 +5596,7 @@
     this.B = "";
     /** @type {number} */
     this.H = 0;
-    setTimeout(function() {
+    setTimeout(function () {
       if (0 < h.b || 0 == h.b && 1 == h.L) {
         h.o.Xc(runlist);
       }
@@ -5608,7 +5618,7 @@
     } else {
       var y = a.b;
       /** @type {number} */
-      a.g = setTimeout(function() {
+      a.g = setTimeout(function () {
         /** @type {number} */
         a.g = 0;
         strictEqual(a, y);
@@ -5706,7 +5716,7 @@
     }
     if (!self.C) {
       /** @type {number} */
-      self.C = setTimeout(function() {
+      self.C = setTimeout(function () {
         return getFile(self);
       }, 3E4);
     }
@@ -5720,7 +5730,7 @@
       self.send([], null);
     }
     /** @type {number} */
-    self.C = setTimeout(function() {
+    self.C = setTimeout(function () {
       return getFile(self);
     }, 3E4);
   }
@@ -5758,18 +5768,18 @@
     /**
      * @return {undefined}
      */
-    socket.onclose = function() {
+    socket.onclose = function () {
       strictEqual(context, a);
     };
     /**
      * @return {undefined}
      */
-    socket.onopen = function() {
+    socket.onopen = function () {
       /**
        * @param {!Object} b
        * @return {undefined}
        */
-      socket.onmessage = function(b) {
+      socket.onmessage = function (b) {
         if (assert(context, a)) {
           /** @type {!WebSocket} */
           context.A = socket;
@@ -5777,13 +5787,13 @@
            * @param {!Object} b
            * @return {undefined}
            */
-          context.A.onmessage = function(b) {
+          context.A.onmessage = function (b) {
             drop(context, b.data);
           };
           /**
            * @return {undefined}
            */
-          context.A.onclose = function() {
+          context.A.onclose = function () {
             /** @type {null} */
             context.A = null;
             disconnect(context);
@@ -5808,12 +5818,12 @@
     /** @type {string} */
     r.I = s + "://" + r.o.host + ":" + dx;
     new xhr({
-      url : r.I + "/r/0",
-      data : "1",
-      Wa : function() {
+      url: r.I + "/r/0",
+      data: "1",
+      Wa: function () {
         strictEqual(r, val);
       },
-      onload : function(c) {
+      onload: function (c) {
         if (assert(r, val)) {
           r.a = c || "X" + Math.random();
           /** @type {number} */
@@ -5831,9 +5841,9 @@
   function registerAsLoaded(item) {
     if (item.a && !item.G) {
       item.G = new xhr({
-        url : item.I + "/r/" + item.a,
-        data : null,
-        Wa : function() {
+        url: item.I + "/r/" + item.a,
+        data: null,
+        Wa: function () {
           /** @type {null} */
           item.G = null;
           if (0 < item.H) {
@@ -5844,12 +5854,12 @@
             }
           } else {
             item.H++;
-            setTimeout(function() {
+            setTimeout(function () {
               registerAsLoaded(item);
             }, 25);
           }
         },
-        onload : function(d) {
+        onload: function (d) {
           /** @type {null} */
           item.G = null;
           /** @type {number} */
@@ -5857,7 +5867,7 @@
           if (d && 0 < d.length) {
             drop(item, d);
           }
-          setTimeout(function() {
+          setTimeout(function () {
             registerAsLoaded(item);
           }, 25);
         }
@@ -5879,22 +5889,22 @@
         /** @type {string} */
         node.B = "";
         node.M = new xhr({
-          url : node.I + "/w/" + node.a,
-          data : name,
-          Wa : function() {
+          url: node.I + "/w/" + node.a,
+          data: name,
+          Wa: function () {
             if (node.a) {
               /** @type {null} */
               node.a = null;
               disconnect(node);
             }
           },
-          onload : function() {
+          onload: function () {
             if (!node.G) {
               registerAsLoaded(node);
             }
             /** @type {null} */
             node.M = null;
-            setTimeout(function() {
+            setTimeout(function () {
               if (0 < node.B.length) {
                 addOverlay(node);
               }
@@ -5909,14 +5919,14 @@
    * @return {undefined}
    */
   function xhr(options) {
-    setTimeout(function() {
+    setTimeout(function () {
       /** @type {!XMLHttpRequest} */
       var request = new XMLHttpRequest;
       if (options.Wc || "withCredentials" in request) {
         /**
          * @return {undefined}
          */
-        request.onreadystatechange = function() {
+        request.onreadystatechange = function () {
           if (4 == request.readyState) {
             if (200 == request.status || 204 == request.status) {
               if (options.onload) {
@@ -5936,18 +5946,18 @@
           /**
            * @return {undefined}
            */
-          request.onprogress = function() {
+          request.onprogress = function () {
           };
           /**
            * @return {undefined}
            */
-          request.onload = function() {
+          request.onload = function () {
             if (options.onload) {
               options.onload(request.responseText);
             }
           };
           /** @type {function(): undefined} */
-          request.onerror = request.ontimeout = function() {
+          request.onerror = request.ontimeout = function () {
             if (options.Wa) {
               options.Wa();
             }
@@ -5969,16 +5979,16 @@
   function View(options, data) {
     var $scope = this;
     new xhr({
-      url : options,
-      data : data,
-      Wc : true,
-      Ze : "string" !== typeof data,
-      onload : function(text) {
+      url: options,
+      data: data,
+      Wc: true,
+      Ze: "string" !== typeof data,
+      onload: function (text) {
         if ($scope.handle) {
           $scope.handle(true, JSON.parse(text));
         }
       },
-      Wa : function() {
+      Wa: function () {
         if ($scope.handle) {
           $scope.handle(false, {});
         }
@@ -6005,7 +6015,7 @@
       out = a[i++];
     }
     if (Array.isArray(a[i])) {
-      return ret = [], a[i].forEach(function(value) {
+      return ret = [], a[i].forEach(function (value) {
         if (null != value) {
           value = "string" == typeof value || "number" == typeof value ? document.createTextNode(value) : value;
           if (out) {
@@ -6022,9 +6032,9 @@
     ret = document.createElement(a[i++]);
     if (i < a.length && "object" == typeof a[i] && !Array.isArray(a[i]) && !a[i].nodeName) {
       var attrs = a[i++];
-      Object.keys(attrs).forEach(function(attr) {
+      Object.keys(attrs).forEach(function (attr) {
         if ("style" == attr) {
-          Object.keys(attrs[attr]).forEach(function(i) {
+          Object.keys(attrs[attr]).forEach(function (i) {
             ret.style[i] = attrs[attr][i];
           });
         } else {
@@ -6043,7 +6053,7 @@
       ret.appendChild(document.createTextNode(a));
     } else {
       if (Array.isArray(a)) {
-        a.forEach(function(f) {
+        a.forEach(function (f) {
           if ("string" == typeof f) {
             ret.appendChild(document.createTextNode(f));
           } else {
@@ -6067,7 +6077,7 @@
     /** @type {string} */
     node.innerHTML = "";
     if (Array.isArray(value)) {
-      value.forEach(function(msg) {
+      value.forEach(function (msg) {
         if ("string" == typeof msg || "number" == typeof msg) {
           node.appendChild(document.createTextNode(msg));
         } else {
@@ -6126,7 +6136,7 @@
    */
   function extend(pattern, data) {
     if ("undefined" !== typeof data) {
-      Object.keys(data).forEach(function(k) {
+      Object.keys(data).forEach(function (k) {
         pattern.style[k] = data[k];
       });
     }
@@ -6174,8 +6184,8 @@
   function getMousePosition(container, x, y) {
     container = container.getBoundingClientRect();
     return {
-      x : x - container.left,
-      y : y - container.top
+      x: x - container.left,
+      y: y - container.top
     };
   }
   /**
@@ -6203,7 +6213,7 @@
    */
   function write(o) {
     o.innerHTML = o.innerHTML.replace(/\uD83C\uDFF4(?:\uDB40\uDC67\uDB40\uDC62(?:\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67|\uDB40\uDC77\uDB40\uDC6C\uDB40\uDC73|\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74)\uDB40\uDC7F|\u200D\u2620\uFE0F)|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|\uD83D\uDC68(?:\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D)?\uD83D\uDC68|(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|(?:\uD83C[\uDFFB-\uDFFF])\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3]))|\uD83D\uDC69\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D(?:\uD83D[\uDC68\uDC69])|\uD83D[\uDC68\uDC69])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|\uD83D\uDC69\u200D\uD83D\uDC66\u200D\uD83D\uDC66|(?:\uD83D\uDC41\uFE0F\u200D\uD83D\uDDE8|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2695\u2696\u2708]|\uD83D\uDC68(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2695\u2696\u2708]|\u200D[\u2695\u2696\u2708])|(?:(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)\uFE0F|\uD83D\uDC6F|\uD83E[\uDD3C\uDDDE\uDDDF])\u200D[\u2640\u2642]|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDD6-\uDDDD])(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|\u200D[\u2640\u2642])|\uD83D\uDC69\u200D[\u2695\u2696\u2708])\uFE0F|\uD83D\uDC69\u200D\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D\uDC68(?:\u200D(?:(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D[\uDC66\uDC67])|\uD83C[\uDFFB-\uDFFF])|\uD83C\uDFF3\uFE0F\u200D\uD83C\uDF08|\uD83D\uDC69\u200D\uD83D\uDC67|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|\uD83D\uDC69\u200D\uD83D\uDC66|\uD83C\uDDF6\uD83C\uDDE6|\uD83C\uDDFD\uD83C\uDDF0|\uD83C\uDDF4\uD83C\uDDF2|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])|\uD83C\uDDED(?:\uD83C[\uDDF0\uDDF2\uDDF3\uDDF7\uDDF9\uDDFA])|\uD83C\uDDEC(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEE\uDDF1-\uDDF3\uDDF5-\uDDFA\uDDFC\uDDFE])|\uD83C\uDDEA(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDED\uDDF7-\uDDFA])|\uD83C\uDDE8(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDEE\uDDF0-\uDDF5\uDDF7\uDDFA-\uDDFF])|\uD83C\uDDF2(?:\uD83C[\uDDE6\uDDE8-\uDDED\uDDF0-\uDDFF])|\uD83C\uDDF3(?:\uD83C[\uDDE6\uDDE8\uDDEA-\uDDEC\uDDEE\uDDF1\uDDF4\uDDF5\uDDF7\uDDFA\uDDFF])|\uD83C\uDDFC(?:\uD83C[\uDDEB\uDDF8])|\uD83C\uDDFA(?:\uD83C[\uDDE6\uDDEC\uDDF2\uDDF3\uDDF8\uDDFE\uDDFF])|\uD83C\uDDF0(?:\uD83C[\uDDEA\uDDEC-\uDDEE\uDDF2\uDDF3\uDDF5\uDDF7\uDDFC\uDDFE\uDDFF])|\uD83C\uDDEF(?:\uD83C[\uDDEA\uDDF2\uDDF4\uDDF5])|\uD83C\uDDF8(?:\uD83C[\uDDE6-\uDDEA\uDDEC-\uDDF4\uDDF7-\uDDF9\uDDFB\uDDFD-\uDDFF])|\uD83C\uDDEE(?:\uD83C[\uDDE8-\uDDEA\uDDF1-\uDDF4\uDDF6-\uDDF9])|\uD83C\uDDFF(?:\uD83C[\uDDE6\uDDF2\uDDFC])|\uD83C\uDDEB(?:\uD83C[\uDDEE-\uDDF0\uDDF2\uDDF4\uDDF7])|\uD83C\uDDF5(?:\uD83C[\uDDE6\uDDEA-\uDDED\uDDF0-\uDDF3\uDDF7-\uDDF9\uDDFC\uDDFE])|\uD83C\uDDE9(?:\uD83C[\uDDEA\uDDEC\uDDEF\uDDF0\uDDF2\uDDF4\uDDFF])|\uD83C\uDDF9(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDED\uDDEF-\uDDF4\uDDF7\uDDF9\uDDFB\uDDFC\uDDFF])|\uD83C\uDDE7(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEF\uDDF1-\uDDF4\uDDF6-\uDDF9\uDDFB\uDDFC\uDDFE\uDDFF])|[#\*0-9]\uFE0F\u20E3|\uD83C\uDDF1(?:\uD83C[\uDDE6-\uDDE8\uDDEE\uDDF0\uDDF7-\uDDFB\uDDFE])|\uD83C\uDDE6(?:\uD83C[\uDDE8-\uDDEC\uDDEE\uDDF1\uDDF2\uDDF4\uDDF6-\uDDFA\uDDFC\uDDFD\uDDFF])|\uD83C\uDDF7(?:\uD83C[\uDDEA\uDDF4\uDDF8\uDDFA\uDDFC])|\uD83C\uDDFB(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDEE\uDDF3\uDDFA])|\uD83C\uDDFE(?:\uD83C[\uDDEA\uDDF9])|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDD6-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u261D\u270A-\u270D]|\uD83C[\uDF85\uDFC2\uDFC7]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66\uDC67\uDC70\uDC72\uDC74-\uDC76\uDC78\uDC7C\uDC83\uDC85\uDCAA\uDD74\uDD7A\uDD90\uDD95\uDD96\uDE4C\uDE4F\uDEC0\uDECC]|\uD83E[\uDD18-\uDD1C\uDD1E\uDD1F\uDD30-\uDD36\uDDB5\uDDB6\uDDD1-\uDDD5])(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u231A\u231B\u23E9-\u23EC\u23F0\u23F3\u25FD\u25FE\u2614\u2615\u2648-\u2653\u267F\u2693\u26A1\u26AA\u26AB\u26BD\u26BE\u26C4\u26C5\u26CE\u26D4\u26EA\u26F2\u26F3\u26F5\u26FA\u26FD\u2705\u270A\u270B\u2728\u274C\u274E\u2753-\u2755\u2757\u2795-\u2797\u27B0\u27BF\u2B1B\u2B1C\u2B50\u2B55]|\uD83C[\uDC04\uDCCF\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE1A\uDE2F\uDE32-\uDE36\uDE38-\uDE3A\uDE50\uDE51\uDF00-\uDF20\uDF2D-\uDF35\uDF37-\uDF7C\uDF7E-\uDF93\uDFA0-\uDFCA\uDFCF-\uDFD3\uDFE0-\uDFF0\uDFF4\uDFF8-\uDFFF]|\uD83D[\uDC00-\uDC3E\uDC40\uDC42-\uDCFC\uDCFF-\uDD3D\uDD4B-\uDD4E\uDD50-\uDD67\uDD7A\uDD95\uDD96\uDDA4\uDDFB-\uDE4F\uDE80-\uDEC5\uDECC\uDED0-\uDED2\uDEEB\uDEEC\uDEF4-\uDEF9]|\uD83E[\uDD10-\uDD3A\uDD3C-\uDD3E\uDD40-\uDD45\uDD47-\uDD70\uDD73-\uDD76\uDD7A\uDD7C-\uDDA2\uDDB0-\uDDB9\uDDC0-\uDDC2\uDDD0-\uDDFF])|(?:[#\*0-9\xA9\xAE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23E9-\u23F3\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB-\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u261D\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u265F\u2660\u2663\u2665\u2666\u2668\u267B\u267E\u267F\u2692-\u2697\u2699\u269B\u269C\u26A0\u26A1\u26AA\u26AB\u26B0\u26B1\u26BD\u26BE\u26C4\u26C5\u26C8\u26CE\u26CF\u26D1\u26D3\u26D4\u26E9\u26EA\u26F0-\u26F5\u26F7-\u26FA\u26FD\u2702\u2705\u2708-\u270D\u270F\u2712\u2714\u2716\u271D\u2721\u2728\u2733\u2734\u2744\u2747\u274C\u274E\u2753-\u2755\u2757\u2763\u2764\u2795-\u2797\u27A1\u27B0\u27BF\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299]|\uD83C[\uDC04\uDCCF\uDD70\uDD71\uDD7E\uDD7F\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE02\uDE1A\uDE2F\uDE32-\uDE3A\uDE50\uDE51\uDF00-\uDF21\uDF24-\uDF93\uDF96\uDF97\uDF99-\uDF9B\uDF9E-\uDFF0\uDFF3-\uDFF5\uDFF7-\uDFFF]|\uD83D[\uDC00-\uDCFD\uDCFF-\uDD3D\uDD49-\uDD4E\uDD50-\uDD67\uDD6F\uDD70\uDD73-\uDD7A\uDD87\uDD8A-\uDD8D\uDD90\uDD95\uDD96\uDDA4\uDDA5\uDDA8\uDDB1\uDDB2\uDDBC\uDDC2-\uDDC4\uDDD1-\uDDD3\uDDDC-\uDDDE\uDDE1\uDDE3\uDDE8\uDDEF\uDDF3\uDDFA-\uDE4F\uDE80-\uDEC5\uDECB-\uDED2\uDEE0-\uDEE5\uDEE9\uDEEB\uDEEC\uDEF0\uDEF3-\uDEF9]|\uD83E[\uDD10-\uDD3A\uDD3C-\uDD3E\uDD40-\uDD45\uDD47-\uDD70\uDD73-\uDD76\uDD7A\uDD7C-\uDDA2\uDDB0-\uDDB9\uDDC0-\uDDC2\uDDD0-\uDDFF])\uFE0F|(?:[\u261D\u26F9\u270A-\u270D]|\uD83C[\uDF85\uDFC2-\uDFC4\uDFC7\uDFCA-\uDFCC]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66-\uDC69\uDC6E\uDC70-\uDC78\uDC7C\uDC81-\uDC83\uDC85-\uDC87\uDCAA\uDD74\uDD75\uDD7A\uDD90\uDD95\uDD96\uDE45-\uDE47\uDE4B-\uDE4F\uDEA3\uDEB4-\uDEB6\uDEC0\uDECC]|\uD83E[\uDD18-\uDD1C\uDD1E\uDD1F\uDD26\uDD30-\uDD39\uDD3D\uDD3E\uDDB5\uDDB6\uDDB8\uDDB9\uDDD1-\uDDDD])/g,
-    w);
+      w);
   }
   /**
    * @param {string} newWayId
@@ -6221,7 +6231,7 @@
   function redraw(data) {
     /** @type {string} */
     var result = "";
-    Object.keys(data || {}).forEach(function(key) {
+    Object.keys(data || {}).forEach(function (key) {
       result = result + ((result ? "&" : "") + encodeURIComponent(key) + "=" + encodeURIComponent(data[key]));
     });
     return result;
@@ -6311,21 +6321,21 @@
     this.app = value;
     this.Ja = this.app.j("bl_buds");
     this.f = $(this.app.B, "div", {
-      className : "stview usno",
-      style : {
-        display : "none"
+      className: "stview usno",
+      style: {
+        display: "none"
       }
     });
     /** @type {!Array} */
     this.a = [];
     this.b = $(this.f, "div", {
-      className : "clst btifp"
+      className: "clst btifp"
     });
     var c;
     $(this.f, "div", {
-      className : "caddbox dcpd"
+      className: "caddbox dcpd"
     }, [$("form", {
-      onsubmit : function() {
+      onsubmit: function () {
         var a = c.value.trim();
         /** @type {string} */
         c.value = "";
@@ -6336,13 +6346,13 @@
         return false;
       }
     }, [$("p", {}, c = $("input", {
-      className : "aid",
-      name : "x",
-      autocomplete : "off"
+      className: "aid",
+      name: "x",
+      autocomplete: "off"
     })), $("p", {}, $("input", {
-      type : "submit",
-      className : "minw",
-      value : this.app.j("bl_ad")
+      type: "submit",
+      className: "minw",
+      value: this.app.j("bl_ad")
     }))])]);
     m(this, this.app.b);
   }
@@ -6382,20 +6392,20 @@
     }
     var c;
     resolve(options.g.Ma, [options.app.S ? null : $("div", [$("p", $("a", {
-      className : "lbut minwd",
-      target : "_blank",
-      href : toString(get(options.app, "stat"), encodeURIComponent(name)),
-      onclick : function() {
+      className: "lbut minwd",
+      target: "_blank",
+      href: toString(get(options.app, "stat"), encodeURIComponent(name)),
+      onclick: function () {
         success(options.app);
       }
     }, options.app.j("ui_stats") + " >")), $("div", {
-      className : "dtline"
+      className: "dtline"
     })]), $("p", [c = $("input", {
-      type : "checkbox",
-      checked : true
+      type: "checkbox",
+      checked: true
     }), options.app.j("bl_buds")]), $("p", $("button", {
-      className : "minw",
-      onclick : function() {
+      className: "minw",
+      onclick: function () {
         success(options.app);
         if (!c.checked) {
           options.app.X("/unbuddy " + name);
@@ -6412,36 +6422,36 @@
    */
   function wrap(data, config, value) {
     return fn(data.b, $("a", {
-      className : "awrap dcpd" + (config.status ? " st1" : ""),
-      onclick : function() {
+      className: "awrap dcpd" + (config.status ? " st1" : ""),
+      onclick: function () {
         handler(data, config.name);
         return false;
       }
     }, $("div", {
-      className : "maxw"
+      className: "maxw"
     }, [$("div", {
-      className : "chtbl",
-      onclick : function(event) {
+      className: "chtbl",
+      onclick: function (event) {
         each(data.app, config.name);
         event.stopPropagation();
         return false;
       }
     }, $("div", {
-      className : "spbb"
+      className: "spbb"
     })), $("div", {
-      className : "uname"
+      className: "uname"
     }, [$("div", {
-      className : "sta"
+      className: "sta"
     }), config.name]), $("div", {
-      className : "infbl",
-      style : {
-        verticalAlign : "top"
+      className: "infbl",
+      style: {
+        verticalAlign: "top"
       }
     }, [$("span", {
-      className : "inftx"
+      className: "inftx"
     }, config.Ha), config.tab ? $("button", {
-      className : "butbl butlh",
-      onclick : function(event) {
+      className: "butbl butlh",
+      onclick: function (event) {
         if (config.tab) {
           server(data.app, config.tab);
         }
@@ -6522,7 +6532,7 @@
   function m(a, x) {
     /** @type {number} */
     a.a.length = 0;
-    Object.keys(x).forEach(function(data) {
+    Object.keys(x).forEach(function (data) {
       data = x[data];
       data.D = wrap(a, data);
       append(a, data);
@@ -6539,54 +6549,54 @@
      */
     function init(params) {
       return [$("b", params.sd + (0 == params.Ga ? "" : " (" + params.j("t_gsmp") + ")")), params.o.ob ? null : $("div", {
-        className : "mlo r" + merge(params, params.Fa)
+        className: "mlo r" + merge(params, params.Fa)
       }), params.o.ob ? null : $("span", {
-        className : "snum"
+        className: "snum"
       }, exec(params, params.Fa))];
     }
     /** @type {!Object} */
     this.app = value;
     this.Ja = this.app.j("bl_mr");
     this.f = $(value.B, "div", {
-      className : "stvxpad vnarrow",
-      style : {
-        display : "none"
+      className: "stvxpad vnarrow",
+      style: {
+        display: "none"
       }
     });
     var $scope = this;
     $(this.f, "div", {
-      className : "btifp"
+      className: "btifp"
     });
     if (0 == this.app.Ga) {
       $(this.f, [$("p", [$("button", {
-        className : "minwd",
-        onclick : function() {
+        className: "minwd",
+        onclick: function () {
           debug($scope.app, $scope.app.Ne);
         }
       }, this.app.j("bl_prefs")), " ", $("button", {
-        className : "minwd",
-        onclick : function() {
+        className: "minwd",
+        onclick: function () {
           debug($scope.app, $scope.app.Re);
         }
       }, this.app.j("t_prof"))]), this.app.P ? null : $("p", {
-        style : {
-          marginTop : "-.5em"
+        style: {
+          marginTop: "-.5em"
         }
       }, [$("button", {
-        className : "minwd",
-        onclick : function() {
+        className: "minwd",
+        onclick: function () {
           logout($scope.app);
         }
       }, this.app.j("t_lout"))]), $("hr")]);
     }
     var n = $(this.f, "p", init(this.app));
-    expect(this.app, "urank", function() {
+    expect(this.app, "urank", function () {
       resolve(n, init($scope.app));
     });
     if (this.app.S) {
       $(this.f, [$("hr"), $("p", $("button", {
-        className : "minwd",
-        onclick : function() {
+        className: "minwd",
+        onclick: function () {
           debug($scope.app, $scope.app.Pe);
         }
       }, this.app.j("t_fb")))]);
@@ -6601,33 +6611,33 @@
     this.app = value;
     this.Ja = this.app.j("t_fb");
     this.f = $(value.B, "div", {
-      className : "stvxpad vnarrow",
-      style : {
-        display : "none"
+      className: "stvxpad vnarrow",
+      style: {
+        display: "none"
       }
     });
     var root = this;
     var component;
     $(this.f, [$("p", {
-      className : "fb"
+      className: "fb"
     }, this.app.j("t_sf")), component = $("textarea", {
-      className : "bsbb",
-      rows : 6,
-      style : {
-        width : "100%"
+      className: "bsbb",
+      rows: 6,
+      style: {
+        width: "100%"
       }
     }), $("p", $("button", {
-      className : "minw",
-      onclick : function() {
+      className: "minw",
+      onclick: function () {
         var app = root.app;
         debug(app, app.N);
         app = component.value.trim();
         /** @type {string} */
         component.value = "";
         new xhr({
-          url : get(root.app, "feedback"),
-          data : "fb=" + app + "\n\n" + window.location.href + "\n" + screen.width + "x" + screen.height + "px",
-          Wc : true
+          url: get(root.app, "feedback"),
+          data: "fb=" + app + "\n\n" + window.location.href + "\n" + screen.width + "x" + screen.height + "px",
+          Wc: true
         });
         return false;
       }
@@ -6648,39 +6658,39 @@
     /** @type {!Array} */
     this.g = [];
     this.f = $(this.app.B, "div", {
-      className : "stview",
-      style : {
-        display : "none"
+      className: "stview",
+      style: {
+        display: "none"
       }
     });
     this.H = $(this.f, "div", {
-      className : "imvfrm"
+      className: "imvfrm"
     });
     this.G = $(this.f, "div", {
-      className : "imvlst"
+      className: "imvlst"
     });
     this.B = $(this.app.H, "div", {
-      className : "fb fl",
-      style : {
-        display : "none",
-        color : "#fff"
+      className: "fb fl",
+      style: {
+        display: "none",
+        color: "#fff"
       }
     }, [$("div", {
-      className : "sta"
+      className: "sta"
     }), this.I = $("div", {
-      className : "ib"
+      className: "ib"
     })]);
     this.C = $(this.G, "div", {
-      className : "iml btifp"
+      className: "iml btifp"
     });
     $(this.G, "p", {
-      className : "dcpd"
+      className: "dcpd"
     }, this.A = $("select", {
-      style : {
-        margin : "1em 0 .25em",
-        minWidth : "10em"
+      style: {
+        margin: "1em 0 .25em",
+        minWidth: "10em"
       },
-      onchange : function(e) {
+      onchange: function (e) {
         e = e.target;
         if (0 < e.selectedIndex) {
           each(menu.app, e.options[e.selectedIndex].text);
@@ -6759,7 +6769,7 @@
         resolve(input.fd, [series.tc]);
       }
       extend(input.fd, {
-        visibility : series.Oa ? "inherit" : "hidden"
+        visibility: series.Oa ? "inherit" : "hidden"
       });
     }
     rebuildModelFromFields(e.app);
@@ -6810,83 +6820,83 @@
       return options.a[obj];
     }
     options.a[obj] = obj = {
-      f : null,
-      u : null,
-      Ia : name,
-      Ke : false,
-      fa : null,
-      fd : null
+      f: null,
+      u: null,
+      Ia: name,
+      Ke: false,
+      fa: null,
+      fd: null
     };
     obj.f = $(options.H, "div", {
-      style : {
-        display : "none"
+      style: {
+        display: "none"
       }
     });
     /** @type {!Array} */
     var navLinksArr = ["...", options.app.j("chd"), options.app.j("ui_block") + " (" + name + ")"];
     obj.u = new Controller(options.app, obj.f, {
-      Zd : function(a) {
+      Zd: function (a) {
         if (a.length > n) {
           a = a.substring(0, n) + "...";
         }
         options.app.send([21], [name, a]);
       },
-      De : function() {
+      De: function () {
         options.app.send([23], [name]);
       },
-      ld : true,
-      He : {
-        className : "imfr"
+      ld: true,
+      He: {
+        className: "imfr"
       },
-      Wd : {
-        className : "imtx",
-        style : {
-          minHeight : "5em"
+      Wd: {
+        className: "imtx",
+        style: {
+          minHeight: "5em"
         }
       },
-      Xe : {
-        className : "imin"
+      Xe: {
+        className: "imin"
       }
     });
     var title = $(obj.u.ab.parentNode.parentNode, "div", {
-      className : "imo1"
+      className: "imo1"
     });
     $(title, "select", {
-      className : "drops",
-      onchange : callback
-    }, navLinksArr.map(function(mei) {
+      className: "drops",
+      onchange: callback
+    }, navLinksArr.map(function (mei) {
       return $("option", mei);
     }));
     title = $(obj.f, "p", {
-      className : "imo2"
+      className: "imo2"
     });
     $(title, "select", {
-      className : "drops",
-      onchange : callback
-    }, navLinksArr.map(function(mei) {
+      className: "drops",
+      onchange: callback
+    }, navLinksArr.map(function (mei) {
       return $("option", mei);
     }));
     obj.fa = $(options.C, "a", {
-      className : "awrap dcpd",
-      onclick : function() {
+      className: "awrap dcpd",
+      onclick: function () {
         each(options.app, name);
         return false;
       }
     }, [$("div", {
-      className : "clbt",
-      onclick : function(event) {
+      className: "clbt",
+      onclick: function (event) {
         remove(options, name);
         event.stopPropagation();
         return false;
       }
     }, "X"), $("div", {
-      className : "sta"
+      className: "sta"
     }), $("div", {
-      className : "ib"
+      className: "ib"
     }, name), obj.fd = $("div", {
-      className : "unrd",
-      style : {
-        visibility : "hidden"
+      className: "unrd",
+      style: {
+        visibility: "hidden"
       }
     }, "0")]);
     print(options, name, obj);
@@ -6934,7 +6944,7 @@
     if (p != obj.b) {
       if (obj.b) {
         extend(obj.b.f, {
-          display : "none"
+          display: "none"
         });
         callback(obj.b.fa, "slctd", false);
       }
@@ -6943,7 +6953,7 @@
         resolve(obj.I, [p.Ia]);
         callback(obj.B, "st1", p.Ke);
         extend(p.f, {
-          display : "block"
+          display: "block"
         });
         callback(p.fa, "slctd");
         p.u.Aa();
@@ -6965,7 +6975,7 @@
     keys.unshift("-- " + options.app.j("bl_cs") + " --");
     /** @type {number} */
     options.A.options.length = 0;
-    $(options.A, keys.map(function(mei) {
+    $(options.A, keys.map(function (mei) {
       return $("option", mei);
     }));
     keys = options.app.Od;
@@ -7062,21 +7072,21 @@
     this.app = value;
     this.Ja = this.app.j("bl_prefs");
     this.f = $(value.B, "div", {
-      className : "stvxpad vnarrow",
-      style : {
-        display : "none"
+      className: "stvxpad vnarrow",
+      style: {
+        display: "none"
       }
     });
     var result = this;
     $(this.f, [$("p", [this.b = $("input", {
-      type : "checkbox"
+      type: "checkbox"
     }), this.app.j("p_ignprv")]), $("p", [this.a = $("input", {
-      type : "checkbox"
+      type: "checkbox"
     }), this.app.j("p_prvbud")]), $("p", [this.g = $("input", {
-      type : "checkbox"
+      type: "checkbox"
     }), this.app.j("p_igninv")]), $("p", $("button", {
-      className : "minw",
-      onclick : function() {
+      className: "minw",
+      onclick: function () {
         var data = result.app;
         var border = result.a.checked;
         data.cc = result.b.checked;
@@ -7101,11 +7111,11 @@
     /** @type {boolean} */
     this.xd = false;
     this.f = $(target.B, "div", {
-      className : "astat bsbb",
-      style : {
-        display : "none"
+      className: "astat bsbb",
+      style: {
+        display: "none"
       },
-      ontouchmove : function() {
+      ontouchmove: function () {
         return false;
       }
     });
@@ -7131,20 +7141,20 @@
     /** @type {number} */
     this.g = 0;
     this.f = $(value.B, "div", {
-      className : "stview",
-      style : {
-        display : "none"
+      className: "stview",
+      style: {
+        display: "none"
       }
     });
     this.C = $(this.f, "p", {
-      className : "tac"
+      className: "tac"
     }, $("div", {
-      className : "loader"
+      className: "loader"
     }));
     this.fa = $(this.f, "div", {
-      className : "turs",
-      style : {
-        display : "none"
+      className: "turs",
+      style: {
+        display: "none"
       }
     });
     /**
@@ -7152,7 +7162,7 @@
      * @param {?} undefined
      * @return {?}
      */
-    window[this.o.ib] = function(e, undefined) {
+    window[this.o.ib] = function (e, undefined) {
       return s.lb(e, undefined);
     };
   }
@@ -7163,21 +7173,21 @@
    */
   function reposition(data, visible) {
     extend(data.fa, {
-      display : visible ? "block" : "none"
+      display: visible ? "block" : "none"
     });
     extend(data.C, {
-      display : "none"
+      display: "none"
     });
     /** @type {number} */
     data.g = 0;
     if (!visible) {
       /** @type {number} */
-      var max = data.g = setTimeout(function() {
+      var max = data.g = setTimeout(function () {
         if (data.g == max) {
           /** @type {number} */
           data.g = 0;
           extend(data.C, {
-            display : "block"
+            display: "block"
           });
         }
       }, 500);
@@ -7189,17 +7199,17 @@
    */
   function destroy(self) {
     var response = self.A = new View(self.o.url + (2 == self.b ? "&sk=2&page=" + self.B : ""), redraw(self.o.dd ? {
-      jsget : 1,
-      ksession : wrapped(self.app)
+      jsget: 1,
+      ksession: wrapped(self.app)
     } : {
-      jsget : 1
-    }));
+        jsget: 1
+      }));
     /**
      * @param {boolean} type
      * @param {?} data
      * @return {?}
      */
-    response.handle = function(type, data) {
+    response.handle = function (type, data) {
       return self.handle(response, type, data);
     };
   }
@@ -7218,25 +7228,25 @@
     }
     var result = obj.tl;
     $(state.fa, "div", {
-      className : "bwrap dcpd"
+      className: "bwrap dcpd"
     }, [$("a", {
-      href : "",
-      onclick : function() {
+      href: "",
+      onclick: function () {
         debug(state.app, state.app.wd);
         return false;
       }
     }, maxpage("t_hupt")), " | ", $("a", {
-      href : "",
-      onclick : function() {
+      href: "",
+      onclick: function () {
         debug(state.app, state.app.wd + "/f");
         return false;
       }
     }, maxpage("t_hfit"))]);
     state.a = $(state.fa, "table", {
-      className : "tulst",
-      style : {
-        width : "100%",
-        borderCollapse : "collapse"
+      className: "tulst",
+      style: {
+        width: "100%",
+        borderCollapse: "collapse"
       }
     });
     var j;
@@ -7245,108 +7255,108 @@
       var container = state.a.insertRow(-1);
       if (1 == state.b) {
         var element = $(container.insertCell(-1), "a", {
-          className : "awrap dcpd hv"
+          className: "awrap dcpd hv"
         });
         container = $(element, "div", {
-          className : "maxw"
+          className: "maxw"
         });
         var div = $(container, "div", {
-          className : "bl1"
+          className: "bl1"
         });
         /** @type {string} */
         $(div, "div", {
-          className : "tid"
+          className: "tid"
         }).innerHTML = '<b class="lc">' + res.id + "</b> (" + res.nop + ")";
         div = $(div, "div", {
-          className : "torg"
+          className: "torg"
         });
         /** @type {string} */
         div.innerHTML = "" + res.onm + "";
         div = $(container, "div", {
-          className : "bl2"
+          className: "bl2"
         });
         container = $(div, "div", {
-          className : "tpar"
+          className: "tpar"
         });
         container.innerHTML = res.par;
         var overlay = $(div, "div", {
-          className : "tdtup"
+          className: "tdtup"
         });
         overlay.innerHTML = res.dt;
-        (function(b) {
+        (function (b) {
           /**
            * @return {?}
            */
-          element.onclick = function() {
+          element.onclick = function () {
             state.app.X("/join " + b);
             return false;
           };
         })(res.id);
       } else {
         element = $(container.insertCell(-1), "div", {
-          className : "awrap dcpd"
+          className: "awrap dcpd"
         });
         container = $(element, "div", {
-          className : "maxw"
+          className: "maxw"
         });
         div = $(container, "div", {
-          className : "bl1"
+          className: "bl1"
         });
         overlay = $(div, "div", {
-          className : "tdtfin"
+          className: "tdtfin"
         });
         overlay.innerHTML = res.dt;
         div = $(div, "div", {
-          className : "torg"
+          className: "torg"
         });
         /** @type {string} */
         div.innerHTML = "" + res.onm + "";
         div = $(container, "div", {
-          className : "bl2"
+          className: "bl2"
         });
         container = $(div, "div", {
-          className : "tpar"
+          className: "tpar"
         });
         container.innerHTML = res.par;
         $(div, "a", {
-          className : "tdt",
-          href : res.resurl,
-          target : "_blank"
+          className: "tdt",
+          href: res.resurl,
+          target: "_blank"
         }, [maxpage("t_trsl"), " (" + res.nop + ")"]);
       }
     }
     result = $(state.fa, "div", {
-      className : "dcpd"
+      className: "dcpd"
     });
     if (2 == state.b && obj.page) {
       $(result, "p", {}, $("a", {
-        className : "fb",
-        href : "",
-        onclick : function() {
+        className: "fb",
+        href: "",
+        onclick: function () {
           debug(state.app, state.app.wd + "/f/" + (obj.page + 1));
           return false;
         }
       }, maxpage("t_next") + " >"));
     }
     $(result, "p", {
-      style : {
-        marginTop : "2em"
+      style: {
+        marginTop: "2em"
       }
     }, $("button", {
-      className : "minw",
-      onclick : function() {
+      className: "minw",
+      onclick: function () {
         debug(state.app, state.app.Qe);
       }
     }, maxpage("t_tune")));
     if ((j = obj.toft) && 0 < j.length) {
       res = $(result, "div", {
-        style : {
-          marginTop : "1.5em"
+        style: {
+          marginTop: "1.5em"
         }
       });
       $(res, "p", maxpage("t_oftt"));
       res = $(res, "p", {
-        className : ""
+        className: ""
       });
       var p;
       for (p in j) {
@@ -7355,7 +7365,7 @@
     }
     if (obj.tcur) {
       $(result, "p", {
-        marginTop : "1.5em"
+        marginTop: "1.5em"
       }, obj.tcur);
     }
   }
@@ -7376,19 +7386,19 @@
     /** @type {number} */
     this.a = 0;
     this.f = $(value.B, "div", {
-      className : "stvxpad vnarrow",
-      style : {
-        display : "none"
+      className: "stvxpad vnarrow",
+      style: {
+        display: "none"
       }
     });
     this.A = $(this.f, "p", {
-      className : "tac"
+      className: "tac"
     }, $("div", {
-      className : "loader"
+      className: "loader"
     }));
     this.g = $(this.f, "div", {
-      style : {
-        display : "none"
+      style: {
+        display: "none"
       }
     });
     /**
@@ -7396,7 +7406,7 @@
      * @param {?} undefined
      * @return {?}
      */
-    window[this.o.ib] = function(e, undefined) {
+    window[this.o.ib] = function (e, undefined) {
       return s.lb(e, undefined);
     };
   }
@@ -7407,21 +7417,21 @@
    */
   function toggleVisibility(node, visible) {
     extend(node.g, {
-      display : visible ? "block" : "none"
+      display: visible ? "block" : "none"
     });
     extend(node.A, {
-      display : "none"
+      display: "none"
     });
     /** @type {number} */
     node.a = 0;
     if (!visible) {
       /** @type {number} */
-      var el = node.a = setTimeout(function() {
+      var el = node.a = setTimeout(function () {
         if (node.a == el) {
           /** @type {number} */
           node.a = 0;
           extend(node.A, {
-            display : "block"
+            display: "block"
           });
         }
       }, 500);
@@ -7491,7 +7501,7 @@
             /** @type {boolean} */
             element.Ca[1].Gb = false;
             extend(element.Ca[1].Ob, {
-              display : "none"
+              display: "none"
             });
           }
         }
@@ -7532,8 +7542,8 @@
    */
   function e() {
     show.call(this, {
-      Te : a,
-      tf : true
+      Te: a,
+      tf: true
     });
   }
   /**
@@ -7566,7 +7576,7 @@
             var t = c;
             /** @type {number} */
             var cols = 0;
-            for (;;) {
+            for (; ;) {
               i = i + h[j];
               t = t + ev[j];
               cols++;
@@ -7594,14 +7604,14 @@
   }
   var self;
   /** @type {!Function} */
-  var defineProperty = "function" == typeof Object.defineProperties ? Object.defineProperty : function(object, name, descriptor) {
+  var defineProperty = "function" == typeof Object.defineProperties ? Object.defineProperty : function (object, name, descriptor) {
     if (object != Array.prototype && object != Object.prototype) {
       object[name] = descriptor.value;
     }
   };
   var _key = "undefined" != typeof window && window === this ? this : "undefined" != typeof global && null != global ? global : this;
-  analyzeAll("Array.prototype.fill", function(position) {
-    return position ? position : function(posts, n, i) {
+  analyzeAll("Array.prototype.fill", function (position) {
+    return position ? position : function (posts, n, i) {
       var len = this.length || 0;
       if (0 > n) {
         /** @type {number} */
@@ -7624,8 +7634,8 @@
       return this;
     };
   });
-  analyzeAll("Object.assign", function(position) {
-    return position ? position : function(win, canCreateDiscussions) {
+  analyzeAll("Object.assign", function (position) {
+    return position ? position : function (win, canCreateDiscussions) {
       /** @type {number} */
       var i = 1;
       for (; i < arguments.length; i++) {
@@ -7648,8 +7658,8 @@
    * @param {string} m
    * @return {undefined}
    */
-  self.xc = function(i, m) {  // lk16:handle websocket message
-    switch(i[0]) {
+  self.xc = function (i, m) {  // lk16:handle websocket message
+    switch (i[0]) {
       case last: // lk16:31 recv get client info
         /** @type {number} */
         i = 0;
@@ -7734,12 +7744,12 @@
           break;
         }
         m = {
-          gd : m[0],
-          link : 3 <= m.length ? {
-            href : m[1],
-            target : "_blank"
+          gd: m[0],
+          link: 3 <= m.length ? {
+            href: m[1],
+            target: "_blank"
           } : null,
-          mf : 3 <= m.length ? m[2] : null
+          mf: 3 <= m.length ? m[2] : null
         };
         /** @type {boolean} */
         this.ua = false;
@@ -7760,7 +7770,7 @@
           /** @type {boolean} */
           this.Ad = true;
           generate(this, {
-            gd : "VERSION"
+            gd: "VERSION"
           });
         }
         break;
@@ -7800,7 +7810,7 @@
    * @param {string} e
    * @return {?}
    */
-  self.j = function(key, e) {
+  self.j = function (key, e) {
     return this.text[key] || window.k2text && window.k2text[key] || e || key;
   };
   /**
@@ -7808,7 +7818,7 @@
    * @param {?} data
    * @return {undefined}
    */
-  self.send = function(result, data) {
+  self.send = function (result, data) {
     if (this.Bd) {
       this.Bd.send(result, data);
     }
@@ -7817,7 +7827,7 @@
    * @param {string} a
    * @return {undefined}
    */
-  self.X = function(a) {
+  self.X = function (a) {
     if (a.length > n) {
       a = a.substring(0, n) + "...";
     }
@@ -7826,7 +7836,7 @@
   /**
    * @return {?}
    */
-  self.af = function() {
+  self.af = function () {
     return this.Ec;
   };
   /**
@@ -7834,9 +7844,9 @@
    * @param {string} style
    * @return {undefined}
    */
-  self.td = function(element, style) {
+  self.td = function (element, style) {
     if ("set_langsymbols" == element) {
-      this.Cc = style.split(" ").map(function(a) {
+      this.Cc = style.split(" ").map(function (a) {
         return "(" + a + ")";
       });
     }
@@ -7844,35 +7854,35 @@
   /**
    * @return {undefined}
    */
-  self.se = function() {
+  self.se = function () {
   };
   /**
    * @return {undefined}
    */
-  self.Ic = function() {
+  self.Ic = function () {
   };
   /**
    * @return {?}
    */
-  self.re = function() {
+  self.re = function () {
     return "h";
   };
   /**
    * @param {string} done
    * @return {?}
    */
-  self.cd = function(done) {
+  self.cd = function (done) {
     return "status" == done ? this.sc = new Request(this) : null;
   };
   /**
    * @return {undefined}
    */
-  self.yc = function() {
+  self.yc = function () {
   };
   /**
    * @return {undefined}
    */
-  self.na = function() {
+  self.na = function () {
     if (this.fb) {
       clearTimeout(this.fb);
       /** @type {number} */
@@ -7920,14 +7930,14 @@
       /** @type {number} */
       b = Math.min(Math.floor((i - d) / 2), 36);
       this.Yd = {
-        Af : totalContributionAmountSatoshis,
-        gf : Math.floor(d),
-        ff : i - b,
-        top : b
+        Af: totalContributionAmountSatoshis,
+        gf: Math.floor(d),
+        ff: i - b,
+        top: b
       };
       if (this.Rd && 0 < b) {
         extend(this.Rd, {
-          top : -(b >> 1) + "px"
+          top: -(b >> 1) + "px"
         });
       }
       /** @type {boolean} */
@@ -7948,15 +7958,15 @@
   /**
    * @return {undefined}
    */
-  self.Ic = function() {
+  self.Ic = function () {
     /**
      * @return {?}
      */
     function handler() {
       return [$("b", params.sd), params.o.ob ? null : $("div", {
-        className : "mlh r" + merge(params, params.Fa)
+        className: "mlh r" + merge(params, params.Fa)
       }), params.o.ob ? null : $("span", {
-        className : "snum"
+        className: "snum"
       }, exec(params, params.Fa))];
     }
     /**
@@ -7965,7 +7975,7 @@
      */
     function parse(relative) {
       return [$("div", {
-        className : "spbb"
+        className: "spbb"
       }), " (" + relative + ")"];
     }
     /**
@@ -7974,15 +7984,15 @@
      */
     function showLayoutPreview(layout) {
       return [$("div", {
-        className : "spbb"
+        className: "spbb"
       }), " (" + layout + ")"];
     }
     var params = this;
     var data = this;
     this.$b = $(this.H, "div", {
-      className : "dclpd bsbb navcont",
-      style : {
-        display : "none"
+      className: "dclpd bsbb navcont",
+      style: {
+        display: "none"
       }
     });
     var checkUncheckAllButton;
@@ -7990,129 +8000,129 @@
     var elem;
     var node;
     $(this.$b, "div", {
-      className : "newtab1"
+      className: "newtab1"
     }, [checkUncheckAllButton = $("button", {
-      className : "butsys minwd",
-      onclick : function() {
+      className: "butsys minwd",
+      onclick: function () {
         data.send([payload], null);
       }
     }, this.j("bl_newtab")), " ", $("div", {
-      className : "selcwr mro"
+      className: "selcwr mro"
     }, [inputElements = $("button", {
-      className : "selcbt butsys vsel"
+      className: "selcbt butsys vsel"
     }, ["-"]), elem = $("select", {
-      className : "selcsl",
-      onchange : function(event) {
+      className: "selcsl",
+      onchange: function (event) {
         if (event = event.target.options[event.target.selectedIndex]) {
           data.X("/join " + event.text.split(" ")[0]);
         }
       }
     })]), node = $("span", {
-      className : "tuinfo fb"
+      className: "tuinfo fb"
     }, "-")]);
-    expect(this, "rooms", function(self) {
+    expect(this, "rooms", function (self) {
       /** @type {number} */
       elem.options.length = 0;
-      $(elem, self.list.map(function(body, state) {
+      $(elem, self.list.map(function (body, state) {
         return $("option", state == self.rb ? {
-          selected : true
+          selected: true
         } : {}, body);
       }));
       resolve(inputElements, [self.list[0 <= self.rb ? self.rb : 0].split("(")[0] || "-"]);
     });
-    expect(this, "tumode", function(a) {
+    expect(this, "tumode", function (a) {
       /** @type {boolean} */
       checkUncheckAllButton.disabled = !!a;
     });
-    expect(this, "tuinfo", function(ease) {
+    expect(this, "tuinfo", function (ease) {
       return resolve(node, [ease || "-"]);
     });
     var start = $(this.$b, "div", {
-      className : "nav ib"
+      className: "nav ib"
     });
     var self = {};
     self.h = $(start, "button", {
-      className : "bmain",
-      onclick : function() {
+      className: "bmain",
+      onclick: function () {
         debug(data, data.N);
       }
     }, this.j("bl_tbs"));
     if (0 == this.Ga) {
       var currentFlexChild = self.c = $(start, "button", {
-        onclick : function() {
+        onclick: function () {
           debug(data, "c");
         }
       }, [data.j("bl_buds") + " (0)"]);
       var value = self.m = $(start, "button", {
-        onclick : function() {
+        onclick: function () {
           debug(data, "m");
         }
       }, parse(0));
       if (this.wc) {
         self.t = $(start, "button", {
-          onclick : function() {
+          onclick: function () {
             debug(data, "t");
           }
         }, this.j("t_turs"));
       }
     }
     self.e = $(start, "button", {
-      onclick : function() {
+      onclick: function () {
         debug(data, "e");
       }
     }, this.j("bl_mr"));
     var y = self.x = $(start, "button", {
-      className : "btab",
-      onclick : function() {
+      className: "btab",
+      onclick: function () {
         if (0 < data.tab.F) {
           debug(data, data.tab.F.toString());
         }
       }
     }, "#000");
-    expect(this, "tabalert", function(a) {
+    expect(this, "tabalert", function (a) {
       return callback(y, "alert", a);
     });
-    expect(this, "tabopen", function(goodDots) {
+    expect(this, "tabopen", function (goodDots) {
       return resolve(y, [0 < goodDots ? "#" + goodDots : "#000"]);
     });
     if (currentFlexChild) {
-      expect(this, "ncontacts", function(a) {
+      expect(this, "ncontacts", function (a) {
         return resolve(currentFlexChild, [data.j("bl_buds") + " (" + a + ")"]);
       });
     }
     if (value) {
-      expect(this, "nmessages", function(dep) {
+      expect(this, "nmessages", function (dep) {
         resolve(value, parse(dep));
         callback(value, "alert", 0 < dep);
       });
     }
-    expect(this, "nav", function(item) {
-      Object.keys(self).forEach(function(name) {
+    expect(this, "nav", function (item) {
+      Object.keys(self).forEach(function (name) {
         return callback(self[name], "active", name == item);
       });
     });
     this.Yb = $(this.H, "div", {
-      className : "navttl fb fl",
-      style : {
-        display : "none"
+      className: "navttl fb fl",
+      style: {
+        display: "none"
       }
     });
     var a = $(this.a, "div", {
-      className : "nav0 usno tama",
-      style : {
-        zIndex : cluezIndex + 1
+      className: "nav0 usno tama",
+      style: {
+        zIndex: cluezIndex + 1
       }
     });
     var download = $(a, "button", {
-      className : "mbut hdhei hdbwd",
-      onclick : function() {
+      className: "mbut hdhei hdbwd",
+      onclick: function () {
         acceptTheCall(a);
         return false;
       }
     }, [$("div", {
-      className : "micon"
+      className: "micon"
     })]);
-    document.addEventListener("click", function(e) {
+    document.addEventListener("click", function (e) {
       if (!(!transform(a, "nav0open") || a.contains(e.target) && !t.contains(e.target))) {
         acceptTheCall(a);
         if (!t.contains(e.target)) {
@@ -8120,43 +8130,43 @@
         }
       }
     }, true);
-    expect(this, "chatalert", function(a) {
+    expect(this, "chatalert", function (a) {
       return callback(download, "alert", a);
     });
     start = $(a, "div", {
-      className : "mcont"
+      className: "mcont"
     });
     var t = $(start, "div", {
-      className : "mlst"
+      className: "mlst"
     });
     var d = {};
     var k = d.x = $(t, "button", {
-      className : "btab",
-      onclick : function() {
+      className: "btab",
+      onclick: function () {
         if (0 < data.tab.F) {
           debug(data, data.tab.F.toString());
         }
       }
     }, "#000");
     d.h = $(t, "button", {
-      onclick : function() {
+      onclick: function () {
         debug(data, data.N);
       }
     }, this.j("bl_tbs"));
     if (0 == this.Ga) {
       var defaultSounds = d.c = $(t, "button", {
-        onclick : function() {
+        onclick: function () {
           debug(data, "c");
         }
       }, [data.j("bl_buds") + " (0)"]);
       var valueProgess = d.m = $(t, "button", {
-        onclick : function() {
+        onclick: function () {
           debug(data, "m");
         }
       }, showLayoutPreview(0));
       if (this.wc) {
         d.t = $(t, "button", {
-          onclick : function() {
+          onclick: function () {
             debug(data, "t");
           }
         }, this.j("t_turs"));
@@ -8164,7 +8174,7 @@
     } else {
       if (!this.P) {
         d.l = $(t, "button", {
-          onclick : function() {
+          onclick: function () {
             if (data.Ab) {
               debug(data, "l");
             } else {
@@ -8175,58 +8185,58 @@
       }
     }
     d.e = $(t, "button", {
-      onclick : function() {
+      onclick: function () {
         debug(data, "e");
       }
     }, this.j("bl_mr"));
-    expect(this, "tabalert", function(a) {
+    expect(this, "tabalert", function (a) {
       return callback(k, "alert", a);
     });
-    expect(this, "tabopen", function(goodDots) {
+    expect(this, "tabopen", function (goodDots) {
       return resolve(k, [0 < goodDots ? "#" + goodDots : "#000"]);
     });
     if (defaultSounds) {
-      expect(this, "ncontacts", function(a) {
+      expect(this, "ncontacts", function (a) {
         return resolve(defaultSounds, [data.j("bl_buds") + " (" + a + ")"]);
       });
     }
     if (valueProgess) {
-      expect(this, "nmessages", function(layout) {
+      expect(this, "nmessages", function (layout) {
         resolve(valueProgess, showLayoutPreview(layout));
         callback(valueProgess, "alert", 0 < layout);
       });
     }
-    expect(this, "nav", function(item) {
-      Object.keys(d).forEach(function(i) {
+    expect(this, "nav", function (item) {
+      Object.keys(d).forEach(function (i) {
         return callback(d[i], "active", i == item);
       });
     });
     start = $(start, "div", {
-      className : "msub"
+      className: "msub"
     });
     var found = $(start, "p", handler());
-    expect(this, "urank", function() {
+    expect(this, "urank", function () {
       return resolve(found, handler());
     });
     if (!(this.S || this.P)) {
       $(start, "p", [$("button", {
-        onclick : function() {
+        onclick: function () {
           /** @type {string} */
           document.body.innerHTML = "";
           window.location = window.k2url.home;
         }
       }, this.zd)]);
     }
-    expect(this, "tabopen", function(a) {
+    expect(this, "tabopen", function (a) {
       if (0 < a) {
-        setTimeout(function() {
+        setTimeout(function () {
           return callback(data.a, "navtabopen", 0 < a);
         }, 0);
       } else {
         callback(data.a, "navtabopen", 0 < a);
       }
     });
-    expect(this, "tumode", function(a) {
+    expect(this, "tumode", function (a) {
       return callback(data.a, "tumode", !!a);
     });
     text(this, "h");
@@ -8234,7 +8244,7 @@
   /**
    * @return {undefined}
    */
-  self.se = function() {
+  self.se = function () {
     insert(this.g, [0, 0, 0], []);
     if (this.L) {
       clearInterval(this.L);
@@ -8250,7 +8260,7 @@
    * @param {string} element
    * @return {undefined}
    */
-  self.td = function(i, element) {
+  self.td = function (i, element) {
     init.prototype.td.call(this, i, element);
     if ("set_tab_mt" == i) {
       this.Md = element.split(" ");
@@ -8262,9 +8272,9 @@
           this.Hd = element.split(" ");
         } else {
           if ("set_rank" == i) {
-            this.W = element.split(" ").filter(function(a, b) {
+            this.W = element.split(" ").filter(function (a, b) {
               return 0 == b % 2;
-            }).map(function(id_local) {
+            }).map(function (id_local) {
               return parseInt(id_local, 10);
             });
           }
@@ -8277,7 +8287,7 @@
    * @param {!Array} data
    * @return {undefined}
    */
-  self.xc = function(match, data) { // lk16:handle websocket message
+  self.xc = function (match, data) { // lk16:handle websocket message
     var t = this;
     var i;
     if (match[0] >= lb) {
@@ -8285,7 +8295,7 @@
         render(this.tab, match, data);
       }
     } else {
-      switch(match[0]) {
+      switch (match[0]) {
         case CSI:
           if (1 > data.length) {
             break;
@@ -8302,8 +8312,8 @@
             var index = "_" + event;
             if (!this.pa.hasOwnProperty(index)) {
               this.pa[index] = {
-                Ia : event,
-                Xd : 1
+                Ia: event,
+                Xd: 1
               };
               this.eb.push(event);
             }
@@ -8328,10 +8338,10 @@
           if (match == Z || match == No) {
             if (!item) {
               this.I[key] = item = {
-                Ia : k,
-                rc : "",
-                Oa : 0,
-                tc : 0
+                Ia: k,
+                rc: "",
+                Oa: 0,
+                tc: 0
               };
             }
             item.rc = "" != item.rc ? item.rc + "\n" + data[0] : data[0];
@@ -8351,8 +8361,8 @@
             }
             if (!this.pa.hasOwnProperty(key)) {
               this.pa[key] = {
-                Ia : k,
-                Xd : 0
+                Ia: k,
+                Xd: 0
               };
               this.eb.unshift(k);
               /** @type {boolean} */
@@ -8425,7 +8435,7 @@
           }
           insert(this.g, match, data);
           if (!this.tab) {
-            setTimeout(function() {
+            setTimeout(function () {
               if (!t.tab) {
                 text(t, "x");
               }
@@ -8527,7 +8537,7 @@
           }
           /** @type {number} */
           var url_str_dir = 0;
-          Object.keys(this.b).forEach(function(n) {
+          Object.keys(this.b).forEach(function (n) {
             if (t.b[n].status) {
               url_str_dir++;
             }
@@ -8539,7 +8549,7 @@
             break;
           }
           if (0 == match[1]) {
-            Object.keys(this.b).forEach(function(n) {
+            Object.keys(this.b).forEach(function (n) {
               delete t.b[n];
             }, this);
             /** @type {number} */
@@ -8547,9 +8557,9 @@
             for (; i < data.length - 1; i = i + 2) {
               if (!this.b.hasOwnProperty(data[i])) {
                 event = {
-                  name : data[i],
-                  status : 0,
-                  $a : data[i + 1]
+                  name: data[i],
+                  status: 0,
+                  $a: data[i + 1]
                 };
                 downandpress(event, this.j("st_st1"));
                 this.b[data[i]] = event;
@@ -8567,9 +8577,9 @@
                 break;
               }
               event = {
-                name : data[0],
-                status : match[2],
-                $a : data[1]
+                name: data[0],
+                status: match[2],
+                $a: data[1]
               };
               downandpress(event, this.j("st_st1"));
               this.b[data[0]] = event;
@@ -8597,7 +8607,7 @@
           }
           /** @type {number} */
           var jobsFinishPass = 0;
-          Object.keys(this.b).forEach(function(n) {
+          Object.keys(this.b).forEach(function (n) {
             if (t.b[n].status) {
               jobsFinishPass++;
             }
@@ -8625,14 +8635,14 @@
              * @param {number} k
              * @return {undefined}
              */
-            var func = function(k) {
+            var func = function (k) {
               cb(t, "tuinfo", 0 > k ? "(?)" : Math.floor(k / 60) + ":" + Math.floor(k % 60 / 10) % 10 + k % 60 % 10);
             };
             func(-i);
             /** @type {number} */
             this.Sd = Date.now() + 1E3 * -i + 100;
             /** @type {number} */
-            this.L = setInterval(function() {
+            this.L = setInterval(function () {
               /** @type {number} */
               var ii = Math.floor((t.Sd - Date.now()) / 1E3);
               func(ii);
@@ -8666,8 +8676,8 @@
             data.unshift("-");
           }
           cb(this, "rooms", {
-            list : data,
-            rb : match[1]
+            list: data,
+            rb: match[1]
           });
           if (this.df) {
             do_export(this);
@@ -8718,7 +8728,7 @@
   /**
    * @return {undefined}
    */
-  self.yc = function() {
+  self.yc = function () {
     if (this.tab && this.tab.f == this.C) {
       var item = this.tab;
       /** @type {boolean} */
@@ -8744,7 +8754,7 @@
    * @param {string} undefined
    * @return {?}
    */
-  self.re = function(undefined) {
+  self.re = function (undefined) {
     /** @type {number} */
     var b = parseInt(undefined, 10);
     return !isNaN(b) && 0 < b ? "x" : "f" == undefined || "p" == undefined || "c" == undefined || "m" == undefined || "e" == undefined || 0 == this.Ga && "i" == undefined || 0 == this.Ga && ("t" == undefined || "n" == undefined) || this.Ab && ("l" == undefined || "s" == undefined) ? undefined : "h";
@@ -8753,97 +8763,97 @@
    * @param {string} undefined
    * @return {?}
    */
-  self.cd = function(undefined) {
+  self.cd = function (undefined) {
     var message = this;
     return "h" == undefined ? this.g = new test(this, this.hc) : "x" == undefined ? (this.tab = new (this.o.wf || Object.constructor)(this), this.tab.ha(this), this.tab) : "c" == undefined ? this.ba = new form(this) : "m" == undefined ? this.M = new start(this) : "e" == undefined ? new handle(this) : "f" == undefined ? new go(this) : "p" == undefined ? new b(this) : "l" == undefined && this.Ab ? new r(this, {
-      url : get(this, "login"),
-      ib : "k2qlog",
-      ub : this.j("t_lgin") + " (" + this.zd + ")",
-      lb : function(a22) {
+      url: get(this, "login"),
+      ib: "k2qlog",
+      ub: this.j("t_lgin") + " (" + this.zd + ")",
+      lb: function (a22) {
         if ("v_signup" == a22) {
           debug(message, "s");
         }
       }
     }) : "s" == undefined && this.Ab ? new r(this, {
-      url : get(this, "register"),
-      ib : "k2qreg",
-      ub : this.j("t_hdrg")
+      url: get(this, "register"),
+      ib: "k2qreg",
+      ub: this.j("t_hdrg")
     }) : "i" == undefined ? new r(this, {
-      url : get(this, "profile"),
-      ib : "k2qprof",
-      dd : true,
-      ub : this.j("t_prof")
+      url: get(this, "profile"),
+      ib: "k2qprof",
+      dd: true,
+      ub: this.j("t_prof")
     }) : "t" == undefined ? new main(this, {
-      url : get(this, "tourns"),
-      ib : "k2qtl",
-      ub : this.j("t_turs")
+      url: get(this, "tourns"),
+      ib: "k2qtl",
+      ub: this.j("t_turs")
     }) : "n" == undefined ? new r(this, {
-      url : get(this, "newtourn"),
-      ib : "k2qnt",
-      dd : true,
-      ub : this.j("t_turs")
+      url: get(this, "newtourn"),
+      ib: "k2qnt",
+      dd: true,
+      ub: this.j("t_turs")
     }) : init.prototype.cd.call(this, undefined);
   };
   self = show.prototype;
   /**
    * @return {undefined}
    */
-  self.xe = function() {
+  self.xe = function () {
   };
   /**
    * @return {?}
    */
-  self.j = function() {
+  self.j = function () {
     return "";
   };
   /**
    * @return {undefined}
    */
-  self.na = function() {
+  self.na = function () {
     this.u.na();
   };
   /**
    * @param {number} fallback
    * @return {?}
    */
-  self.mb = function(fallback) {
+  self.mb = function (fallback) {
     return fallback;
   };
   /**
    * @return {undefined}
    */
-  self.ce = function() {
+  self.ce = function () {
   };
   /**
    * @return {?}
    */
-  self.he = function() {
+  self.he = function () {
     return "";
   };
   /**
    * @return {?}
    */
-  self.fe = function() {
+  self.fe = function () {
     return "";
   };
   /**
    * @return {undefined}
    */
-  self.start = function() {
+  self.start = function () {
     var local = this;
     this.na();
     /** @type {boolean} */
     this.I = window.k2pback.m2 ? true : false;
     resolve(this.M, this.I ? [this.B[1] = $("input", {
-      type : "radio",
-      name : "pbpt",
-      onchange : function() {
+      type: "radio",
+      name: "pbpt",
+      onchange: function () {
         update(local, 1, 0);
       }
     }), "1", this.B[2] = $("input", {
-      type : "radio",
-      name : "pbpt",
-      onchange : function() {
+      type: "radio",
+      name: "pbpt",
+      onchange: function () {
         update(local, 2, 0);
       }
     }), "2"] : []);
@@ -8855,7 +8865,7 @@
    * @param {number} x
    * @return {undefined}
    */
-  self.ye = function(x) {
+  self.ye = function (x) {
     var valueProgess = this;
     var width = this.a.length;
     this.Y = x >= width ? width - 1 : x;
@@ -8864,12 +8874,12 @@
     if (width = this.he(this.Y)) {
       resolve(this.L, $("b", [width + (this.b ? "\u00a0 " + this.b : "")]));
     }
-    resolve(this.N, this.a.map(function(targetFormIdAndName, deps) {
+    resolve(this.N, this.a.map(function (targetFormIdAndName, deps) {
       return $("span", {
-        style : this.Y == deps ? {
-          color : "#c22"
+        style: this.Y == deps ? {
+          color: "#c22"
         } : {},
-        onclick : function() {
+        onclick: function () {
           require(valueProgess, deps);
         }
       }, [("undefined" === typeof this.Sc.Mf && 0 == deps % 2 ? 1 + (deps >> 1) + ". " : "") + targetFormIdAndName, this.Sc.Of ? $("br") : " "]);
@@ -8954,7 +8964,7 @@
    * @param {string} hash
    * @return {undefined}
    */
-  self.ha = function(callback, hash) {
+  self.ha = function (callback, hash) {
     /** @type {!Object} */
     this.$ = callback;
     this.Ba = hash || 0;
@@ -8965,7 +8975,7 @@
       this.Rb = false;
     }
     this.f = $(this.$.f, "div", {
-      className : "bcont noth usno"
+      className: "bcont noth usno"
     });
     if (this.$.app.Nb) {
       /** @type {boolean} */
@@ -8981,14 +8991,14 @@
     }
     link(this);
     this.Jb = $(this.f, "canvas", {
-      className : "noth",
-      style : {
-        position : "absolute",
-        left : 0,
-        top : 0,
-        width : "100%",
-        height : "100%",
-        zIndex : 1
+      className: "noth",
+      style: {
+        position: "absolute",
+        left: 0,
+        top: 0,
+        width: "100%",
+        height: "100%",
+        zIndex: 1
       }
     });
     this.Fb = this.Jb.getContext("2d");
@@ -8996,33 +9006,33 @@
   /**
    * @return {undefined}
    */
-  self.qb = function() {
+  self.qb = function () {
   };
   /**
    * @return {undefined}
    */
-  self.oc = function() {
+  self.oc = function () {
   };
   /**
    * @return {undefined}
    */
-  self.Dd = function() {
+  self.Dd = function () {
   };
   /**
    * @return {undefined}
    */
-  self.history = function() {
+  self.history = function () {
   };
   /**
    * @return {undefined}
    */
-  self.jd = function() {
+  self.jd = function () {
     if (0 != this.Da.length) {
       /** @type {number} */
       var a = this.Da.length - 1;
       for (; 0 <= a; a--) {
       }
-      this.Ca.forEach(function(current, cX1) {
+      this.Ca.forEach(function (current, cX1) {
         if (current.Gb && !current.kd) {
           this.oc(cX1, current.Ob, current.Ae, current.Be);
         }
@@ -9032,7 +9042,7 @@
   /**
    * @return {undefined}
    */
-  self.na = function() {
+  self.na = function () {
     var img_width = this.f.offsetWidth;
     var randomBasedOnCookie = this.f.offsetHeight;
     var c = getUnderlineBackgroundPositionY();
@@ -9052,18 +9062,18 @@
   /**
    * @return {undefined}
    */
-  self.Vb = function() {
+  self.Vb = function () {
   };
   /**
    * @return {undefined}
    */
-  self.Zc = function() {
+  self.Zc = function () {
   };
   /**
    * @param {string} val
    * @return {undefined}
    */
-  self.rf = function(val) {
+  self.rf = function (val) {
     var c = this;
     /** @type {!Arguments} */
     var names = arguments;
@@ -9074,14 +9084,14 @@
     var length = names.length;
     for (; i < length; i++) {
       this.Ac.push(cover = $("img", {
-        src : window.k2img[names[i]]
+        src: window.k2img[names[i]]
       }));
       if (!cover.complete) {
         this.Zb++;
         /**
          * @return {undefined}
          */
-        cover.onload = function() {
+        cover.onload = function () {
           c.Zb--;
           if (0 == c.Zb && c.we) {
             c.ic();
@@ -9093,7 +9103,7 @@
   /**
    * @return {undefined}
    */
-  self.ic = function() {
+  self.ic = function () {
     if (loadPlugin(this) && 0 != this.Ea.length) {
       var i;
       /** @type {boolean} */
@@ -9137,16 +9147,16 @@
         if (0 <= item.x && 0 <= item.y) {
           if (item != result) {
             extend(item.a, {
-              display : "block"
+              display: "block"
             });
           }
         } else {
           extend(item.a, {
-            display : "none"
+            display: "none"
           });
         }
       }
-      this.Ca.forEach(function(current, cX1) {
+      this.Ca.forEach(function (current, cX1) {
         if (current.kd && current.Gb) {
           this.oc(cX1, current.Ob, current.Ae, current.Be);
         }
@@ -9158,7 +9168,7 @@
    * @param {string} t
    * @return {undefined}
    */
-  self.setActive = function(b, t) {
+  self.setActive = function (b, t) {
     if (this.wb != b) {
       this.ia = this.wb = b;
       if (!b && this.K) {
@@ -9181,7 +9191,7 @@
   /**
    * @return {undefined}
    */
-  Controller.prototype.reset = function() {
+  Controller.prototype.reset = function () {
     /** @type {string} */
     this.a.innerHTML = "";
     /** @type {string} */
@@ -9190,7 +9200,7 @@
   /**
    * @return {undefined}
    */
-  Controller.prototype.Aa = function() {
+  Controller.prototype.Aa = function () {
     if (this.o.ld && !this.app.oa) {
       if (0 < this.f.clientHeight) {
         /** @type {number} */
@@ -9211,7 +9221,7 @@
    * @param {string} root
    * @return {undefined}
    */
-  Controller.prototype.append = function(props, root) {
+  Controller.prototype.append = function (props, root) {
     var bng1 = this;
     var commaPos;
     props = props.split("\n");
@@ -9237,7 +9247,7 @@
              * @param {number} i
              * @return {?}
              */
-            f = function(i) {
+            f = function (i) {
               /** @type {number} */
               i = parseInt(i, 10);
               return 10 > i ? "0" + i : i;
@@ -9249,14 +9259,14 @@
           }
         }
         write(html(data, $("div", {
-          className : "tind"
+          className: "tind"
         }, ["+ " + f]), v));
       } else {
         if (1 < value.length && "[" == value[0] && "]" == value[value.length - 1]) {
           html(data, $("div", {
-            className : "mtbq"
+            className: "mtbq"
           }, $("button", {
-            onclick : function(event) {
+            onclick: function (event) {
               this.parentNode.parentNode.removeChild(this.parentNode);
               if (bng1.o.De) {
                 bng1.o.De();
@@ -9268,7 +9278,7 @@
         } else {
           if (-1 != (commaPos = value.indexOf(":"))) {
             write(html(data, $("div", {
-              className : "tind"
+              className: "tind"
             }, [$("b", [value.substring(0, commaPos)]), value.substring(commaPos)]), v));
           } else {
             $(data, "div", [value]);
@@ -9394,7 +9404,7 @@
   /**
    * @return {undefined}
    */
-  draw.prototype.reset = function() {
+  draw.prototype.reset = function () {
     /** @type {number} */
     this.g = 0;
     /** @type {number} */
@@ -9409,7 +9419,7 @@
    * @param {number} addedRenderer
    * @return {undefined}
    */
-  draw.prototype.Aa = function(addedRenderer) {
+  draw.prototype.Aa = function (addedRenderer) {
     if (!(-1 == this.tab.Za && this.b < this.g - 1 - addedRenderer)) {
       testCircleCircle(this, this.g - 1);
       /** @type {number} */
@@ -9423,7 +9433,7 @@
   /**
    * @return {undefined}
    */
-  test.prototype.onshow = function() {
+  test.prototype.onshow = function () {
     if (this.g) {
       this.g.Aa();
     }
@@ -9431,7 +9441,7 @@
       /** @type {boolean} */
       this.W = true;
       if ("function" === typeof window.k2adload) {
-        setTimeout(function() {
+        setTimeout(function () {
           window.k2adload();
         }, 0);
       }
@@ -9440,7 +9450,7 @@
   /**
    * @return {undefined}
    */
-  test.prototype.Db = function() {
+  test.prototype.Db = function () {
     /** @type {boolean} */
     var l = "p" == y();
     if (this.L != l) {
@@ -9471,7 +9481,7 @@
    * @param {string} callback
    * @return {undefined}
    */
-  self.ha = function(index, ch, hash, callback) {
+  self.ha = function (index, ch, hash, callback) {
     /** @type {boolean} */
     this.Eb = ch = !!ch;
     this.ea = index + index % 2;
@@ -9518,7 +9528,7 @@
   /**
    * @return {undefined}
    */
-  self.reset = function() {
+  self.reset = function () {
     /** @type {number} */
     var index = 0;
     for (; index < this.ea; index++) {
@@ -9568,7 +9578,7 @@
    * @param {string} s
    * @return {?}
    */
-  self.j = function(s) {
+  self.j = function (s) {
     return this.app.j(s);
   };
   /**
@@ -9576,14 +9586,14 @@
    * @param {?} type
    * @return {undefined}
    */
-  self.send = function(item, type) {
+  self.send = function (item, type) {
     this.app.send(item, type);
   };
   /**
    * @param {string} a
    * @return {undefined}
    */
-  self.X = function(a) {
+  self.X = function (a) {
     if (a.length) {
       if (a.length > n) {
         a = a.substring(0, n) + "...";
@@ -9645,7 +9655,7 @@
    * @param {string} a
    * @return {undefined}
    */
-  self.ha = function(callback, hash, a) {
+  self.ha = function (callback, hash, a) {
     if (!this.f) {
       /** @type {!Object} */
       this.app = callback;
@@ -9665,14 +9675,14 @@
       this.T = new kernel;
       this.T.ha(this.app.hc, this.a.pd, true, this.a.md);
       this.f = $(this.app.B, "div", {
-        className : "gview",
-        style : {
-          display : "none"
+        className: "gview",
+        style: {
+          display: "none"
         }
       });
       if (this.app.P) {
         extend(this.f, {
-          minHeight : "460px"
+          minHeight: "460px"
         });
       }
       fail(this);
@@ -9680,13 +9690,13 @@
       this.u = new hash;
       this.u.ha(this);
       extend(this.f, {
-        background : this.u.Oe
+        background: this.u.Oe
       });
       page(this);
       new Layer(this.u.f, {
-        className : "ctcont cttac ctst0",
-        style : {
-          zIndex : 70
+        className: "ctcont cttac ctst0",
+        style: {
+          zIndex: 70
         }
       });
       this.bb = new SvgShape(this);
@@ -9698,7 +9708,7 @@
   /**
    * @return {undefined}
    */
-  self.ye = function() {
+  self.ye = function () {
     callback(this.f, "tstatinbohide", !setItem(this.history));
   };
   /** @type {null} */
@@ -9710,7 +9720,7 @@
    * @param {?} b
    * @return {undefined}
    */
-  self.Ud = function(x, c, name, b) {
+  self.Ud = function (x, c, name, b) {
     this.u.setActive(false, void 0, "_move");
     /** @type {!Array} */
     x = [92, this.F, x];
@@ -9727,23 +9737,23 @@
    * @param {!Object} scope
    * @return {undefined}
    */
-  self.Ge = function(scope) {
+  self.Ge = function (scope) {
     if (!this.a.bf) {
       var prev = this.app.Ed;
       if (prev && !(1 >= prev.length)) {
         var c = this;
         $(scope, "div", {
-          className : "mbsp"
+          className: "mbsp"
         }, [$("div", {
-          className : "nowrel"
+          className: "nowrel"
         }, this.j("tb_tr_add")), this.A = $("select", {
-          onchange : function() {
+          onchange: function () {
             try {
               setTimeout(c, "tm", this.options[this.selectedIndex].text);
             } catch (d) {
             }
           }
-        }, prev.map(function(mei) {
+        }, prev.map(function (mei) {
           return $("option", mei);
         }))]);
         this.Xa.push(this.A);
@@ -9753,12 +9763,12 @@
   /**
    * @return {undefined}
    */
-  self.Fe = function() {
+  self.Fe = function () {
   };
   /**
    * @return {undefined}
    */
-  self.reset = function() {
+  self.reset = function () {
     if (0 != this.F) {
       /** @type {number} */
       this.F = 0;
@@ -9805,7 +9815,7 @@
    * @param {number} fallback
    * @return {?}
    */
-  self.mb = function(fallback) {
+  self.mb = function (fallback) {
     return fallback;
   };
   /**
@@ -9813,7 +9823,7 @@
    * @param {number} e
    * @return {?}
    */
-  self.ie = function(el, e) {
+  self.ie = function (el, e) {
     return e;
   };
   /**
@@ -9821,14 +9831,14 @@
    * @param {!Object} connection
    * @return {?}
    */
-  self.Ee = function(auth, connection) {
+  self.Ee = function (auth, connection) {
     return connection;
   };
   /**
    * @param {string} config
    * @return {undefined}
    */
-  self.Db = function(config) {
+  self.Db = function (config) {
     if (config) {
       config = this.app;
       /** @type {boolean} */
@@ -9838,7 +9848,7 @@
   /**
    * @return {undefined}
    */
-  self.onshow = function() {
+  self.onshow = function () {
     /** @type {number} */
     var port = parseInt(proceed(), 10);
     if (port != this.F) {
@@ -9869,10 +9879,10 @@
   /**
    * @return {undefined}
    */
-  Color.prototype.reset = function() {
+  Color.prototype.reset = function () {
     /** @type {number} */
     this.g.length = 0;
-    Object.keys(this.b).forEach(function(pos) {
+    Object.keys(this.b).forEach(function (pos) {
       var data = this.b[pos];
       forEach(data.Ua, this);
       if (data.D) {
@@ -9904,7 +9914,7 @@
    * @param {?} data
    * @return {undefined}
    */
-  ready.prototype.send = function(result, data) {
+  ready.prototype.send = function (result, data) {
     if (this.A || this.a) {
       if (result = encode(result, data), this.A) {
         try {
@@ -9925,7 +9935,7 @@
      * @param {boolean} content
      * @return {undefined}
      */
-    callback = function(a, name, content) {
+    callback = function (a, name, content) {
       if (2 == arguments.length || content) {
         if (!transform(a, name)) {
           a.className += (0 < a.className.length ? " " : "") + name;
@@ -9941,7 +9951,7 @@
      * @param {string} val
      * @return {?}
      */
-    transform = function(t, val) {
+    transform = function (t, val) {
       return !!t.className.match(new RegExp("(\\s|^)" + val + "(\\s|$)"));
     };
   }
@@ -9949,7 +9959,7 @@
    * @param {string} i
    * @return {undefined}
    */
-  Layer.prototype.show = function(i) {
+  Layer.prototype.show = function (i) {
     if (this.a != i) {
       var children = this.f.children;
       /** @type {number} */
@@ -9958,7 +9968,7 @@
       for (; j < il; j++) {
         if ("undefined" !== typeof children[j]["data-tab"]) {
           extend(children[j], {
-            display : children[j]["data-tab"] == i ? "block" : "none"
+            display: children[j]["data-tab"] == i ? "block" : "none"
           });
         }
       }
@@ -9972,7 +9982,7 @@
    * @param {?} element
    * @return {?}
    */
-  Layer.prototype.add = function(data, result, element) {
+  Layer.prototype.add = function (data, result, element) {
     result = element ? $(this.f, "div", result, element) : $(this.f, "div", result);
     result["data-tab"] = data;
     return result;
@@ -9980,12 +9990,12 @@
   /**
    * @return {undefined}
    */
-  SvgShape.prototype.start = function() {
+  SvgShape.prototype.start = function () {
     var ast = this;
     /** @type {boolean} */
     this.H = true;
     /** @type {number} */
-    this.B = setInterval(function() {
+    this.B = setInterval(function () {
       return verify(ast);
     }, Math.floor(1E3 / this.S));
   };
@@ -9994,13 +10004,13 @@
   /**
    * @return {?}
    */
-  start.prototype.Le = function() {
+  start.prototype.Le = function () {
     return this.b ? this.B : null;
   };
   /**
    * @return {undefined}
    */
-  start.prototype.onshow = function() {
+  start.prototype.onshow = function () {
     if (this.b) {
       this.b.u.Aa();
     }
@@ -10014,7 +10024,7 @@
   /**
    * @return {undefined}
    */
-  start.prototype.Db = function() {
+  start.prototype.Db = function () {
     var x = y();
     if (x && !/^[a-z0-9~]+$/i.test(x)) {
       /** @type {null} */
@@ -10027,7 +10037,7 @@
   /**
    * @return {undefined}
    */
-  b.prototype.onshow = function() {
+  b.prototype.onshow = function () {
     this.b.checked = this.app.cc;
     this.a.checked = this.app.bc;
     this.g.checked = this.app.ec;
@@ -10036,7 +10046,7 @@
    * @param {string} options
    * @return {undefined}
    */
-  main.prototype.Db = function(options) {
+  main.prototype.Db = function (options) {
     var w = y();
     /** @type {number} */
     var b = 1;
@@ -10067,7 +10077,7 @@
   /**
    * @return {undefined}
    */
-  main.prototype.lb = function() {
+  main.prototype.lb = function () {
   };
   /**
    * @param {string} res
@@ -10075,7 +10085,7 @@
    * @param {?} data
    * @return {undefined}
    */
-  main.prototype.handle = function(res, err, data) {
+  main.prototype.handle = function (res, err, data) {
     if (res == this.A) {
       /** @type {null} */
       this.A = null;
@@ -10089,21 +10099,21 @@
   /**
    * @return {undefined}
    */
-  r.prototype.onshow = function() {
+  r.prototype.onshow = function () {
     var a = this;
     toggleVisibility(this, 0);
     var b = this.b = new View(this.o.url, redraw(this.o.dd ? {
-      jsget : 1,
-      ksession : wrapped(this.app)
+      jsget: 1,
+      ksession: wrapped(this.app)
     } : {
-      jsget : 1
-    }));
+        jsget: 1
+      }));
     /**
      * @param {boolean} error
      * @param {?} options
      * @return {?}
      */
-    b.handle = function(error, options) {
+    b.handle = function (error, options) {
       return a.handle(b, error, options);
     };
   };
@@ -10112,7 +10122,7 @@
    * @param {?} data
    * @return {undefined}
    */
-  r.prototype.lb = function(e, data) {
+  r.prototype.lb = function (e, data) {
     var eventManager = this;
     if ("fsub" == e) {
       toggleVisibility(this, 0);
@@ -10122,7 +10132,7 @@
        * @param {?} type
        * @return {?}
        */
-      b.handle = function(data, type) {
+      b.handle = function (data, type) {
         return eventManager.handle(b, data, type);
       };
     }
@@ -10136,7 +10146,7 @@
    * @param {!Object} data
    * @return {undefined}
    */
-  r.prototype.handle = function(value, type, data) {
+  r.prototype.handle = function (value, type, data) {
     if (value == this.b && (this.b = null, type)) {
       if (data.ksession) {
         value = this.app;
@@ -10160,8 +10170,8 @@
           this.g.innerHTML = data.html || "";
           if (data.script) {
             $(this.g, "script", {
-              type : "text/javascript",
-              text : data.script
+              type: "text/javascript",
+              text: data.script
             });
           }
           toggleVisibility(this, 1);
@@ -10211,7 +10221,7 @@
    * @param {number} callback
    * @return {undefined}
    */
-  self.ha = function(callback) {
+  self.ha = function (callback) {
     Tool.prototype.ha.call(this, callback);
     /** @type {!Array} */
     this.u = [];
@@ -10222,16 +10232,16 @@
     }
     this.rf("0.png", "1.png");
     this.Ca[1] = {
-      Gb : false,
-      Ob : $(this.f, "div", {
-        className : "bsbb",
-        style : {
-          pointerEvents : "none",
-          position : "absolute",
-          display : "none",
-          zIndex : 5,
-          background : "#fff",
-          opacity : "0.5"
+      Gb: false,
+      Ob: $(this.f, "div", {
+        className: "bsbb",
+        style: {
+          pointerEvents: "none",
+          position: "absolute",
+          display: "none",
+          zIndex: 5,
+          background: "#fff",
+          opacity: "0.5"
         }
       })
     };
@@ -10242,7 +10252,7 @@
   /**
    * @return {undefined}
    */
-  self.jd = function() {
+  self.jd = function () {
     var flatness_db = this.hb;
     var widnowHeight = this.gb;
     /** @type {number} */
@@ -10256,7 +10266,7 @@
   /**
    * @return {undefined}
    */
-  self.ic = function() {
+  self.ic = function () {
     if (loadPlugin(this)) {
       ctx = this.Fb;
       var size = this.ja;
@@ -10332,7 +10342,7 @@
    * @param {number} i
    * @return {undefined}
    */
-  self.Vb = function(value, i) {
+  self.Vb = function (value, i) {
     /** @type {number} */
     value = Math.floor((value - this.nb) / this.ra);
     /** @type {number} */
@@ -10349,7 +10359,7 @@
    * @param {number} val
    * @return {undefined}
    */
-  self.Zc = function(r, val) {
+  self.Zc = function (r, val) {
     /** @type {number} */
     r = Math.floor((r - this.nb) / this.ra);
     /** @type {number} */
@@ -10369,21 +10379,21 @@
    * @param {number} x0
    * @return {undefined}
    */
-  self.oc = function(a, doc, c, x0) {
+  self.oc = function (a, doc, c, x0) {
     a = this.ra;
     extend(doc, {
-      display : "block",
-      left : Math.floor(this.nb + c * a) + "px",
-      top : Math.floor(this.tb + x0 * a) + "px",
-      width : Math.round(a) + "px",
-      height : Math.round(a) + "px"
+      display: "block",
+      left: Math.floor(this.nb + c * a) + "px",
+      top: Math.floor(this.tb + x0 * a) + "px",
+      width: Math.round(a) + "px",
+      height: Math.round(a) + "px"
     });
   };
   /**
    * @param {string} flag
    * @return {undefined}
    */
-  self.setActive = function(flag) {
+  self.setActive = function (flag) {
     Tool.prototype.setActive.call(this, flag);
     if (!flag) {
       select(this, -1, -1);
@@ -10392,7 +10402,7 @@
   /**
    * @return {undefined}
    */
-  self.reset = function() {
+  self.reset = function () {
     /** @type {number} */
     var i = 0;
     for (; 8 > i; i++) {
@@ -10421,7 +10431,7 @@
    * @param {number} offset
    * @return {undefined}
    */
-  self.qb = function(offset) {
+  self.qb = function (offset) {
     this.reset();
     /** @type {number} */
     var endOfCentralDirOffset = offset;
@@ -10472,7 +10482,7 @@
               var val = i;
               /** @type {number} */
               var x = 0;
-              for (;;) {
+              for (; ;) {
                 key = key + possible[index];
                 val = val + error[index];
                 x++;
@@ -10481,7 +10491,7 @@
                 }
                 if (this.u[val][key] == value) {
                   if (1 < x) {
-                    for (;;) {
+                    for (; ;) {
                       /** @type {number} */
                       key = key - possible[index];
                       /** @type {number} */
@@ -10518,7 +10528,7 @@
    * @param {!Object} val
    * @return {undefined}
    */
-  self.history = function(val) {
+  self.history = function (val) {
     /** @type {!Object} */
     this.da = val;
   };
@@ -10526,7 +10536,7 @@
    * @param {!Object} c
    * @return {?}
    */
-  self.Dd = function(c) {
+  self.Dd = function (c) {
     if (!(3 > c.length)) {
       c = c[2];
       /** @type {number} */
@@ -10553,17 +10563,17 @@
   /**
    * @return {undefined}
    */
-  window.k2start = function() {
+  window.k2start = function () {
     new move({
-      wf : me,
-      zf : 1713,
-      nf : 2
+      wf: me,
+      zf: 1713,
+      nf: 2
     });
   };
   /**
    * @return {undefined}
    */
-  window.k2play = function() {
+  window.k2play = function () {
     new addRoomButton;
   };
   me.prototype = new Promise;
@@ -10574,20 +10584,20 @@
    * @param {?} callback
    * @return {undefined}
    */
-  self.ha = function(callback) {
+  self.ha = function (callback) {
     Promise.prototype.ha.call(this, callback, a, {
-      $c : true,
-      ne : true,
-      Wb : "PGN",
-      pd : true,
-      md : data
+      $c: true,
+      ne: true,
+      Wb: "PGN",
+      pd: true,
+      md: data
     });
   };
   /**
    * @param {number} bytes
    * @return {?}
    */
-  self.mb = function(bytes) {
+  self.mb = function (bytes) {
     return this.u.Qc ? 1 - bytes : bytes;
   };
   /**
@@ -10595,7 +10605,7 @@
    * @param {number} e
    * @return {?}
    */
-  self.ie = function(a, e) {
+  self.ie = function (a, e) {
     if (5 == a[e]) {
       var i = a[e + 1];
       this.u.uc = a.slice(e + 2, e + 2 + i);
@@ -10607,13 +10617,13 @@
    * @param {!Object} scope
    * @return {undefined}
    */
-  self.Ge = function(scope) {
+  self.Ge = function (scope) {
     var b = this;
     $(scope, "div", {
-      className : "mbsp"
+      className: "mbsp"
     }, [this.N = $("input", {
-      type : "checkbox",
-      onchange : function() {
+      type: "checkbox",
+      onchange: function () {
         setTimeout(b, "xot", this.checked ? 1 : 0);
       }
     }), "random 8 (xot)"]);
@@ -10624,7 +10634,7 @@
    * @param {number} args
    * @return {undefined}
    */
-  self.Fe = function(f, args) {
+  self.Fe = function (f, args) {
     if ("xot" == f) {
       /** @type {boolean} */
       this.N.checked = 0 != args;
@@ -10634,7 +10644,7 @@
    * @param {!Object} a
    * @return {?}
    */
-  self.Ee = function(a) {
+  self.Ee = function (a) {
     /** @type {!Array} */
     var children = [];
     /** @type {number} */
@@ -10664,20 +10674,20 @@
   /**
    * @return {?}
    */
-  self.he = function() {
+  self.he = function () {
     return _build(this.u, 0) + ":" + _build(this.u, 1);
   };
   /**
    * @return {?}
    */
-  self.fe = function() {
+  self.fe = function () {
     return this.W ? "xot" : "";
   };
   /**
    * @param {string} s
    * @return {?}
    */
-  self.xe = function(s) {
+  self.xe = function (s) {
     /** @type {!Array} */
     var next = [];
     /** @type {!Array} */
@@ -10724,8 +10734,8 @@
       }
     }
     return {
-      J : next,
-      O : jisps
+      J: next,
+      O: jisps
     };
   };
   /**
@@ -10733,7 +10743,7 @@
    * @param {number} a
    * @return {undefined}
    */
-  self.Ud = function(f, a) {
+  self.Ud = function (f, a) {
     var valueProgess = this;
     var h = this.ga;
     var currentIndex = this.Y;
@@ -10767,14 +10777,14 @@
       } catch (l) {
       }
     }
-    setTimeout(function() {
+    setTimeout(function () {
       return require(valueProgess, currentIndex + 1 + (h == l ? 1 : 0));
     }, 0);
   };
   /**
    * @return {undefined}
    */
-  self.ce = function() {
+  self.ce = function () {
     var newValue = this.ga;
     var text = String(this, newValue);
     if (0 == text.length) {

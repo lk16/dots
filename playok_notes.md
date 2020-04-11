@@ -32,6 +32,7 @@ COOKIE_KT=''
 WS_KEY=$(cat /dev/urandom | tr -dc a-z | head -c 16 | base64)
 echo $WS_KEY
 
+
 # connect to websocket
 # this uses the 'kt' and 'ku' cookies
 curl -i 'https://x.playok.com:17003/ws/' \
