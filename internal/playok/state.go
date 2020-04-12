@@ -1,21 +1,30 @@
 package playok
 
-import (
-	"bytes"
-	"fmt"
-	"sort"
-)
+import "github.com/lk16/dots/internal/othello"
 
 type table struct {
-	rules   string
-	players [2]string
+	timeLimit int // minutes
+	xot       bool
+	rated     bool
+	players   [2]string
+}
+
+type currentTable struct {
+	table
+	ID        int
+	viewers   []string
+	op        string
+	allowUndo bool
+	minRating int
+	board     othello.Board
 }
 
 type state struct {
-	userName string
-	rating   int
-	tables   map[int]table
-	players  map[string]player
+	userName     string
+	rating       int
+	tables       map[int]table
+	players      map[string]player
+	currentTable currentTable
 }
 
 type player struct {
@@ -27,30 +36,4 @@ func newState() *state {
 		tables:  make(map[int]table),
 		players: make(map[string]player),
 	}
-}
-
-// String gives a string representation of the state
-func (state state) String() string {
-
-	var tableIDs []int
-	for ID := range state.tables {
-		tableIDs = append(tableIDs, ID)
-	}
-
-	sort.Ints(tableIDs)
-
-	var buff bytes.Buffer
-
-	for _, ID := range tableIDs {
-		table := state.tables[ID]
-
-		buff.WriteString(fmt.Sprintf("%10s%5d%15s%15s\n",
-			table.rules,
-			ID,
-			table.players[0],
-			table.players[1],
-		))
-	}
-
-	return buff.String()
 }
