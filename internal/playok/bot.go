@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -195,25 +196,85 @@ func (bot *Bot) visitReversiPage() error {
 // takeAction gives the bot to take initiative, such as joining tables or doing moves
 func (bot *Bot) takeAction() error {
 
-	if bot.playok.currentTable.ID != 0 {
-		log.Printf("Bot viewing table, no action")
-		return nil
+	// wait until we have the tables list
+	retries := 5
+	for {
+		bot.playok.RLock()
+		success := len(bot.playok.tables) != 0
+		bot.playok.RUnlock()
+
+		if !success {
+			retries--
+			if retries == 0 {
+				return errors.New("get tables list: max retries reached")
+			}
+			time.Sleep(time.Second)
+		}
+		break
 	}
 
-	if len(bot.playok.tables) == 0 {
-		log.Printf("Bot has not received list of tables (yet), no action")
-		return nil
-	}
-
+	// join some table with one player
 	for tableID, table := range bot.playok.tables {
-		if table.players[0] == "" || table.players[1] == "" {
+		// only care about public tables with one player
+		if table.minRatingID != 0 || (table.players[0] == "" && table.players[1] == "") || (table.players[0] != "" && table.players[1] != "") {
 			continue
 		}
 
 		if err := bot.sendJoinTableRequest(tableID); err != nil {
 			return errors.Wrap(err, "joining table request failed")
 		}
+		break
 	}
+
+	// wait until we joined the table
+	for {
+		bot.playok.RLock()
+		success := bot.playok.currentTable.ID != 0
+		bot.playok.RUnlock()
+
+		if !success {
+			retries--
+			if retries == 0 {
+				return errors.New("joining table: max retries reached")
+			}
+			time.Sleep(time.Second)
+		}
+		break
+	}
+
+	time.Sleep(time.Second)
+
+	bot.playok.RLock()
+
+	seatID := 1
+	if bot.playok.currentTable.players[0] != "" {
+		seatID = 0
+	}
+
+	bot.playok.RUnlock()
+
+	if err := bot.sendTakeSeatRequest(bot.playok.currentTable.ID, seatID); err != nil {
+		return errors.Wrap(err, "taking seat request failed")
+	}
+
+	for {
+		bot.playok.RLock()
+		success := bot.playok.currentTable.players[0] == bot.playok.userName || bot.playok.currentTable.players[1] == bot.playok.userName
+		bot.playok.RUnlock()
+
+		if !success {
+			retries--
+			if retries == 0 {
+				return errors.New("taking seat: max retries reached")
+			}
+			time.Sleep(time.Second)
+		}
+		break
+	}
+
+	// start game
+
+	// play full game
 
 	return nil
 }
@@ -283,52 +344,61 @@ func (bot *Bot) loop() error {
 		return errors.Wrap(err, "sending init message failed")
 	}
 
-	printStateTicker := time.NewTicker(500 * time.Millisecond)
-	keepAliveTicker := time.NewTicker(30 * time.Second)
-	botActionTicker := time.NewTicker(time.Second)
-	messageChan := make(chan []byte)
+	errChan := make(chan error)
 
 	go func() {
 		for {
 			messageType, messageBytes, err := bot.websocket.ReadMessage()
 			if err != nil {
-				panic("read message error:" + err.Error())
+				errChan <- errors.Wrap(err, "read message error:")
+				return
 			}
 
 			if messageType != websocket.TextMessage {
-				log.Printf("RECV ignoring message with type %d: %s",
-					messageType, string(messageBytes))
+				log.Printf("RECV ignoring message with type %d: %s", messageType, string(messageBytes))
 			}
 
-			messageChan <- messageBytes
+			if err = bot.readMessage(messageBytes); err != nil {
+				errChan <- errors.Wrap(err, "message handling error")
+				return
+			}
 		}
 	}()
 
-	for {
-		select {
-		case <-printStateTicker.C:
-			bot.printState()
-		case <-keepAliveTicker.C:
+	go func() {
+		for {
+			time.Sleep(500 * time.Millisecond)
+			//bot.printState()
+		}
+	}()
+
+	go func() {
+		for {
+			time.Sleep(30 * time.Second)
 			if err = bot.sendKeepAlive(); err != nil {
-				return errors.Wrap(err, "sending keep alive failed")
-			}
-		case <-botActionTicker.C:
-			if err = bot.takeAction(); err != nil {
-				return errors.Wrap(err, "bot action failed")
-			}
-		case messageBytes := <-messageChan:
-			if err = bot.readMessage(messageBytes); err != nil {
-				return errors.Wrap(err, "message handling error")
+				errChan <- errors.Wrap(err, "sending keep alive failed")
+				return
 			}
 		}
-	}
+	}()
+
+	go func() {
+		if err = bot.takeAction(); err != nil {
+			errChan <- errors.Wrap(err, "bot action failed")
+			return
+		}
+		log.Printf("INFO bot.takeAction() returned")
+	}()
+
+	return <-errChan
 }
 
 func (bot *Bot) handleConnect(message Message) error {
+
+	bot.playok.Lock()
+	defer bot.playok.Unlock()
+
 	bot.playok.userName = message.S[0]
-	if bot.playok.userName != bot.userName {
-		return errors.New("received unexpected username from server")
-	}
 
 	_ = message.I[1] // TODO
 	_ = message.I[2] // TODO
@@ -341,6 +411,7 @@ func (bot *Bot) sendMessage(message Message) error {
 	if err != nil {
 		return err
 	}
+	log.Printf("SEND %s", string(bytes))
 	err = bot.websocket.WriteMessage(websocket.TextMessage, bytes)
 	if err != nil {
 		return err
@@ -371,7 +442,19 @@ func (bot *Bot) sendMove(moveID int) error {
 			bot.playok.currentTable.ID,
 			2, // hardcoded as 2 in JS. wtf?
 			moveID,
-			0, // TODO
+			rand.Intn(100), // TODO random timestamp value?
+		},
+	}
+
+	return bot.sendMessage(message)
+}
+
+func (bot *Bot) sendTakeSeatRequest(tableID, seatID int) error {
+	message := Message{
+		I: []int{
+			83,
+			tableID,
+			seatID,
 		},
 	}
 
@@ -386,6 +469,9 @@ func (bot *Bot) sendJoinTableRequest(tableID int) error {
 }
 
 func (bot *Bot) handleRating(message Message) error {
+	bot.playok.Lock()
+	defer bot.playok.Unlock()
+
 	bot.playok.rating = message.I[1]
 	return nil
 }
@@ -425,6 +511,9 @@ func (bot *Bot) upsertUser(iSlice []int, s string) error {
 
 	playerName := s
 
+	bot.playok.Lock()
+	defer bot.playok.Unlock()
+
 	bot.playok.players[playerName] = player{
 		rating: rating,
 	}
@@ -455,10 +544,16 @@ func (bot *Bot) handleInitTables(message Message) error {
 }
 
 func (bot *Bot) handleUpdateTable(message Message) error {
+	bot.playok.Lock()
+	defer bot.playok.Unlock()
+
 	return bot.upsertTable(message.I[1:], message.S)
 }
 
 func (bot *Bot) handleJoinTable(message Message) error {
+	bot.playok.Lock()
+	defer bot.playok.Unlock()
+
 	bot.playok.currentTable.ID = message.I[1]
 	return bot.upsertTable(message.I[1:], message.S)
 }
@@ -474,9 +569,9 @@ func (bot *Bot) upsertTable(iSlice []int, sSlice []string) error {
 	}
 
 	tableID := iSlice[0]
-	_ = iSlice[1] // TODO
-	_ = iSlice[2] // TODO
-	_ = iSlice[3] // TODO
+	minRatingID := iSlice[1] // TODO rating requirement
+	_ = iSlice[2]            // TODO 1 if first seat is taken, 0 if not, 2 if abandonned?
+	_ = iSlice[3]            // TODO 1 if second seat is taken, 0 if not, 2 if abandonned?
 
 	tableSettings := sSlice[0]
 	players := [2]string{
@@ -485,8 +580,9 @@ func (bot *Bot) upsertTable(iSlice []int, sSlice []string) error {
 	}
 
 	table := table{
-		players: players,
-		rated:   true,
+		players:     players,
+		rated:       true,
+		minRatingID: minRatingID,
 	}
 
 	if tableSettings != "" {
@@ -519,6 +615,9 @@ func (bot *Bot) upsertTable(iSlice []int, sSlice []string) error {
 func (bot *Bot) handlePlayerLogout(message Message) error {
 	username := message.S[0]
 
+	bot.playok.Lock()
+	defer bot.playok.Unlock()
+
 	if _, ok := bot.playok.players[username]; !ok {
 		errors.New("received logout for player that's already logged out")
 	}
@@ -529,6 +628,9 @@ func (bot *Bot) handlePlayerLogout(message Message) error {
 
 func (bot *Bot) handleTableClose(message Message) error {
 	tableID := message.I[1]
+
+	bot.playok.Lock()
+	defer bot.playok.Unlock()
 
 	if _, ok := bot.playok.tables[tableID]; !ok {
 		return errors.New("closing table that's already closed")
@@ -544,6 +646,9 @@ func (bot *Bot) handleTableSettingsUpdate(message Message) error {
 	if len(message.S) != expectedSlength {
 		return errorf("expected len(message.S)==%d, got %d", expectedSlength, len(message.S))
 	}
+
+	bot.playok.Lock()
+	defer bot.playok.Unlock()
 
 	if message.I[1] != bot.playok.currentTable.ID {
 		return errors.New("received table update for unexpected table")
@@ -583,6 +688,9 @@ func (bot *Bot) handleTableSettingsUpdate(message Message) error {
 
 func (bot *Bot) handleTableViewersUpdate(message Message) error {
 
+	bot.playok.Lock()
+	defer bot.playok.Unlock()
+
 	if message.I[1] != bot.playok.currentTable.ID {
 		return errors.New("received table update for unexpected table")
 	}
@@ -592,6 +700,9 @@ func (bot *Bot) handleTableViewersUpdate(message Message) error {
 }
 
 func (bot *Bot) handleTableChatMessage(message Message) error {
+
+	bot.playok.Lock()
+	defer bot.playok.Unlock()
 
 	if message.I[1] != bot.playok.currentTable.ID {
 		return errors.New("received table update for unexpected table")
@@ -609,6 +720,9 @@ func (bot *Bot) handleAlertMessage(message Message) error {
 
 func (bot *Bot) handleBootedFromTable(message Message) error {
 
+	bot.playok.Lock()
+	defer bot.playok.Unlock()
+
 	if message.I[1] != bot.playok.currentTable.ID {
 		return errors.New("received table update for unexpected table")
 	}
@@ -620,55 +734,71 @@ func (bot *Bot) handleBootedFromTable(message Message) error {
 
 func (bot *Bot) handleTableBoardReset(message Message) error {
 
+	bot.playok.Lock()
+	defer bot.playok.Unlock()
+
 	if message.I[1] != bot.playok.currentTable.ID {
 		return errors.New("received table update for unexpected table")
 	}
 
-	board := *othello.NewBoard()
+	bot.playok.currentTable.board = *othello.NewBoardWithTurn()
 
 	for _, value := range message.I[2:] {
-		if value < -1 || value > 127 {
-			return errorf("unexpected move value %d", value)
-		}
-
-		if value == -1 {
-			continue
-		}
-		if value > 64 {
-			value -= 64
-		}
-
-		flipped := board.DoMove(1 << value)
-		if flipped == 0 {
-			return errors.New("no discs flipped")
+		if err := bot.handleBoardUpdate(value); err != nil {
+			return err
 		}
 	}
 
-	bot.playok.currentTable.board = board
 	return nil
 }
 
 func (bot *Bot) handleTableBoardUpdate(message Message) error {
+
+	bot.playok.Lock()
+	defer bot.playok.Unlock()
 
 	if message.I[1] != bot.playok.currentTable.ID {
 		return errors.New("received table update for unexpected table")
 	}
 
 	value := message.I[2]
+	return bot.handleBoardUpdate(value)
+}
 
-	if value < 0 || value > 127 {
+func (bot *Bot) handleBoardUpdate(value int) error {
+	if value < -1 || value > 127 {
 		return errorf("unexpected move value %d", value)
 	}
 
-	if value > 64 {
+	if value == -1 {
+		bot.playok.currentTable.board = *othello.NewBoardWithTurn()
+		return nil
+	}
+	if value >= 64 {
 		value -= 64
 	}
 
-	flipped := bot.playok.currentTable.board.DoMove(1 << value)
+	board := bot.playok.currentTable.board
+
+	flipped := board.DoMove(othello.BitSet(1) << uint(value))
 	if flipped == 0 {
+		log.Printf("DEBG board=%s\nfailed at value=%d", board.String(), value)
 		return errors.New("no discs flipped")
 	}
 
+	bot.playok.currentTable.board = board
+	return nil
+}
+
+func (bot *Bot) handleCurrentTableUpdate(message Message) error {
+	bot.playok.Lock()
+	defer bot.playok.Unlock()
+
+	if message.I[1] != bot.playok.currentTable.ID {
+		return errors.New("received table update for unexpected table")
+	}
+
+	bot.playok.currentTable.playerToMove = message.I[3]
 	return nil
 }
 
@@ -714,12 +844,15 @@ func (bot *Bot) readMessage(messageBytes []byte) error {
 		81: bot.handleTableChatMessage,
 		84: ignore, // table join messsage
 		86: bot.handleTableViewersUpdate,
+		87: todo,
 		88: todo,
 		89: bot.handleTableSettingsUpdate,
-		90: todo,
+		90: bot.handleCurrentTableUpdate,
 		91: bot.handleTableBoardReset,
 		92: bot.handleTableBoardUpdate,
 	}
+
+	log.Printf("DEBG [%d] %s", message.I[0], messageBytes)
 
 	handler, ok := messageHandlers[message.I[0]]
 	if !ok {
@@ -755,6 +888,9 @@ func (bot *Bot) Run() error {
 // printState prints the bot state in ascii art
 func (bot *Bot) printState() {
 
+	bot.playok.RLock()
+	defer bot.playok.RUnlock()
+
 	var tableIDs []int
 	for ID := range bot.playok.tables {
 		tableIDs = append(tableIDs, ID)
@@ -764,30 +900,32 @@ func (bot *Bot) printState() {
 
 	var buff bytes.Buffer
 
-	for _, ID := range tableIDs {
-		table := bot.playok.tables[ID]
+	/*
+		for _, ID := range tableIDs {
+			table := bot.playok.tables[ID]
 
-		var xot string
-		if table.xot {
-			xot = "xot"
+			var xot string
+			if table.xot {
+				xot = "xot"
+			}
+
+			var unrated string
+			if !table.rated {
+				unrated = "x"
+			}
+
+			buff.WriteString(fmt.Sprintf("%3s %1s %2dm %5d% 15s %15s\n",
+				xot,
+				unrated,
+				table.timeLimit,
+				ID,
+				table.players[0],
+				table.players[1],
+			))
 		}
 
-		var unrated string
-		if !table.rated {
-			unrated = "x"
-		}
-
-		buff.WriteString(fmt.Sprintf("%3s %1s %2dm %5d% 15s %15s\n",
-			xot,
-			unrated,
-			table.timeLimit,
-			ID,
-			table.players[0],
-			table.players[1],
-		))
-	}
-
-	buff.WriteString("---\n")
+		buff.WriteString("---\n")
+	*/
 
 	buff.WriteString(fmt.Sprintf("%8s:%10s\n", "username", bot.playok.userName))
 	buff.WriteString(fmt.Sprintf("%8s:%10d\n", "rating", bot.playok.rating))

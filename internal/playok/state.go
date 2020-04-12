@@ -1,25 +1,31 @@
 package playok
 
-import "github.com/lk16/dots/internal/othello"
+import (
+	"sync"
+
+	"github.com/lk16/dots/internal/othello"
+)
 
 type table struct {
-	timeLimit int // minutes
-	xot       bool
-	rated     bool
-	players   [2]string
+	timeLimit   int // minutes
+	xot         bool
+	rated       bool
+	players     [2]string
+	minRatingID int // TODO
 }
 
 type currentTable struct {
 	table
-	ID        int
-	viewers   []string
-	op        string
-	allowUndo bool
-	minRating int
-	board     othello.Board
+	ID           int
+	viewers      []string
+	op           string
+	allowUndo    bool
+	board        othello.BoardWithTurn
+	playerToMove int
 }
 
 type state struct {
+	sync.RWMutex
 	userName     string
 	rating       int
 	tables       map[int]table

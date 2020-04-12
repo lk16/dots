@@ -632,3 +632,77 @@ func stableDiscs(me, opp BitSet) BitSet {
 	}
 	return stable
 }
+
+// BoardWithTurn is a Board annotated with a turn
+type BoardWithTurn struct {
+	Board
+	Turn int
+}
+
+// NewBoardWithTurn initializes a Board with black to move
+func NewBoardWithTurn() *BoardWithTurn {
+	return &BoardWithTurn{
+		Board: *NewBoard(),
+		Turn:  0,
+	}
+}
+
+// DoMove does a move and updates the turn if necessary
+func (board *BoardWithTurn) DoMove(moveBit BitSet) BitSet {
+	flipped := board.Board.DoMove(moveBit)
+
+	if board.Moves().Count() == 0 {
+		board.SwitchTurn()
+	} else {
+		board.Turn = 1 - board.Turn
+	}
+
+	return flipped
+}
+
+// String returns an ASCII-art representation of the BoardWithTurn
+func (board BoardWithTurn) String() string {
+
+	buffer := new(bytes.Buffer)
+	_, _ = buffer.WriteString("+-a-b-c-d-e-f-g-h-+\n")
+
+	moves := board.Moves()
+
+	me := board.me
+	opp := board.opp
+
+	if board.Turn != 0 {
+		me, opp = opp, me
+	}
+
+	for y := uint(0); y < 8; y++ {
+		_, _ = buffer.WriteString(fmt.Sprintf("%d ", y+1))
+
+		for x := uint(0); x < 8; x++ {
+			mask := BitSet(1) << (y*8 + x)
+			if me&mask != 0 {
+				_, _ = buffer.WriteString("○ ")
+			} else if opp&mask != 0 {
+				_, _ = buffer.WriteString("● ")
+			} else if moves&mask != 0 {
+				_, _ = buffer.WriteString("- ")
+			} else {
+				_, _ = buffer.WriteString("  ")
+			}
+		}
+
+		_, _ = buffer.WriteString("|\n")
+	}
+
+	_, _ = buffer.WriteString("+-----------------+\n")
+
+	turnRune := "○"
+	if board.Turn == 1 {
+		turnRune = "●"
+	}
+
+	_, _ = buffer.WriteString("To move: " + turnRune + "\n")
+	_, _ = buffer.WriteString("Raw: " + fmt.Sprintf("%#v", board) + "\n")
+
+	return buffer.String()
+}
