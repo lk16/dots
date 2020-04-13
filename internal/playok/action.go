@@ -2,6 +2,7 @@ package playok
 
 import (
 	"log"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -74,6 +75,10 @@ func (bot *Bot) takeAction() error {
 			return errors.Wrap(err, "waiting for turn failed")
 		}
 
+		bot.playok.RLock()
+		info("\n%s", bot.playok.currentTable.board.String())
+		bot.playok.RUnlock()
+
 		info("bot is to move")
 
 		discCount, err := bot.computeAndSendMove()
@@ -88,6 +93,11 @@ func (bot *Bot) takeAction() error {
 		}
 
 		info("bot received move confirmation")
+
+		bot.playok.RLock()
+		info("\n%s", bot.playok.currentTable.board.String())
+		bot.playok.RUnlock()
+
 	}
 
 	return nil
@@ -125,8 +135,6 @@ func (bot *Bot) computeAndSendMove() (int, error) {
 	board := bot.playok.currentTable.board
 	bot.playok.RUnlock()
 
-	info("board:\n%s", board.String())
-
 	children := board.GetChildren()
 	info("board has %d children", len(children))
 
@@ -137,7 +145,7 @@ func (bot *Bot) computeAndSendMove() (int, error) {
 		pvs := treesearch.NewPvs()
 
 		for i := range children {
-			heur := pvs.Search(children[i], treesearch.MinHeuristic, treesearch.MaxHeuristic, 8)
+			heur := pvs.Search(children[i], treesearch.MinHeuristic, treesearch.MaxHeuristic, 10)
 			info("child %2d/%2d has heuristic %6d", i+1, len(children), heur)
 			if heur > bestHeur {
 				bestHeur = heur
@@ -146,16 +154,14 @@ func (bot *Bot) computeAndSendMove() (int, error) {
 		}
 	}
 
-	info("best child:\n%s", bestChild.String())
-
 	moveBit := (board.Me() | board.Opp()) ^ (bestChild.Me() | bestChild.Opp())
-	info("move bit: %d", moveBit)
-
 	moveID := moveBit.Lowest()
-	info("move ID: %d", moveID)
+
+	delay := time.Duration(500+rand.Intn(500)+rand.Intn(500)) * time.Millisecond
+	info("delaying sending move %dms", delay.Milliseconds)
+	time.Sleep(delay)
 
 	info("sending move")
-
 	if err := bot.sendMove(moveID); err != nil {
 		return 0, errors.Wrap(err, "failed to send move")
 	}
