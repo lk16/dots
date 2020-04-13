@@ -59,7 +59,7 @@ func (bot *Bot) handleMessage(messageBytes []byte) error {
 		92: bot.handleTableBoardUpdate,
 	}
 
-	log.Printf("DEBG [%d] %s", message.I[0], messageBytes)
+	log.Printf("RECV [%d] %s", message.I[0], messageBytes)
 
 	handler, ok := messageHandlers[message.I[0]]
 	if !ok {
@@ -310,13 +310,13 @@ func (bot *Bot) handleTableChatMessage(message Message) error {
 		return errors.New("received table update for unexpected table")
 	}
 
-	log.Printf("Chat message: %s", message.S[0])
+	log.Printf("INFO Chat message: %s", message.S[0])
 	return nil
 }
 
 func (bot *Bot) handleAlertMessage(message Message) error {
 
-	log.Printf("Alert message: %s", message.S[0])
+	log.Printf("INFO Alert message: %s", message.S[0])
 	return nil
 }
 

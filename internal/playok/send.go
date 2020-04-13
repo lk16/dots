@@ -73,6 +73,20 @@ func (bot *Bot) sendJoinTableRequest(tableID int) error {
 	return bot.sendMessage(message)
 }
 
+func (bot *Bot) sendLeaveTableRequest(tableID int) error {
+	message := Message{
+		I: []int{73, tableID},
+	}
+	return bot.sendMessage(message)
+}
+
+func (bot *Bot) sendStartGameRequest(tableID int) error {
+	message := Message{
+		I: []int{85, tableID},
+	}
+	return bot.sendMessage(message)
+}
+
 func (bot *Bot) sendInitMessage() error {
 
 	var kSessionCookie string

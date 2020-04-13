@@ -1,6 +1,7 @@
 package playok
 
 import (
+	"math/rand"
 	"sync"
 
 	"github.com/lk16/dots/internal/othello"
@@ -12,6 +13,16 @@ type table struct {
 	rated       bool
 	players     [2]string
 	minRatingID int // TODO
+}
+
+func (t table) countPlayers() int {
+	var count int
+	for _, player := range t.players {
+		if player != "" {
+			count++
+		}
+	}
+	return count
 }
 
 type currentTable struct {
@@ -31,6 +42,18 @@ type state struct {
 	tables       map[int]table
 	players      map[string]player
 	currentTable currentTable
+}
+
+func (s state) getShuffledTableIDs() []int {
+	IDs := make([]int, len(s.tables))
+	i := 0
+	for ID := range s.tables {
+		IDs[i] = ID
+		i++
+	}
+
+	rand.Shuffle(len(IDs), func(i, j int) { IDs[i], IDs[j] = IDs[j], IDs[i] })
+	return IDs
 }
 
 type player struct {
