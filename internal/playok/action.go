@@ -3,7 +3,6 @@ package playok
 import (
 	"log"
 	"math/rand"
-	"strings"
 	"time"
 
 	"github.com/lk16/dots/internal/treesearch"
@@ -58,49 +57,51 @@ func (bot *Bot) takeAction() error {
 		return errors.Wrap(err, "taking seat failed")
 	}
 
-	if err := bot.sendStartGameRequest(tableID); err != nil {
-		return errors.Wrap(err, "failed sending start game request")
-	}
-
-	if err := bot.awaitStartGame(tableID); err != nil {
-		// TODO leave table and try again
-		return errors.Wrap(err, "starting game failed")
-	}
-
 	for {
-		if err := bot.awaitTurn(tableID, seatID); err != nil {
-			if err == errGameEnded {
-				break
+
+		if err := bot.sendStartGameRequest(tableID); err != nil {
+			return errors.Wrap(err, "failed sending start game request")
+		}
+
+		if err := bot.awaitStartGame(tableID); err != nil {
+			// TODO leave table and try again
+			return errors.Wrap(err, "starting game failed")
+		}
+
+		for {
+			if err := bot.awaitTurn(tableID, seatID); err != nil {
+				if err == errGameEnded {
+					break
+				}
+				return errors.Wrap(err, "waiting for turn failed")
 			}
-			return errors.Wrap(err, "waiting for turn failed")
+
+			bot.playok.RLock()
+			info("\n%s", bot.playok.currentTable.board.String())
+			bot.playok.RUnlock()
+
+			info("bot is to move")
+
+			discCount, err := bot.computeAndSendMove()
+			if err != nil {
+				return errors.Wrap(err, "compute and send move failed")
+			}
+
+			info("bot sent move")
+
+			if err := bot.awaitMoveConfirmation(discCount); err != nil {
+				return errors.Wrap(err, "waiting for move confirmation failed")
+			}
+
+			info("bot received move confirmation")
+
+			bot.playok.RLock()
+			info("\n%s", bot.playok.currentTable.board.String())
+			bot.playok.RUnlock()
+
+			time.Sleep(time.Second)
 		}
-
-		bot.playok.RLock()
-		info("\n%s", bot.playok.currentTable.board.String())
-		bot.playok.RUnlock()
-
-		info("bot is to move")
-
-		discCount, err := bot.computeAndSendMove()
-		if err != nil {
-			return errors.Wrap(err, "compute and send move failed")
-		}
-
-		info("bot sent move")
-
-		if err := bot.awaitMoveConfirmation(discCount); err != nil {
-			return errors.Wrap(err, "waiting for move confirmation failed")
-		}
-
-		info("bot received move confirmation")
-
-		bot.playok.RLock()
-		info("\n%s", bot.playok.currentTable.board.String())
-		bot.playok.RUnlock()
-
 	}
-
-	return nil
 }
 
 // awaitMoveConfirmation waits until the server tells us the move is received
@@ -135,38 +136,26 @@ func (bot *Bot) computeAndSendMove() (int, error) {
 	board := bot.playok.currentTable.board
 	bot.playok.RUnlock()
 
-	children := board.GetChildren()
-	info("board has %d children", len(children))
+	othelloBot := treesearch.NewBot(log.Writer(), 10, 16)
 
-	bestHeur := treesearch.MinHeuristic
-	bestChild := children[0]
-
-	if len(children) > 1 {
-		pvs := treesearch.NewPvs()
-
-		for i := range children {
-			heur := pvs.Search(children[i], treesearch.MinHeuristic, treesearch.MaxHeuristic, 10)
-			info("child %2d/%2d has heuristic %6d", i+1, len(children), heur)
-			if heur > bestHeur {
-				bestHeur = heur
-				bestChild = children[i]
-			}
-		}
+	move, err := othelloBot.DoMove(board.Board)
+	if err != nil {
+		return 0, errors.Wrap(err, "bot failed to compute move")
 	}
 
-	moveBit := (board.Me() | board.Opp()) ^ (bestChild.Me() | bestChild.Opp())
+	moveBit := (board.Me() | board.Opp()) ^ (move.Me() | move.Opp())
 	moveID := moveBit.Lowest()
 
-	delay := time.Duration(500+rand.Intn(500)+rand.Intn(500)) * time.Millisecond
-	info("delaying sending move %dms", delay.Milliseconds)
-	time.Sleep(delay)
+	randomDelay := time.Duration(500+rand.Intn(500)+rand.Intn(500)) * time.Millisecond
+	info("delaying sending move %dms", randomDelay.Milliseconds())
+	time.Sleep(randomDelay)
 
 	info("sending move")
 	if err := bot.sendMove(moveID); err != nil {
 		return 0, errors.Wrap(err, "failed to send move")
 	}
 
-	return bestChild.CountDiscs(), nil
+	return move.CountDiscs(), nil
 }
 
 func (bot *Bot) awaitTurn(tableID, seatID int) error {
@@ -198,7 +187,7 @@ func (bot *Bot) awaitTurn(tableID, seatID int) error {
 
 func (bot *Bot) awaitStartGame(tableID int) error {
 
-	retries := 30
+	retries := 10
 	for {
 		info("await start game: %d retries left", retries)
 
@@ -292,7 +281,7 @@ func (bot *Bot) awaitFindOnePlayerTable() int {
 
 		for _, ID := range tableIDs {
 			table := bot.playok.tables[ID]
-			if table.countPlayers() == 1 && table.minRatingID == 0 && (strings.HasSuffix(table.players[0], "g") || strings.HasSuffix(table.players[1], "g")) {
+			if table.countPlayers() == 1 && table.minRatingID == 0 {
 				foundTableID = ID
 				break
 			}
