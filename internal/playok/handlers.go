@@ -107,14 +107,19 @@ func (bot *Bot) upsertUser(iSlice []int, s string) error {
 		return errorf("len(iSlice)==%d, expected 3", len(iSlice))
 	}
 
-	_ = iSlice[0] // TODO
-	_ = iSlice[1] // TODO viewing table
+	_ = iSlice[0]        // TODO
+	tableID := iSlice[1] // TODO viewing table
 	rating := iSlice[2]
 
 	playerName := s
 
 	bot.playok.Lock()
 	defer bot.playok.Unlock()
+
+	// this informs us we have left a table and are in the lobby
+	if playerName == bot.playok.userName && tableID == 0 {
+		bot.playok.currentTable = currentTable{}
+	}
 
 	bot.playok.players[playerName] = player{
 		rating: rating,
