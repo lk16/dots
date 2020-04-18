@@ -6,14 +6,14 @@ function update_fields(board) {
         let image = '';
 
         if(board.white.includes(i)){
-            image = './svg/field/?disc=white';
+            image = './svg/field?disc=white';
         } else if(board.black.includes(i)){
-            image = './svg/field/?disc=black';
+            image = './svg/field?disc=black';
         } else if(valid_moves.includes(i)){
             if(board.turn === 0){
-                image = './svg/field/?move=black';
+                image = './svg/field?move=black';
             }  else {
-                image = './svg/field/?move=white';
+                image = './svg/field?move=white';
             }
         } else {
             image = './svg/field';
@@ -22,8 +22,8 @@ function update_fields(board) {
         $('#board img').eq(i).attr('src', image);
     }
 
-    $('.white_disc_count').attr('src', './svg/field/?disc=white&text=' + board.white.length);
-    $('.black_disc_count').attr('src', './svg/field/?disc=black&text=' + board.black.length);
+    $('.white_disc_count').attr('src', './svg/field?disc=white&text=' + board.white.length);
+    $('.black_disc_count').attr('src', './svg/field?disc=black&text=' + board.black.length);
 }
 
 function get_flippable_discs(board, move) {
@@ -201,7 +201,7 @@ $(function(){
         }
     }
 
-    $('#board td').append('<img src="./svg/field/" />');
+    $('#board td').append('<img src="./svg/field" />');
 
     // deep copy
     state.board = JSON.parse(JSON.stringify(start_board));
@@ -211,7 +211,13 @@ $(function(){
     if (ws) {
         return false;
     }
-    ws = new WebSocket('wss://' + window.location.host + window.location.pathname + 'ws/');
+
+    let ws_protocol = 'wss://';
+    if(window.location.protocol == 'http:') {
+        ws_protocol =  'ws://';
+    }
+
+    ws = new WebSocket(ws_protocol + window.location.host + window.location.pathname + 'ws');
 
     ws.onclose = function(evt) {
     };
@@ -246,7 +252,7 @@ $(function(){
                 let move = message.data.move;
                 let heuristic = message.data.heuristic;
 
-                let img_url = window.location.protocol + "//" + window.location.host + window.location.pathname + 'svg/field/?text=' + heuristic;
+                let img_url = window.location.protocol + "//" + window.location.host + window.location.pathname + 'svg/field?text=' + heuristic;
                 console.log(state.board.turn);
                 if(state.board.turn === 1){
                     img_url += "&textcolor=white"
@@ -353,15 +359,15 @@ $(document).on('click', 'button#xot_game', function(){
 $(document).on('click', 'button#undo_move', function(){
 
     for(let i = board_history.length - 1; i >= 0; i--){
-        let turn = board_history[i].turn; 
+        let turn = board_history[i].turn;
         if((turn === 1 && state.players.white !== 'bot') || (turn === 0 && state.players.black !== 'bot')){
             request_analysis_stop();
             state.board = board_history[i];
             board_history = board_history.slice(0, i);
             update_fields(state.board);
-            request_ws_move();  
+            request_ws_move();
             return;
         }
     }
-    
+
 });

@@ -110,14 +110,23 @@ func svgIcon(w http.ResponseWriter, _ *http.Request) {
 	canvas.End()
 }
 
+// TODO replace by something better
+type logger struct{}
+
+func (logger logger) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	log.Printf("%s %s", req.Method, req.URL.String())
+	http.DefaultServeMux.ServeHTTP(w, req)
+}
+
 // Main initializes and runs the dots webserver
 func Main() {
 	http.HandleFunc("/ws", ws)
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("internal/web/static"))))
-	http.HandleFunc("/svg/field/", svgField)
-	http.HandleFunc("/svg/icon/", svgIcon)
+	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("internal/web/static"))))
+	http.HandleFunc("/svg/field", svgField)
+	http.HandleFunc("/svg/icon", svgIcon)
 	http.HandleFunc("/", root)
 	addr := "0.0.0.0:8080"
 	log.Printf("Server running at %s", addr)
-	log.Fatal(http.ListenAndServe(addr, nil))
+
+	log.Fatal(http.ListenAndServe(addr, &logger{}))
 }
