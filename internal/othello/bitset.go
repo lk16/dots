@@ -3,7 +3,6 @@ package othello
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"math/bits"
 )
 
@@ -50,17 +49,17 @@ func (bs BitSet) Len() int {
 // Set sets a bit on a given offset.
 func (bs *BitSet) Set(offset uint) {
 	if offset >= 64 {
-		log.Fatalf("BitSet.Set() called with offset %d.\n", offset)
+		panic("bit offset out of range")
 	}
-	*bs |= BitSet(1) << uint(offset)
+	*bs |= BitSet(1) << offset
 }
 
 // Test returns whether a bit at a given offset is set
 func (bs BitSet) Test(offset uint) bool {
 	if offset >= 64 {
-		log.Fatalf("BitSet.Test() called with offset %d.\n", offset)
+		panic("bit offset out of range")
 	}
-	mask := BitSet(1) << uint(offset)
+	mask := BitSet(1) << offset
 	return bs&mask != 0
 }
 
