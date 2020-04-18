@@ -10,20 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func boardIsValid(board *Board) bool {
-
-	// no field can be occupied by two discs
-	if (board.me & board.opp) != 0 {
-		return false
-	}
-
-	// start discs are never removed
-	startBoard := NewBoard()
-	startMask := startBoard.me | startBoard.opp
-
-	return (board.me|board.opp)&startMask == startMask
-}
-
 // Test othello generator
 func genTestBoards() chan Board {
 	ch := make(chan Board)
@@ -89,6 +75,28 @@ func genTestBoards() chan Board {
 	return ch
 }
 
+func TestNewCustomBoard(t *testing.T) {
+	expected := Board{
+		me:  0x0F,
+		opp: 0x30,
+	}
+	got := *NewCustomBoard(expected.me, expected.opp)
+	assert.Equal(t, expected, got)
+}
+
+func TestBoardGetMoveField(t *testing.T) {
+	parent := *NewBoard()
+	child := parent
+	child.DoMove(1 << 19)
+
+	moveID, ok := parent.GetMoveField(child)
+	assert.True(t, ok)
+	assert.Equal(t, 19, moveID)
+
+	moveID, ok = parent.GetMoveField(parent)
+	assert.False(t, ok)
+}
+
 func TestRandomBoard(t *testing.T) {
 	for discs := 4; discs <= 64; discs++ {
 
@@ -100,7 +108,6 @@ func TestRandomBoard(t *testing.T) {
 		got := (board.me | board.opp).Count()
 
 		assert.Equal(t, expected, got)
-		assert.True(t, boardIsValid(board))
 	}
 
 	board, err := NewRandomBoard(3)
@@ -203,10 +210,6 @@ func TestBoardMoves(t *testing.T) {
 		// create copy to silence warnings
 		board := b
 
-		if !boardIsValid(&board) {
-			continue
-		}
-
 		clone := board
 		expected := boardMoves(board)
 
@@ -236,10 +239,6 @@ func TestBoardGetChildren(t *testing.T) {
 		// create copy to silence warnings
 		board := b
 
-		if !boardIsValid(&board) {
-			continue
-		}
-
 		expected := board.getChildren()
 
 		discs := board.me | board.opp
@@ -259,13 +258,7 @@ func TestBoardGetChildren(t *testing.T) {
 
 			// pieces shouldn't be removed
 			assert.Equal(t, discs, childDiscs&discs)
-
-			// create copy to silence warnings
-			childCopy := child
-
-			assert.True(t, boardIsValid(&childCopy))
 		}
-
 	}
 }
 
@@ -330,10 +323,6 @@ func TestBoardDoRandomMove(t *testing.T) {
 		}
 
 		assert.Contains(t, board.GetChildren(), child)
-
-		if boardIsValid(&board) {
-			assert.True(t, boardIsValid(&child))
-		}
 	}
 }
 
@@ -445,7 +434,6 @@ func TestBoardNewBoard(t *testing.T) {
 	got := *NewBoard()
 
 	assert.Equal(t, expected, got)
-	assert.True(t, boardIsValid(&got))
 }
 
 func TestBoardOpponentMoves(t *testing.T) {
@@ -471,6 +459,28 @@ func TestBoardNormalize(t *testing.T) {
 			assert.Equal(t, expected, got)
 		}
 	}
+}
+
+func TestPotentialMoves(t *testing.T) {
+	b := NewBoard()
+	assert.Equal(t, BitSet(0x00003824241C0000), potentialMoves(b.me, b.opp))
+
+	b = NewCustomBoard(0x01, 0x0302)
+	assert.Equal(t, BitSet(0x070404), potentialMoves(b.me, b.opp))
+
+	b = &Board{}
+	assert.Equal(t, BitSet(0), potentialMoves(b.me, b.opp))
+}
+
+func TestBoardPotentialMoveCountDifference(t *testing.T) {
+	b := NewBoard()
+	assert.Equal(t, 0, b.PotentialMoveCountDifference())
+
+	b = NewCustomBoard(0x01, 0x0302)
+	assert.Equal(t, 5, b.PotentialMoveCountDifference())
+
+	b = &Board{}
+	assert.Equal(t, 0, b.PotentialMoveCountDifference())
 }
 
 var dummy int

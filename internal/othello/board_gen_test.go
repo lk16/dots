@@ -13,10 +13,6 @@ func TestBoardChildGenNext(t *testing.T) {
 		// create copy to silence warnings
 		board := b
 
-		if !boardIsValid(&board) {
-			continue
-		}
-
 		children := board.GetChildren()
 
 		clone := board

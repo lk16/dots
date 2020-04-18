@@ -11,6 +11,8 @@ const (
 	cornerMask  = BitSet(1<<0 | 1<<7 | 1<<56 | 1<<63)
 	xSquareMask = BitSet(1<<9 | 1<<14 | 1<<49 | 1<<54)
 	cSquareMask = BitSet(1<<1 | 1<<6 | 1<<8 | 1<<15 | 1<<48 | 1<<55 | 1<<57 | 1<<62)
+
+	startDiscsMask = BitSet(1<<27 | 1<<28 | 1<<35 | 1<<36)
 )
 
 var (
@@ -240,7 +242,7 @@ func moves(me, opp BitSet) BitSet {
 	flipR |= maskR & (flipR >> (2 * 8))
 	movesSet |= (flipL << 8) | (flipR >> 8)
 
-	movesSet &^= me | opp
+	movesSet &^= me | opp | startDiscsMask
 	return movesSet
 }
 
