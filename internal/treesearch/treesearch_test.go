@@ -2,9 +2,10 @@ package treesearch
 
 import (
 	"fmt"
-	"github.com/lk16/dots/internal/othello"
 	"math/rand"
 	"testing"
+
+	"github.com/lk16/dots/internal/othello"
 )
 
 func TestFormatBigNumber(t *testing.T) {
@@ -74,7 +75,7 @@ func TestTreeSearch(t *testing.T) {
 	mtdf := NewMtdf()
 	pvs := NewPvs()
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 10; i++ {
 		for discs := 4; discs < 64; discs++ {
 
 			board, err := othello.NewRandomBoard(discs)
@@ -90,16 +91,11 @@ func TestTreeSearch(t *testing.T) {
 
 			testedBoards[normalized] = struct{}{}
 
-			if len(testedBoards)%1000 == 0 {
-				fmt.Printf("\rTesting board %10d", len(testedBoards))
-			}
-
 			for depth := 0; depth < 4; depth++ {
 				internal(t, depth, *board, minimax, mtdf, pvs, len(testedBoards))
 			}
 		}
 	}
-	fmt.Printf("\rTesting board %10d\n", len(testedBoards))
 }
 
 func TestTreeSearchExact(t *testing.T) {
@@ -129,7 +125,7 @@ func TestTreeSearchExact(t *testing.T) {
 	mtdf := NewMtdf()
 	pvs := NewPvs()
 
-	for i := 0; i < 2000; i++ {
+	for i := 0; i < 20; i++ {
 		for discs := 56; discs < 64; discs++ {
 
 			board, err := othello.NewRandomBoard(discs)
@@ -145,12 +141,7 @@ func TestTreeSearchExact(t *testing.T) {
 
 			testedBoards[normalized] = struct{}{}
 
-			if len(testedBoards)%10 == 0 {
-				fmt.Printf("\rTesting board %10d", len(testedBoards))
-			}
-
 			internal(t, *board, minimax, mtdf, pvs, len(testedBoards))
 		}
 	}
-	fmt.Printf("\rTesting board %10d\n", len(testedBoards))
 }

@@ -7,26 +7,6 @@ import (
 	"math/bits"
 )
 
-// MostSignificantBit returns the most significant bit in a bitset
-func MostSignificantBit(x uint64) uint64 {
-
-	shift := uint(0)
-
-	if x >= 1<<32 {
-		x >>= 32
-		shift += 32
-	}
-	if x >= 1<<16 {
-		x >>= 16
-		shift += 16
-	}
-	if x >= 1<<8 {
-		x >>= 8
-		shift += 8
-	}
-	return msb8tab[x] << shift
-}
-
 // BitSet contains 64 bits for efficient Board computations
 type BitSet uint64
 
@@ -52,11 +32,6 @@ func (bs BitSet) String() string {
 	_, _ = buffer.WriteString("+-----------------+\n")
 
 	return buffer.String()
-}
-
-// Log logs an ASCII-art string representation of a BitSet
-func (bs BitSet) Log() {
-	log.Printf("%s", bs.String())
 }
 
 // Count returns the number of set bits
@@ -93,25 +68,6 @@ func (bs BitSet) Lowest() int {
 	return bits.TrailingZeros64(uint64(bs))
 }
 
-var msb8tab = [256]uint64{
-	0, 1, 2, 2, 4, 4, 4, 4, 8, 8, 8, 8, 8, 8, 8, 8,
-	16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16,
-	32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
-	32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
-	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-	128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128,
-	128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128,
-	128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128,
-	128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128,
-	128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128,
-	128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128,
-	128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128,
-	128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128}
-
-//
 var doMoveToLowerLookup = [64]BitSet{
 	// no bits are flipped if player to move has no discs on the inspected line
 	^(BitSet(0)),

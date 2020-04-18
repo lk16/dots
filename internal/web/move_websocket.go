@@ -117,7 +117,11 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 
 	for i := range analyzedChildren {
 
-		move := board.GetMoveField(children[i])
+		move, ok := board.GetMoveField(children[i])
+		if !ok {
+			// TODO handle better
+			log.Printf("warning: GetMoveField failed")
+		}
 
 		analyzedChildren[i] = analyzedChild{
 			child: children[i],

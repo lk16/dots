@@ -3,7 +3,6 @@ package othello
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"math/rand"
 )
 
@@ -18,12 +17,6 @@ const (
 // Instead it keeps track which discs are owned by the player to move.
 type Board struct {
 	me, opp BitSet
-}
-
-// SortableBoard is a board with associated heuristic estimation suitable for sorting
-type SortableBoard struct {
-	Board Board
-	Heur  int
 }
 
 // NewBoard returns a Board representing the initial state
@@ -112,13 +105,12 @@ func (board Board) rotate(rotation int) Board {
 }
 
 // GetMoveField computes the index of the move given a child and a parent
-func (board Board) GetMoveField(child Board) int {
+func (board Board) GetMoveField(child Board) (int, bool) {
 	moveBit := board.Me() | board.Opp() ^ (child.Me() | child.Opp())
-	count := moveBit.Count()
-	if count != 1 {
-		log.Fatalf("error in GetMoveField(): difference of %d bits", count)
+	if moveBit.Count() != 1 {
+		return 0, false
 	}
-	return moveBit.Lowest()
+	return moveBit.Lowest(), true
 }
 
 // Normalize returns a normalized othello with regards to symmetry
@@ -178,11 +170,6 @@ func (board Board) String() string {
 	_, _ = buffer.WriteString("Raw: " + fmt.Sprintf("%#v", board) + "\n")
 
 	return buffer.String()
-}
-
-// Log logs an ASCII-art representation of a board
-func (board Board) Log() {
-	log.Printf("%s", board.String())
 }
 
 // Moves returns a bitset of valid moves for a Board
@@ -646,24 +633,6 @@ func (board Board) GetChildren() []Board {
 
 		children[i] = board
 		children[i].DoMove(moveBit)
-	}
-	return children
-}
-
-// GetSortableChildren returns a slice with all children of a Board
-// such that they can easily be sorted
-func (board Board) GetSortableChildren() []SortableBoard {
-
-	moves := board.Moves()
-	children := make([]SortableBoard, moves.Count())
-
-	for i := range children {
-		moveBit := moves & (-moves)
-		moves &^= moveBit
-
-		children[i].Board = board
-		children[i].Board.DoMove(moveBit)
-		children[i].Heur = 0
 	}
 	return children
 }
