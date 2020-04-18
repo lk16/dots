@@ -252,12 +252,53 @@ func moves(me, opp BitSet) BitSet {
 	return movesSet
 }
 
+var flipTable = [64]byte{
+	0x00, 0x01, 0x00, 0x03, 0x00, 0x01, 0x00, 0x07,
+	0x00, 0x01, 0x00, 0x03, 0x00, 0x01, 0x00, 0x0F,
+	0x00, 0x01, 0x00, 0x03, 0x00, 0x01, 0x00, 0x07,
+	0x00, 0x01, 0x00, 0x03, 0x00, 0x01, 0x00, 0x1F,
+	0x00, 0x01, 0x00, 0x03, 0x00, 0x01, 0x00, 0x07,
+	0x00, 0x01, 0x00, 0x03, 0x00, 0x01, 0x00, 0x0F,
+	0x00, 0x01, 0x00, 0x03, 0x00, 0x01, 0x00, 0x07,
+	0x00, 0x01, 0x00, 0x03, 0x00, 0x01, 0x00, 0x3F,
+}
+
+func (board *Board) doMove0Right() BitSet {
+
+	oppShifted := (board.opp >> 1) & 0x3F
+	lookup := BitSet(flipTable[oppShifted])
+	meBitNeeded := (lookup + 1) << 1
+
+	mask := (meBitNeeded & board.me) - 1
+	mask += (mask >> 63)
+
+	return (lookup << 1) & mask
+}
+
+func (board *Board) doMove0Down() BitSet {
+
+	oppShifted := board.opp & 0x0000010101010101
+	oppShifted |= (oppShifted & 0x0000010101000000) >> 21
+	oppShifted |= (oppShifted & 0x0000000000010000) >> 14
+	oppShifted |= (oppShifted & 0x0000000000000100) >> 7
+	log.Printf("oppShifted\n%s", oppShifted.String())
+	oppShifted &= 0x3F
+
+	lookup := BitSet(flipTable[oppShifted])
+	meBitNeeded := (lookup + 1) << 1
+
+	mask := (meBitNeeded & board.me) - 1
+	mask += (mask >> 63)
+
+	return (lookup << 1) & mask
+}
+
 // DoMove does a move and returns the flipped discs
 func (board *Board) DoMove(moveBit BitSet) BitSet {
 
 	var flipped BitSet
-
 	switch moveBit {
+
 	case BitSet(1 << 0):
 		flipped = board.doMoveToHigherBits(0x00000000000000FE)
 		flipped |= board.doMoveToHigherBits(0x0101010101010100)
@@ -796,4 +837,78 @@ func (board *Board) doMoveToLowerBits(line BitSet) BitSet {
 	}
 
 	return potentiallyFlipped
+}
+
+// BoardWithTurn is a Board annotated with a turn
+type BoardWithTurn struct {
+	Board
+	Turn int
+}
+
+// NewBoardWithTurn initializes a Board with black to move
+func NewBoardWithTurn() *BoardWithTurn {
+	return &BoardWithTurn{
+		Board: *NewBoard(),
+		Turn:  0,
+	}
+}
+
+// DoMove does a move and updates the turn if necessary
+func (board *BoardWithTurn) DoMove(moveBit BitSet) BitSet {
+	flipped := board.Board.DoMove(moveBit)
+
+	if board.Moves().Count() == 0 {
+		board.SwitchTurn()
+	} else {
+		board.Turn = 1 - board.Turn
+	}
+
+	return flipped
+}
+
+// String returns an ASCII-art representation of the BoardWithTurn
+func (board BoardWithTurn) String() string {
+
+	buffer := new(bytes.Buffer)
+	_, _ = buffer.WriteString("+-a-b-c-d-e-f-g-h-+\n")
+
+	moves := board.Moves()
+
+	me := board.me
+	opp := board.opp
+
+	if board.Turn != 0 {
+		me, opp = opp, me
+	}
+
+	for y := uint(0); y < 8; y++ {
+		_, _ = buffer.WriteString(fmt.Sprintf("%d ", y+1))
+
+		for x := uint(0); x < 8; x++ {
+			mask := BitSet(1) << (y*8 + x)
+			if me&mask != 0 {
+				_, _ = buffer.WriteString("○ ")
+			} else if opp&mask != 0 {
+				_, _ = buffer.WriteString("● ")
+			} else if moves&mask != 0 {
+				_, _ = buffer.WriteString("- ")
+			} else {
+				_, _ = buffer.WriteString("  ")
+			}
+		}
+
+		_, _ = buffer.WriteString("|\n")
+	}
+
+	_, _ = buffer.WriteString("+-----------------+\n")
+
+	turnRune := "○"
+	if board.Turn == 1 {
+		turnRune = "●"
+	}
+
+	_, _ = buffer.WriteString("To move: " + turnRune + "\n")
+	_, _ = buffer.WriteString("Raw: " + fmt.Sprintf("%#v", board) + "\n")
+
+	return buffer.String()
 }

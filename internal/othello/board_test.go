@@ -653,3 +653,115 @@ func BenchmarkGetChildrenXot(b *testing.B) {
 	}
 	b.StopTimer()
 }
+
+func TestDoMove0Right(t *testing.T) {
+
+	rand.Seed(0)
+	i := 0
+	for i < 100000 {
+
+		board := Board{
+			me:  BitSet(rand.Intn(256)),
+			opp: BitSet(rand.Intn(256)),
+		}
+
+		board.me &= 0xFE
+		board.opp &= 0xFE
+
+		if board.me&board.opp != 0 {
+			continue
+		}
+
+		if board.opp >= board.me {
+			continue
+		}
+
+		copy := board
+		lhs := board.DoMove(1 << 0)
+
+		board = copy
+		rhs := board.doMove0Right()
+
+		board = copy
+
+		if lhs != rhs {
+			log.Printf(board.String())
+			log.Printf(lhs.String())
+			log.Printf(rhs.String())
+			t.FailNow()
+		}
+
+		i++
+	}
+}
+
+func TestDoMove0Down(t *testing.T) {
+
+	rand.Seed(0)
+	i := 0
+	for i < 100000 {
+
+		board := Board{
+			me:  BitSet(rand.Uint64()),
+			opp: BitSet(rand.Uint64()),
+		}
+
+		board.me &= 0x0101010101010100
+		board.opp &= 0x0101010101010100
+
+		if board.me&board.opp != 0 {
+			continue
+		}
+
+		if board.opp >= board.me {
+			continue
+		}
+
+		copy := board
+		lhs := board.DoMove(1 << 0)
+
+		board = copy
+		rhs := board.doMove0Down()
+
+		board = copy
+
+		if lhs != rhs {
+			log.Printf("\n%s", board.String())
+			log.Printf("\n%s", lhs.String())
+			log.Printf("\n%s", rhs.String())
+			t.FailNow()
+		}
+
+		i++
+	}
+}
+
+var dummyBitSet BitSet
+
+func BenchmarkDoMove0Right(b *testing.B) {
+	var board Board
+	for i := 0; i < b.N; i++ {
+		board.me = BitSet(rand.Intn(256))
+		board.opp = BitSet(rand.Intn(256))
+		board.me &^= board.opp
+
+		board.me &^= (1 << 0)
+		board.opp &^= (1 << 0)
+
+		dummyBitSet = board.doMove0Right()
+	}
+}
+
+func BenchmarkDoMove(b *testing.B) {
+	var board Board
+	for i := 0; i < b.N; i++ {
+		board.me = BitSet(rand.Intn(256))
+		board.opp = BitSet(rand.Intn(256))
+		board.me &^= board.opp
+
+		board.me &^= (1 << 0)
+		board.opp &^= (1 << 0)
+
+		dummyBitSet = board.DoMove(1 << 0)
+	}
+}
