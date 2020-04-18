@@ -3,6 +3,7 @@ package web
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/lk16/dots/internal/othello"
 )
 
@@ -107,14 +108,14 @@ func (s *boardState) getBoard() (*othello.Board, int, error) {
 		if w < 0 || w >= 64 {
 			return nil, 0, fmt.Errorf("invalid white field value %d", w)
 		}
-		white.Set(w)
+		white.Set(uint(w))
 	}
 
 	for _, b := range s.Black {
 		if b < 0 || b >= 64 {
 			return nil, 0, fmt.Errorf("invalid black field value %d", b)
 		}
-		black.Set(b)
+		black.Set(uint(b))
 	}
 
 	if white&black != 0 {

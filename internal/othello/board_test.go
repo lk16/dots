@@ -32,8 +32,8 @@ func genTestBoards() chan Board {
 		// generate all boards with all flipping lines from each square
 
 		// for each field
-		for y := 0; y < 8; y++ {
-			for x := 0; x < 8; x++ {
+		for y := uint(0); y < 8; y++ {
+			for x := uint(0); x < 8; x++ {
 				board := Board{}
 				board.me.Set(y*8 + x)
 
@@ -49,15 +49,15 @@ func genTestBoards() chan Board {
 						for d := 1; d <= 6; d++ {
 
 							// check if me can still flip within othello boundaries
-							py := y + (d+1)*dy
-							px := x + (d+1)*dx
+							py := int(y) + (d+1)*dy
+							px := int(x) + (d+1)*dx
 
 							if (py < 0) || (py > 7) || (px < 0) || (px > 7) {
 								break
 							}
 
-							qy := y + d*dy
-							qx := x + d*dx
+							qy := y + uint(d*dy)
+							qx := x + uint(d*dx)
 
 							board.opp.Set(qy*8 + qx)
 
@@ -115,7 +115,7 @@ func TestRandomBoard(t *testing.T) {
 func TestBoardDoMove(t *testing.T) {
 
 	doMove := func(board *Board, index uint) BitSet {
-		if (board.me | board.opp).Test(int(index)) {
+		if (board.me | board.opp).Test(index) {
 			return 0
 		}
 		flipped := BitSet(0)
@@ -128,16 +128,18 @@ func TestBoardDoMove(t *testing.T) {
 				for {
 					curx := int(index%8) + (dx * s)
 					cury := int(index/8) + (dy * s)
-					cur := 8*cury + curx
 					if curx < 0 || curx >= 8 || cury < 0 || cury >= 8 {
 						break
 					}
+
+					cur := uint(8*cury + curx)
+
 					if board.opp.Test(cur) {
 						s++
 					} else {
 						if board.me.Test(cur) && (s >= 2) {
 							for p := 1; p < s; p++ {
-								f := int(index) + (p * (8*dy + dx))
+								f := index + uint(p*(8*dy+dx))
 								flipped.Set(f)
 							}
 						}
@@ -147,7 +149,7 @@ func TestBoardDoMove(t *testing.T) {
 			}
 		}
 		board.me |= flipped
-		board.me.Set(int(index))
+		board.me.Set(index)
 		board.opp &= ^board.me
 		board.opp, board.me = board.me, board.opp
 		return flipped
@@ -158,7 +160,7 @@ func TestBoardDoMove(t *testing.T) {
 		for i := uint(0); i < 64; i++ {
 
 			// othello.DoMove() should not be called for invalid moves
-			if !moves.Test(int(i)) {
+			if !moves.Test(i) {
 				continue
 			}
 
@@ -187,9 +189,9 @@ func TestBoardMoves(t *testing.T) {
 		moves := BitSet(0)
 		empties := ^(board.me | board.opp)
 
-		for i := 0; i < 64; i++ {
+		for i := uint(0); i < 64; i++ {
 			clone := board
-			if empties.Test(i) && clone.DoMove(1<<uint(i)) != 0 {
+			if empties.Test(i) && clone.DoMove(1<<i) != 0 {
 				moves.Set(i)
 			}
 		}
@@ -221,7 +223,7 @@ func (board *Board) getChildren() []Board {
 	empties := board.me | board.opp
 	for i := uint(0); i < 64; i++ {
 		clone := *board
-		if clone.DoMove(1<<i) != 0 && !empties.Test(int(i)) {
+		if clone.DoMove(1<<i) != 0 && !empties.Test(i) {
 			children = append(children, clone)
 		}
 	}
@@ -278,10 +280,11 @@ func TestBoardAsciiArt(t *testing.T) {
 
 		expected.WriteString("+-a-b-c-d-e-f-g-h-+\n")
 
-		for y := 0; y < 8; y++ {
+		for y := uint(0); y < 8; y++ {
 			expected.WriteString(fmt.Sprintf("%d ", y+1))
 
-			for x := 0; x < 8; x++ {
+			for x := uint(0); x < 8; x++ {
+
 				if clone.me.Test(8*y + x) {
 					expected.WriteString("○ ")
 				} else if clone.opp.Test(8*y + x) {

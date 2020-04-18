@@ -15,12 +15,14 @@ func (bs BitSet) String() string {
 	var buffer bytes.Buffer
 	_, _ = buffer.WriteString("+-a-b-c-d-e-f-g-h-+\n")
 
-	for y := uint(0); y < 8; y++ {
+	for y := 0; y < 8; y++ {
 		_, _ = buffer.WriteString(fmt.Sprintf("%d ", y+1))
 
-		for x := uint(0); x < 8; x++ {
-			f := y*8 + x
-			if uint64(bs)&uint64(1<<f) != 0 {
+		for x := 0; x < 8; x++ {
+
+			f := uint(y*8 + x)
+
+			if bs.Test(f) {
 				_, _ = buffer.WriteString("@ ")
 			} else {
 				_, _ = buffer.WriteString("- ")
@@ -46,16 +48,16 @@ func (bs BitSet) Len() int {
 }
 
 // Set sets a bit on a given offset.
-func (bs *BitSet) Set(offset int) {
-	if offset < 0 || offset >= 64 {
+func (bs *BitSet) Set(offset uint) {
+	if offset >= 64 {
 		log.Fatalf("BitSet.Set() called with offset %d.\n", offset)
 	}
 	*bs |= BitSet(1) << uint(offset)
 }
 
 // Test returns whether a bit at a given offset is set
-func (bs BitSet) Test(offset int) bool {
-	if offset < 0 || offset >= 64 {
+func (bs BitSet) Test(offset uint) bool {
+	if offset >= 64 {
 		log.Fatalf("BitSet.Test() called with offset %d.\n", offset)
 	}
 	mask := BitSet(1) << uint(offset)
