@@ -2,6 +2,7 @@ package othello
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"math/rand"
 )
@@ -10,6 +11,11 @@ const (
 	cornerMask  = BitSet(1<<0 | 1<<7 | 1<<56 | 1<<63)
 	xSquareMask = BitSet(1<<9 | 1<<14 | 1<<49 | 1<<54)
 	cSquareMask = BitSet(1<<1 | 1<<6 | 1<<8 | 1<<15 | 1<<48 | 1<<55 | 1<<57 | 1<<62)
+)
+
+var (
+	// ErrInvalidDiscAmount is used when an unexpected amount of discs is requested
+	ErrInvalidDiscAmount = errors.New("cannot create board with requested amount of discs")
 )
 
 // Board represents the state of an othello othello game.
@@ -37,8 +43,7 @@ func NewCustomBoard(me, opp BitSet) (board *Board) {
 func NewRandomBoard(discs int) (*Board, error) {
 
 	if discs < 4 || discs > 64 {
-		err := fmt.Errorf("cannot create random board with %d discs", discs)
-		return nil, err
+		return nil, ErrInvalidDiscAmount
 	}
 
 	board := NewBoard()

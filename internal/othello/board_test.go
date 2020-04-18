@@ -6,6 +6,8 @@ import (
 	"log"
 	"math/rand"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func boardIsValid(board *Board) bool {
@@ -80,6 +82,8 @@ func genTestBoards() chan Board {
 			}
 		}
 
+		// TODO be sure we don't send any invalid boards
+
 		close(ch)
 	}()
 	return ch
@@ -91,30 +95,21 @@ func TestRandomBoard(t *testing.T) {
 		expected := discs
 
 		board, err := NewRandomBoard(discs)
-		if err != nil {
-			t.Error(err)
-		}
+		assert.Nil(t, err)
 
 		got := (board.me | board.opp).Count()
 
-		if expected != got {
-			t.Fatalf("Expected disc count %d, got %d\n", expected, got)
-		}
-
-		if !boardIsValid(board) {
-			t.Fatalf("Invalid othello:\n%s\n\n", board.String())
-		}
+		assert.Equal(t, expected, got)
+		assert.True(t, boardIsValid(board))
 	}
 
 	board, err := NewRandomBoard(3)
-	if err == nil {
-		t.Fatalf("Expected error, got nil\n%s\n\n", board.String())
-	}
+	assert.Nil(t, board)
+	assert.Equal(t, ErrInvalidDiscAmount, err)
 
 	board, err = NewRandomBoard(65)
-	if err == nil {
-		t.Fatalf("Expected error, got nil\n%s\n\n", board.String())
-	}
+	assert.Nil(t, board)
+	assert.Equal(t, ErrInvalidDiscAmount, err)
 }
 
 func TestBoardDoMove(t *testing.T) {
@@ -180,15 +175,8 @@ func TestBoardDoMove(t *testing.T) {
 			gotReturn := clone.DoMove(BitSet(1 << i))
 			gotBoard := clone
 
-			if (gotReturn != expectedReturn) || (gotBoard != expectedBoard) {
-				t.Errorf("Doing move %c%d on othello\n%s\n", 'a'+i%8, (i/8)+1,
-					board.String())
-				t.Errorf("Expected return value:\n%s\n\nGot:\n%s\n\n",
-					BitSet(expectedReturn).String(), BitSet(gotReturn).String())
-				t.Errorf("Expected othello:\n%s\n\nGot:\n%s\n\n",
-					expectedBoard.String(), gotBoard.String())
-				t.FailNow()
-			}
+			assert.Equal(t, expectedBoard, gotBoard)
+			assert.Equal(t, expectedReturn, gotReturn)
 		}
 	}
 }
@@ -221,15 +209,10 @@ func TestBoardMoves(t *testing.T) {
 		expected := boardMoves(board)
 
 		got := clone.Moves()
-		if expected != got {
-			t.Errorf("For othello\n%s", board.String())
-			t.Fatalf("Expected:\n%s\n\nGot:\n%s\n\n",
-				BitSet(expected).String(), BitSet(got).String())
-		}
-		if clone != board {
-			t.Fatalf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
-				board.String(), clone.String())
-		}
+		assert.Equal(t, expected, got)
+
+		// board shouldn't change
+		assert.Equal(t, board, clone)
 	}
 }
 
@@ -256,47 +239,29 @@ func TestBoardGetChildren(t *testing.T) {
 		}
 
 		expected := board.getChildren()
-		expectedSet := make(map[Board]struct{}, 10)
-		for _, e := range expected {
-			expectedSet[e] = struct{}{}
-		}
 
 		discs := board.me | board.opp
 
 		clone := board
 		got := clone.GetChildren()
 
-		if clone != board {
-			t.Fatalf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
-				board.String(), clone.String())
-		}
+		// board shouldn't change
+		assert.Equal(t, board, clone)
+
+		// children set should be matching expected children set
+		assert.ElementsMatch(t, expected, got)
 
 		for _, child := range got {
 
 			childDiscs := child.me | child.opp
 
-			if (childDiscs & discs) != discs {
-				t.Fatalf("Pieces were removed from othello with othello.GetChildren()\n")
-			}
+			// pieces shouldn't be removed
+			assert.Equal(t, discs, childDiscs&discs)
 
 			// create copy to silence warnings
 			childCopy := child
 
-			if !boardIsValid(&childCopy) {
-				t.Fatalf("Valid othello:\n%s\n\nInvalid child:\n%s\n\n",
-					board.String(), child.String())
-			}
-
-		}
-
-		if len(got) != len(expected) {
-			t.Fatalf("Expected %d children, got %d.\n", len(expected), len(got))
-		}
-
-		for _, g := range got {
-			if _, ok := expectedSet[g]; !ok {
-				t.Fatalf("Children sets are unequal.\n")
-			}
+			assert.True(t, boardIsValid(&childCopy))
 		}
 
 	}
@@ -338,16 +303,10 @@ func TestBoardAsciiArt(t *testing.T) {
 		clone = board
 		got.WriteString(board.String())
 
-		if clone != board {
-			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
-				board.String(), clone.String())
-		}
+		// board should not change
+		assert.Equal(t, board, clone)
 
-		if got.String() != expected.String() {
-			t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
-				expected.String(), got.String())
-		}
-
+		assert.Equal(t, expected, got)
 	}
 }
 
@@ -357,35 +316,20 @@ func TestBoardDoRandomMove(t *testing.T) {
 		// make copy to silence warnings
 		board := b
 
-		clone := board
+		child := board
 
-		clone.DoRandomMove()
+		child.DoRandomMove()
 
 		if board.Moves() == 0 {
 			// no moves means no change
-			if clone != board {
-				t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
-					board.String(), clone.String())
-			}
+			assert.Equal(t, child, board)
 			continue
 		}
 
-		found := false
-		for _, child := range board.GetChildren() {
-			if clone == child {
-				found = true
-				break
-			}
-		}
+		assert.Contains(t, board.GetChildren(), child)
 
-		if !found {
-			t.Errorf("Expected child of:\n%s\n\nGot:\n%s\n\n",
-				board.String(), clone.String())
-		}
-
-		if boardIsValid(&board) && !boardIsValid(&clone) {
-			t.Errorf("Found othello:\n%s\n\nWith invalid child:\n%s\n\n",
-				board.String(), clone.String())
+		if boardIsValid(&board) {
+			assert.True(t, boardIsValid(&child))
 		}
 	}
 }
@@ -399,11 +343,7 @@ func TestBoardSwitchTurn(t *testing.T) {
 		got := board
 		got.SwitchTurn()
 
-		if expected != got {
-			t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
-				expected.String(), got.String())
-			t.FailNow()
-		}
+		assert.Equal(t, expected, got)
 	}
 }
 
@@ -414,14 +354,10 @@ func TestBoardCountDiscs(t *testing.T) {
 		clone := board
 		got := clone.CountDiscs()
 
-		if clone != board {
-			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
-				board.String(), clone.String())
-		}
+		// board should not change
+		assert.Equal(t, board, clone)
 
-		if expected != got {
-			t.Errorf("Expected %d discs, got %d\n", expected, got)
-		}
+		assert.Equal(t, expected, got)
 	}
 }
 
@@ -432,14 +368,10 @@ func TestBoardCountEmpties(t *testing.T) {
 		clone := board
 		got := clone.CountEmpties()
 
-		if clone != board {
-			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
-				board.String(), clone.String())
-		}
+		// board should not change
+		assert.Equal(t, board, clone)
 
-		if expected != got {
-			t.Errorf("Expected %d discs, got %d\n", expected, got)
-		}
+		assert.Equal(t, expected, got)
 	}
 }
 
@@ -461,14 +393,11 @@ func TestBoardExactScore(t *testing.T) {
 
 		clone := board
 		got := clone.ExactScore()
-		if clone != board {
-			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
-				board.String(), clone.String())
-		}
 
-		if expected != got {
-			t.Errorf("Expected %d, got %d\n", expected, got)
-		}
+		// board shouldn't change
+		assert.Equal(t, board, clone)
+
+		assert.Equal(t, expected, got)
 	}
 }
 
@@ -479,15 +408,10 @@ func TestBoardMe(t *testing.T) {
 		clone := board
 		got := clone.Me()
 
-		if clone != board {
-			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
-				board.String(), clone.String())
-		}
+		// board shouldn't change
+		assert.Equal(t, board, clone)
 
-		if expected != got {
-			t.Errorf("Expected %s, got %s\n",
-				BitSet(expected).String(), BitSet(got).String())
-		}
+		assert.Equal(t, expected, got)
 	}
 }
 
@@ -498,15 +422,10 @@ func TestBoardOpp(t *testing.T) {
 		clone := board
 		got := clone.Opp()
 
-		if clone != board {
-			t.Errorf("Board was changed. Before:\n%s\n\nAfter\n%s\n\n",
-				board.String(), clone.String())
-		}
+		// board shouldn't change
+		assert.Equal(t, board, clone)
 
-		if expected != got {
-			t.Errorf("Expected %v, got %v\n",
-				BitSet(expected).String(), BitSet(got).String())
-		}
+		assert.Equal(t, expected, got)
 	}
 }
 
@@ -522,14 +441,8 @@ func TestBoardNewBoard(t *testing.T) {
 
 	got := *NewBoard()
 
-	if expected != got {
-		t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
-			expected.String(), got.String())
-	}
-
-	if !boardIsValid(&got) {
-		t.Errorf("Start othello is invalid:\n%s\n\n", got.String())
-	}
+	assert.Equal(t, expected, got)
+	assert.True(t, boardIsValid(&got))
 }
 
 func TestBoardOpponentMoves(t *testing.T) {
@@ -541,9 +454,7 @@ func TestBoardOpponentMoves(t *testing.T) {
 		expected := clone.Moves()
 		got := board.OpponentMoves()
 
-		if expected != got {
-			t.Errorf("Expected %d, got %d", expected, got)
-		}
+		assert.Equal(t, expected, got)
 	}
 }
 
@@ -554,11 +465,7 @@ func TestBoardNormalize(t *testing.T) {
 		for r := 1; r < 8; r++ {
 			got := board.rotate(r).Normalize()
 
-			if expected != got {
-				t.Errorf("Expected:\n%s\n\nGot:\n%s\n\n",
-					expected.String(), got.String())
-				t.FailNow()
-			}
+			assert.Equal(t, expected, got)
 		}
 	}
 }
@@ -570,10 +477,7 @@ func TestBoardCornerCountDifference(t *testing.T) {
 		expected := (board.Me() & cornerMask).Count() - (board.Opp() & cornerMask).Count()
 		got := board.CornerCountDifference()
 
-		if expected != got {
-			t.Errorf("\n%s\n\nExpected: %d\nGot: %d\n", board.String(), expected, got)
-			t.FailNow()
-		}
+		assert.Equal(t, expected, got)
 	}
 }
 
@@ -591,10 +495,7 @@ func TestBoardXsquareCountDifference(t *testing.T) {
 	for board := range genTestBoards() {
 		expected := (board.Me() & xSquareMask).Count() - (board.Opp() & xSquareMask).Count()
 		got := board.XsquareCountDifference()
-		if expected != got {
-			t.Errorf("\n%s\n\nExpected: %d\nGot: %d\n", board.String(), expected, got)
-			t.FailNow()
-		}
+		assert.Equal(t, expected, got)
 	}
 }
 
@@ -612,10 +513,8 @@ func TestBoardCsquareCountDifference(t *testing.T) {
 	for board := range genTestBoards() {
 		expected := (board.Me() & cSquareMask).Count() - (board.Opp() & cSquareMask).Count()
 		got := board.CsquareCountDifference()
-		if expected != got {
-			t.Errorf("\n%s\n\nExpected: %d\nGot: %d\n", board.String(), expected, got)
-			t.FailNow()
-		}
+
+		assert.Equal(t, expected, got)
 	}
 }
 

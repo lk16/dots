@@ -1,14 +1,12 @@
 package othello
 
 import (
-	"bytes"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBoardChildGenNext(t *testing.T) {
-	if testing.Short() {
-		t.SkipNow()
-	}
 
 	for b := range genTestBoards() {
 
@@ -19,48 +17,21 @@ func TestBoardChildGenNext(t *testing.T) {
 			continue
 		}
 
-		expectedSet := map[Board]struct{}{}
-
-		for _, child := range board.GetChildren() {
-			expectedSet[child] = struct{}{}
-		}
-
-		gotSet := map[Board]struct{}{}
+		children := board.GetChildren()
 
 		clone := board
 		gen := NewUnsortedChildGenerator(&clone)
 
+		var generatedChildren []Board
+
 		for gen.Next() {
-			gotSet[clone] = struct{}{}
+			generatedChildren = append(generatedChildren, clone)
 		}
 
-		if clone != board {
-			t.Errorf("Parent state not restored")
-		}
+		// parent state should be restored
+		assert.Equal(t, board, clone)
 
-		for g := range gotSet {
-			if _, ok := expectedSet[g]; !ok {
-				t.Errorf("Children sets are unequal.\n")
-				break
-			}
-		}
-
-		if t.Failed() {
-			buff := new(bytes.Buffer)
-			t.Errorf("Expected set (%d):\n", len(expectedSet))
-
-			for child := range expectedSet {
-				buff.WriteString(child.String() + "\n\n")
-			}
-			t.Errorf(buff.String())
-			buff.Reset()
-			t.Errorf("Got set (%d):\n", len(gotSet))
-			for child := range gotSet {
-				buff.WriteString(child.String() + "\n\n")
-			}
-			t.Errorf(buff.String())
-			break
-		}
+		assert.ElementsMatch(t, children, generatedChildren)
 	}
 }
 
@@ -69,25 +40,22 @@ func TestBoardChildGenRestoreParent(t *testing.T) {
 	gen := NewUnsortedChildGenerator(board)
 	gen.Next()
 	gen.RestoreParent()
-	if *board != *NewBoard() {
-		t.Errorf("Restore parent failed")
-	}
+
+	assert.Equal(t, *NewBoard(), *board)
 }
 
 func TestBoardChildGenHasMoves(t *testing.T) {
 	board := NewBoard()
 	gen := NewUnsortedChildGenerator(board)
-	if !gen.HasMoves() {
-		t.Errorf("Expected initial othello has moves")
-	}
+
+	// the start board should have moves
+	assert.True(t, gen.HasMoves())
 
 	board, err := NewRandomBoard(64)
-	if err != nil {
-		t.Errorf("Error generating random full board: %s", err)
-	}
+	assert.Nil(t, err)
+
 	gen = NewUnsortedChildGenerator(board)
 
-	if gen.HasMoves() {
-		t.Errorf("Expected full othello does not have moves")
-	}
+	// full board should not have moves
+	assert.False(t, gen.HasMoves())
 }
