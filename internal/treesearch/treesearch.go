@@ -21,8 +21,8 @@ const (
 	MinHeuristic = ExactScoreFactor * MinScore
 )
 
-// Interface is the interface for tree search algorithms
-type Interface interface {
+// Searcher is the interface for tree search algorithms
+type Searcher interface {
 	Name() string
 	Search(board othello.Board, alpha, beta, depth int) int
 	ExactSearch(board othello.Board, alpha, beta int) int

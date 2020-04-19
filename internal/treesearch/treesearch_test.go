@@ -50,7 +50,7 @@ func TestFormatBigNumber(t *testing.T) {
 
 func TestTreeSearch(t *testing.T) {
 
-	internal := func(t *testing.T, depth int, board othello.Board, minimax, mtdf, pvs Interface, testedBoards int) {
+	internal := func(t *testing.T, depth int, board othello.Board, minimax, mtdf, pvs Searcher, testedBoards int) {
 
 		minimaxResult := minimax.Search(board, MinHeuristic, MaxHeuristic, depth)
 		mtdfResult := mtdf.Search(board, MinHeuristic, MaxHeuristic, depth)
@@ -100,7 +100,7 @@ func TestTreeSearch(t *testing.T) {
 
 func TestTreeSearchExact(t *testing.T) {
 
-	internal := func(t *testing.T, board othello.Board, minimax, mtdf, pvs Interface, testedBoards int) {
+	internal := func(t *testing.T, board othello.Board, minimax, mtdf, pvs Searcher, testedBoards int) {
 
 		minimaxResult := minimax.ExactSearch(board, MinHeuristic, MaxHeuristic)
 		mtdfResult := mtdf.ExactSearch(board, MinHeuristic, MaxHeuristic)

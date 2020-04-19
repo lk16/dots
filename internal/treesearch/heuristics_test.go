@@ -1,8 +1,9 @@
 package treesearch
 
 import (
-	"github.com/lk16/dots/internal/othello"
 	"testing"
+
+	"github.com/lk16/dots/internal/othello"
 )
 
 var dummy int

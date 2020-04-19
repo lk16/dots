@@ -1,8 +1,9 @@
 package treesearch
 
 import (
-	"github.com/lk16/dots/internal/othello"
 	"sort"
+
+	"github.com/lk16/dots/internal/othello"
 )
 
 // Pvs implements the principal variation search algorithm

@@ -28,7 +28,7 @@ func (s *Stats) NodesPerSecond() uint64 {
 	duration := s.Duration.Seconds()
 
 	if duration == 0.0 {
-		return 0.0
+		return 0
 	}
 
 	return uint64(float64(s.Nodes) / duration)

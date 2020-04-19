@@ -1,11 +1,13 @@
 package treesearch
 
 import (
+	"errors"
 	"fmt"
-	"github.com/lk16/dots/internal/othello"
 	"io"
 	"log"
 	"sort"
+
+	"github.com/lk16/dots/internal/othello"
 )
 
 // Bot is a bot that uses a Heuristic for choosing its moves
@@ -13,18 +15,21 @@ type Bot struct {
 	searchDepth   int
 	exactDepth    int
 	writer        io.Writer
-	search        Interface
+	searcher      Searcher
 	LifetimeStats Stats
 }
 
+// ErrNoMoves means there were no moves for provided board
+var ErrNoMoves = errors.New("no moves possible")
+
 // NewBot creates a new Bot
-func NewBot(writer io.Writer, searchDepth, exactDepth int) *Bot {
+func NewBot(writer io.Writer, searchDepth, exactDepth int, searcher Searcher) *Bot {
 
 	return &Bot{
 		searchDepth: searchDepth,
 		exactDepth:  exactDepth,
 		writer:      writer,
-		search:      NewPvs()}
+		searcher:    searcher}
 }
 
 func (bot *Bot) write(format string, args ...interface{}) {
@@ -38,25 +43,10 @@ func (bot *Bot) write(format string, args ...interface{}) {
 // DoMove computes the best child of a Board
 func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 
-	isExact := bot.exactDepth >= board.CountEmpties()
-
-	var depth int
-	if isExact {
-		depth = board.CountEmpties()
-	} else {
-		depth = bot.searchDepth
-	}
-
-	if isExact {
-		bot.write("Searching for exact solution at depth %d\n", depth)
-	} else {
-		bot.write("Searching with heuristic at depth %d\n", depth)
-	}
-
 	children := board.GetSortableChildren()
 
 	if len(children) == 0 {
-		return nil, fmt.Errorf("no moves possible")
+		return nil, ErrNoMoves
 	}
 
 	// prevent returning empty Board when bot cannot prevent losing all discs
@@ -64,21 +54,38 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 
 	if len(children) == 1 {
 		bot.write("Only one move. Skipping evaluation.\n")
-		return &children[0].Board, nil
+		return &afterwards, nil
 	}
 
-	if (!isExact) && (depth > 6) {
-		for i := range children {
-			children[i].Heur = bot.search.Search(children[i].Board, MinHeuristic, MaxHeuristic, 6)
+	emptiesCount := board.CountEmpties()
+	isExact := bot.exactDepth >= emptiesCount
+
+	var depth int
+
+	if isExact {
+		depth = emptiesCount
+		bot.write("Searching for exact solution at depth %d\n", depth)
+	} else {
+		depth = bot.searchDepth
+		bot.write("Searching with heuristic at depth %d\n", depth)
+
+		if depth > 6 {
+			alpha := MinHeuristic
+			for i := range children {
+				children[i].Heur = bot.searcher.Search(children[i].Board, alpha, MaxHeuristic, 6)
+				if children[i].Heur > alpha {
+					alpha = children[i].Heur
+				}
+			}
+			sort.Slice(children, func(i, j int) bool {
+				return children[i].Heur > children[j].Heur
+			})
 		}
-		sort.Slice(children, func(i, j int) bool {
-			return children[i].Heur > children[j].Heur
-		})
 	}
 
-	sortStats := bot.search.GetStats()
+	sortStats := bot.searcher.GetStats()
 	bot.write("\n\n%12s %63s\n\n", "Sorting:", sortStats.String())
-	bot.search.ResetStats()
+	bot.searcher.ResetStats()
 
 	totalStats := sortStats
 
@@ -96,13 +103,13 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 
 		var heur int
 		if isExact {
-			heur = bot.search.ExactSearch(child.Board, alpha, beta)
+			heur = bot.searcher.ExactSearch(child.Board, alpha, beta)
 		} else {
-			heur = bot.search.Search(child.Board, alpha, beta, bot.searchDepth)
+			heur = bot.searcher.Search(child.Board, alpha, beta, bot.searchDepth)
 		}
 
-		childStats := bot.search.GetStats()
-		bot.search.ResetStats()
+		childStats := bot.searcher.GetStats()
+		bot.searcher.ResetStats()
 		totalStats.Add(childStats)
 		if heur > alpha {
 			alpha = heur
