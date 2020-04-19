@@ -163,7 +163,7 @@ func (bot *Bot) computeAndSendMove() (int, error) {
 	board := bot.playok.currentTable.board
 	bot.playok.RUnlock()
 
-	othelloBot := treesearch.NewBot(log.Writer(), 10, 18)
+	othelloBot := treesearch.NewBot(log.Writer(), 10, 18, treesearch.NewPvs())
 
 	move, err := othelloBot.DoMove(board.Board)
 	if err != nil {
