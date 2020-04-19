@@ -8,12 +8,9 @@ WORKDIR /app
 
 ADD . .
 
-# TODO this is ugly
-ADD ./assets /assets
-
 RUN go mod download
 
 ENV CGO_ENABLED 0
 RUN go install ./cmd/dots/main.go
 
-CMD go test -failfast -coverprofile=coverage.out ./internal/...
+CMD go test ./internal/...

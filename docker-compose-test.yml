@@ -6,7 +6,7 @@ version: '3'
 services:
 
   # App Service
-  dots:
+  dots_test:
     # Configuration for building the docker image for the service
     build:
       context: . # Use an image built from the specified dockerfile in the current directory.

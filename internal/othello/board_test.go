@@ -557,6 +557,9 @@ var dummyBoardSlice []Board
 
 func BenchmarkGetChildrenXot(b *testing.B) {
 	rand.Seed(0)
+	if err := LoadXot(); err != nil {
+		panic("loading xot boards failed: " + err.Error())
+	}
 	board := NewXotBoard()
 	b.ResetTimer()
 	b.StartTimer()

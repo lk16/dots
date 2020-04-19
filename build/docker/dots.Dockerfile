@@ -14,15 +14,7 @@ LABEL maintainer="Luuk Verweij <luuk_verweij@msn.com>"
 # Set the Current Working Directory inside the container
 WORKDIR /app
 
-# Copy go mod and sum files
-COPY go.mod go.sum ./
-
-# Download all dependancies. Dependencies will be cached if the go.mod and go.sum files are not changed
-RUN go mod download
-
-# Copy the source
-COPY ./cmd ./cmd
-COPY ./internal ./internal
+ADD . .
 
 # Build the Go app
 ENV CGO_ENABLED 0
