@@ -19,7 +19,7 @@ func Squared(board othello.Board) int {
 
 // FastHeuristic is way faster by not computing all possible moves
 func FastHeuristic(board othello.Board) int {
-	heur := 3 * board.CornerCountDifference()
+	heur := 5 * board.CornerCountDifference()
 	heur += 1 * board.PotentialMoveCountDifference()
 	return heur
 }
