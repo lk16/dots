@@ -9,7 +9,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-var xotBoards []Board
+var (
+	xotBoards   []Board
+	xotDataPath = "/app/assets/xot.json"
+)
 
 type xotBoardModel struct {
 	Me  string `json:"me"`
@@ -20,11 +23,15 @@ type xotBoardModel struct {
 // When calling this again after a successful call, this function does nothing.
 func LoadXot() error {
 
+	if len(xotBoards) != 0 {
+		return nil
+	}
+
 	var bytes []byte
 	var err error
 
-	if bytes, err = ioutil.ReadFile("./assets/xot.json"); err != nil {
-		return errors.Wrap(err, "failed to initialize xot")
+	if bytes, err = ioutil.ReadFile(xotDataPath); err != nil {
+		return errors.Wrap(err, "failed to load xot file")
 	}
 
 	var xotModels []xotBoardModel
@@ -51,12 +58,12 @@ func LoadXot() error {
 	return nil
 }
 
-// NewXotBoard returns a new xot board
+// NewXotBoard returns a random xot board
 // http://berg.earthlingz.de/xot/aboutxot.php?lang=en
 func NewXotBoard() *Board {
 
 	if len(xotBoards) == 0 {
-		panic("xot boards not loaded")
+		panic("xot boards are not loaded")
 	}
 
 	return &xotBoards[rand.Intn(len(xotBoards))]
