@@ -11,8 +11,11 @@ RUN apk update && apk upgrade && \
 # Add Maintainer Info
 LABEL maintainer="Luuk Verweij <luuk_verweij@msn.com>"
 
-# Set the Current Working Directory inside the container
 WORKDIR /app
+
+COPY go.mod go.sum ./
+
+RUN go mod download
 
 ADD . .
 
