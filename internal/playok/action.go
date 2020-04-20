@@ -320,7 +320,7 @@ func (bot *Bot) awaitFindOnePlayerTable() int {
 
 		for _, ID := range tableIDs {
 			table := bot.playok.tables[ID]
-			if table.countPlayers() == 1 {
+			if !table.xot && table.countPlayers() == 1 {
 				foundTableID = ID
 				break
 			}
