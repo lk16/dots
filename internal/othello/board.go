@@ -73,44 +73,6 @@ func NewRandomBoard(discs int) (*Board, error) {
 	return board, nil
 }
 
-func (board Board) rotate(rotation int) Board {
-
-	rotate := func(bitset BitSet, rotation int) (result BitSet) {
-		result = bitset
-		if rotation&1 != 0 {
-			result = (result&0x00000000FFFFFFFF)<<32 | (result&0xFFFFFFFF00000000)>>32
-			result = (result&0x0000FFFF0000FFFF)<<16 | (result&0xFFFF0000FFFF0000)>>16
-			result = (result&0x00FF00FF00FF00FF)<<8 | (result&0xFF00FF00FF00FF00)>>8
-		}
-		if rotation&2 != 0 {
-			result = (result&0x0F0F0F0F0F0F0F0F)<<4 | (result&0xF0F0F0F0F0F0F0F0)>>4
-			result = (result&0x3333333333333333)<<2 | (result&0xCCCCCCCCCCCCCCCC)>>2
-			result = (result&0x5555555555555555)<<1 | (result&0xAAAAAAAAAAAAAAAA)>>1
-		}
-		if rotation&4 != 0 {
-			var tmp BitSet
-			k1 := BitSet(0xaa00aa00aa00aa00)
-			k2 := BitSet(0xcccc0000cccc0000)
-			k4 := BitSet(0xf0f0f0f00f0f0f0f)
-			tmp = result ^ (result << 36)
-			result ^= k4 & (tmp ^ (result >> 36))
-			tmp = k2 & (result ^ (result << 18))
-			result ^= tmp ^ (tmp >> 18)
-			tmp = k1 & (result ^ (result << 9))
-			result ^= tmp ^ (tmp >> 9)
-			return result
-		}
-
-		return
-	}
-
-	rotated := board
-	rotated.me = rotate(rotated.me, rotation)
-	rotated.opp = rotate(rotated.opp, rotation)
-	return rotated
-
-}
-
 // GetMoveField computes the index of the move given a child and a parent
 func (board Board) GetMoveField(child Board) (int, bool) {
 	moveBit := board.Me() | board.Opp() ^ (child.Me() | child.Opp())
@@ -123,26 +85,110 @@ func (board Board) GetMoveField(child Board) (int, bool) {
 // Normalize returns a normalized othello with regards to symmetry
 func (board Board) Normalize() Board {
 
+	mirrorHor := func(bitset BitSet) BitSet {
+		result := bitset
+		result = (result&0x00000000FFFFFFFF)<<32 | (result&0xFFFFFFFF00000000)>>32
+		result = (result&0x0000FFFF0000FFFF)<<16 | (result&0xFFFF0000FFFF0000)>>16
+		result = (result&0x00FF00FF00FF00FF)<<8 | (result&0xFF00FF00FF00FF00)>>8
+		return result
+	}
+
+	mirrorVer := func(bitset BitSet) BitSet {
+		result := bitset
+		result = (result&0x0F0F0F0F0F0F0F0F)<<4 | (result&0xF0F0F0F0F0F0F0F0)>>4
+		result = (result&0x3333333333333333)<<2 | (result&0xCCCCCCCCCCCCCCCC)>>2
+		result = (result&0x5555555555555555)<<1 | (result&0xAAAAAAAAAAAAAAAA)>>1
+		return result
+	}
+
+	mirrorDia := func(bitset BitSet) BitSet {
+		var tmp BitSet
+		result := bitset
+		k1 := BitSet(0xaa00aa00aa00aa00)
+		k2 := BitSet(0xcccc0000cccc0000)
+		k4 := BitSet(0xf0f0f0f00f0f0f0f)
+		tmp = result ^ (result << 36)
+		result ^= k4 & (tmp ^ (result >> 36))
+		tmp = k2 & (result ^ (result << 18))
+		result ^= tmp ^ (tmp >> 18)
+		tmp = k1 & (result ^ (result << 9))
+		result ^= tmp ^ (tmp >> 9)
+		return result
+	}
+
 	less := func(lhs, rhs Board) bool {
 		if lhs.me < rhs.me {
 			return true
 		}
-		if lhs.me == rhs.me && lhs.opp < rhs.opp {
-			return true
-		}
-		return false
+		return lhs.me == rhs.me && lhs.opp < rhs.opp
 	}
 
-	normalized := board.rotate(0)
+	lowest := board
 
-	for r := 1; r < 8; r++ {
-		cur := board.rotate(r)
-		if less(cur, normalized) {
-			normalized = cur
-		}
+	board = Board{
+		me:  mirrorHor(board.me),
+		opp: mirrorHor(board.opp),
 	}
 
-	return normalized
+	if less(board, lowest) {
+		lowest = board
+	}
+
+	board = Board{
+		me:  mirrorVer(board.me),
+		opp: mirrorVer(board.opp),
+	}
+
+	if less(board, lowest) {
+		lowest = board
+	}
+
+	board = Board{
+		me:  mirrorHor(board.me),
+		opp: mirrorHor(board.opp),
+	}
+
+	if less(board, lowest) {
+		lowest = board
+	}
+
+	board = Board{
+		me:  mirrorDia(board.me),
+		opp: mirrorDia(board.opp),
+	}
+
+	if less(board, lowest) {
+		lowest = board
+	}
+
+	board = Board{
+		me:  mirrorHor(board.me),
+		opp: mirrorHor(board.opp),
+	}
+
+	if less(board, lowest) {
+		lowest = board
+	}
+
+	board = Board{
+		me:  mirrorVer(board.me),
+		opp: mirrorVer(board.opp),
+	}
+
+	if less(board, lowest) {
+		lowest = board
+	}
+
+	board = Board{
+		me:  mirrorHor(board.me),
+		opp: mirrorHor(board.opp),
+	}
+
+	if less(board, lowest) {
+		lowest = board
+	}
+
+	return lowest
 }
 
 // String returns an ASCII-art string representation of a board

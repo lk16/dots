@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // Test othello generator
@@ -450,14 +451,75 @@ func TestBoardOpponentMoves(t *testing.T) {
 }
 
 func TestBoardNormalize(t *testing.T) {
+
+	mirrorHor := func(bitset BitSet) BitSet {
+		result := bitset
+		result = (result&0x00000000FFFFFFFF)<<32 | (result&0xFFFFFFFF00000000)>>32
+		result = (result&0x0000FFFF0000FFFF)<<16 | (result&0xFFFF0000FFFF0000)>>16
+		result = (result&0x00FF00FF00FF00FF)<<8 | (result&0xFF00FF00FF00FF00)>>8
+		return result
+	}
+
+	mirrorVer := func(bitset BitSet) BitSet {
+		result := bitset
+		result = (result&0x0F0F0F0F0F0F0F0F)<<4 | (result&0xF0F0F0F0F0F0F0F0)>>4
+		result = (result&0x3333333333333333)<<2 | (result&0xCCCCCCCCCCCCCCCC)>>2
+		result = (result&0x5555555555555555)<<1 | (result&0xAAAAAAAAAAAAAAAA)>>1
+		return result
+	}
+
+	mirrorDia := func(bitset BitSet) BitSet {
+		var tmp BitSet
+		result := bitset
+		k1 := BitSet(0xaa00aa00aa00aa00)
+		k2 := BitSet(0xcccc0000cccc0000)
+		k4 := BitSet(0xf0f0f0f00f0f0f0f)
+		tmp = result ^ (result << 36)
+		result ^= k4 & (tmp ^ (result >> 36))
+		tmp = k2 & (result ^ (result << 18))
+		result ^= tmp ^ (tmp >> 18)
+		tmp = k1 & (result ^ (result << 9))
+		result ^= tmp ^ (tmp >> 9)
+		return result
+	}
+
 	for board := range genTestBoards() {
-		expected := board.rotate(0).Normalize()
+		expected := board.Normalize()
 
 		for r := 1; r < 8; r++ {
-			got := board.rotate(r).Normalize()
+			rotated := board
+			if r&1 != 0 {
+				rotated = Board{me: mirrorHor(rotated.me), opp: mirrorHor(rotated.opp)}
+			}
+			if r&2 != 0 {
+				rotated = Board{me: mirrorVer(rotated.me), opp: mirrorVer(rotated.opp)}
+			}
 
-			assert.Equal(t, expected, got)
+			if r&4 != 0 {
+				rotated = Board{me: mirrorDia(rotated.me), opp: mirrorDia(rotated.opp)}
+			}
+			got := rotated.Normalize()
+
+			require.Equal(t, expected, got)
 		}
+	}
+}
+
+var dummyBoard Board
+
+func BenchmarkBoardNormalize(b *testing.B) {
+
+	var boards []Board
+
+	for i := 0; i < 1000; i++ {
+		board, err := NewRandomBoard(24)
+		assert.Nil(b, err)
+		boards = append(boards, *board)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		dummyBoard = boards[i%1000].Normalize()
 	}
 }
 
