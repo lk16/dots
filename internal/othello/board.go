@@ -412,22 +412,26 @@ func (board Board) CsquareCountDifference() int {
 
 func potentialMoves(me, opp BitSet) BitSet {
 	const (
-		leftMask  = 0x7F7F7F7F7F7F7F7F
-		rightMask = 0xFEFEFEFEFEFEFEFE
+		leftMask          = 0x7F7F7F7F7F7F7F7F
+		leftMaskTwoSteps  = 0x3F3F3F3F3F3F3F3F
+		rightMask         = 0xFEFEFEFEFEFEFEFE
+		rightMaskTwoSteps = 0xFDFDFDFDFDFDFDFD
 	)
 
+	any := me | opp
+
 	oppSurrounded := BitSet(0)
-	oppSurrounded |= (opp & leftMask) << 1
-	oppSurrounded |= (opp & rightMask) >> 1
-	oppSurrounded |= (opp & leftMask) << 9
-	oppSurrounded |= (opp & rightMask) >> 9
-	oppSurrounded |= (opp & rightMask) << 7
-	oppSurrounded |= (opp & leftMask) >> 7
+	oppSurrounded |= ((opp & leftMask) << 1) & ((any & leftMaskTwoSteps) << 2)
+	oppSurrounded |= ((opp & rightMask) >> 1) & ((any & rightMaskTwoSteps) >> 2)
+	oppSurrounded |= ((opp & leftMask) << 9) & ((any & leftMaskTwoSteps) << 18)
+	oppSurrounded |= ((opp & rightMask) >> 9) & ((any & rightMaskTwoSteps) >> 18)
+	oppSurrounded |= ((opp & rightMask) << 7) & ((any & rightMaskTwoSteps) << 14)
+	oppSurrounded |= ((opp & leftMask) >> 7) & ((any & leftMaskTwoSteps) >> 14)
 
 	oppSurrounded |= opp << 8
 	oppSurrounded |= opp >> 8
 
-	oppSurrounded &^= (me | opp)
+	oppSurrounded &^= any
 	return oppSurrounded
 }
 

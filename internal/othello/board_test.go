@@ -525,13 +525,23 @@ func BenchmarkBoardNormalize(b *testing.B) {
 
 func TestPotentialMoves(t *testing.T) {
 	b := NewBoard()
-	assert.Equal(t, BitSet(0x00003824241C0000), potentialMoves(b.me, b.opp))
+	assert.Equal(t, BitSet(0x00003020040c0000), potentialMoves(b.me, b.opp))
 
 	b = NewCustomBoard(0x01, 0x0302)
 	assert.Equal(t, BitSet(0x070404), potentialMoves(b.me, b.opp))
 
 	b = &Board{}
 	assert.Equal(t, BitSet(0), potentialMoves(b.me, b.opp))
+
+	for board := range genTestBoards() {
+		b := board
+
+		moves := b.Moves()
+		potentialMoves := potentialMoves(b.me, b.opp)
+
+		// check that potentialMoves includes all moves
+		assert.Equal(t, moves, moves&potentialMoves)
+	}
 }
 
 func TestBoardPotentialMoveCountDifference(t *testing.T) {
