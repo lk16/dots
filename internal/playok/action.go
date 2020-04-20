@@ -3,6 +3,7 @@ package playok
 import (
 	"log"
 	"math/rand"
+	"os"
 	"time"
 
 	"github.com/lk16/dots/internal/treesearch"
@@ -26,6 +27,7 @@ const (
 	stateAwaitStartGame
 	stateAwaitLeaveTable
 	stateAwaitTurn
+	stateStop
 )
 
 func info(format string, args ...interface{}) {
@@ -46,7 +48,17 @@ func (bot *Bot) takeAction() error {
 		switch state {
 
 		case stateAwaitTablesList:
+
 			if bot.checkTablesList() {
+
+				bot.playok.RLock()
+				tableID = bot.playok.currentTable.ID
+				bot.playok.RUnlock()
+
+				if tableID != 0 {
+					state = stateAwaitTurn
+					break
+				}
 				state = stateAwaitFindTable
 			}
 
@@ -59,6 +71,11 @@ func (bot *Bot) takeAction() error {
 			state = stateAwaitFindTable
 
 		case stateAwaitFindTable:
+			if bot.shutdownSoon {
+				state = stateStop
+				break
+			}
+
 			tableID = bot.awaitFindOnePlayerTable()
 			info("table %d has one player", tableID)
 			bot.sendJoinTableRequest(tableID)
@@ -86,6 +103,10 @@ func (bot *Bot) takeAction() error {
 			state = stateAwaitStartGame
 
 		case stateAwaitStartGame:
+			if bot.shutdownSoon {
+				state = stateStop
+				break
+			}
 			bot.sendStartGameRequest(tableID)
 			if err := bot.awaitStartGame(tableID); err != nil {
 				state = stateAwaitLeaveTable
@@ -117,13 +138,17 @@ func (bot *Bot) takeAction() error {
 			if err != nil {
 				info("waiting for move confirmation failed: %s", err.Error())
 				break
-				// TODO do not recomputed move on retry
-
+				// TODO do not recompute move on retry
 			}
 
 			bot.playok.RLock()
 			info("\n%s", bot.playok.currentTable.board.String())
 			bot.playok.RUnlock()
+
+		case stateStop:
+			info("shutting down")
+			// TODO this is ugly
+			os.Exit(0)
 
 		default:
 			return errorf("Unhandled state value: %d", state)

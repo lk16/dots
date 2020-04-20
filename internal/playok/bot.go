@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"os"
+	"os/signal"
 	"sort"
+	"syscall"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -28,19 +31,24 @@ func errorf(format string, args ...interface{}) error {
 
 // Bot contains the state of an automated player on playok.com
 type Bot struct {
-	connector *connector
-	websocket *websocket.Conn
-	playok    *state
-	errChan   chan error
+	connector    *connector
+	websocket    *websocket.Conn
+	playok       *state
+	errChan      chan error
+	shutdownChan chan os.Signal
+
+	// if true: shutdown after next game is complete
+	shutdownSoon bool
 }
 
 // NewBot initializes a new bot
 func NewBot(userName, password string) *Bot {
 
 	return &Bot{
-		connector: newConnector(userName, password),
-		playok:    newState(),
-		errChan:   make(chan error),
+		connector:    newConnector(userName, password),
+		playok:       newState(),
+		errChan:      make(chan error),
+		shutdownChan: make(chan os.Signal),
 	}
 }
 
@@ -58,6 +66,9 @@ func (bot *Bot) Run() error {
 		return errors.Wrap(err, "sending init message failed")
 	}
 
+	signal.Notify(bot.shutdownChan, os.Interrupt, syscall.SIGTERM)
+
+	go bot.shutdownListener()
 	go bot.loopKeepAlive()
 	go bot.loopHandleMessage()
 	go bot.loopPrintState()
@@ -65,6 +76,13 @@ func (bot *Bot) Run() error {
 
 	// stop bot if any error shows up
 	return <-bot.errChan
+}
+
+func (bot *Bot) shutdownListener() {
+	for signal := range bot.shutdownChan {
+		log.Printf("INFO received signal: %s", signal.String())
+		bot.shutdownSoon = true
+	}
 }
 
 func (bot *Bot) loopKeepAlive() {

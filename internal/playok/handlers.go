@@ -162,6 +162,11 @@ func (bot *Bot) handleJoinTable(message Message) error {
 	defer bot.playok.Unlock()
 
 	bot.playok.currentTable.ID = message.I[1]
+
+	if len(message.I) == 2 {
+		return nil
+	}
+
 	return bot.upsertTable(message.I[1:], message.S)
 }
 
