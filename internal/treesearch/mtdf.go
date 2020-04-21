@@ -153,6 +153,17 @@ func (mtdf *Mtdf) search(alpha int) int {
 		if entry.low >= alpha+1 {
 			return alpha + 1
 		}
+
+		mtdf.depth--
+		parent := mtdf.board
+		mtdf.board = entry.bestChild
+		childHeur := -mtdf.search(-(alpha + 1))
+		mtdf.board = parent
+		mtdf.depth++
+		if childHeur > alpha {
+			return alpha + 1
+		}
+
 	} else {
 		entry = hashtableValue{
 			high: MaxHeuristic,
@@ -176,11 +187,13 @@ func (mtdf *Mtdf) search(alpha int) int {
 	heur := alpha
 	mtdf.depth--
 	parent := mtdf.board
+	bestChild := children[0].Board
 	for _, child := range children {
 		mtdf.board = child.Board
 		childHeur := -mtdf.search(-(alpha + 1))
 		if childHeur > alpha {
 			heur = alpha + 1
+			bestChild = child.Board
 			break
 		}
 	}
@@ -196,6 +209,7 @@ func (mtdf *Mtdf) search(alpha int) int {
 			entry.low = alpha + 1
 		}
 	}
+	entry.bestChild = bestChild
 
 	mtdf.hashtable[key] = entry
 
