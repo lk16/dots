@@ -16,5 +16,6 @@ ENV CGO_ENABLED 0
 ENV DOTS_ASSETS_PATH /app/assets/
 
 RUN go install ./cmd/dots/main.go && \
+go install ./cmd/playok_bot/main.go && \
 golangci-lint run ./... && \
 go test -coverprofile=coverage.out ./internal/...

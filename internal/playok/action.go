@@ -188,17 +188,19 @@ func (bot *Bot) computeAndSendMove() (int, error) {
 	board := bot.playok.currentTable.board
 	bot.playok.RUnlock()
 
-	othelloBot := treesearch.NewBot(log.Writer(), 10, 18, treesearch.NewPvs())
+	othelloBot := treesearch.NewBot(log.Writer(), 10, 18, treesearch.NewPvs(treesearch.Squared))
 
 	move, err := othelloBot.DoMove(board.Board)
 	if err != nil {
 		return 0, errors.Wrap(err, "bot failed to compute move")
 	}
 
-	moveBit := (board.Me() | board.Opp()) ^ (move.Me() | move.Opp())
-	moveID := moveBit.Lowest()
+	moveID, ok := board.GetMoveField(*move)
+	if !ok {
+		return 0, errors.New("GetMoveField failed")
+	}
 
-	randomDelay := time.Duration(500+rand.Intn(500)+rand.Intn(500)) * time.Millisecond
+	randomDelay := (time.Duration(300+rand.Intn(300)+rand.Intn(300)) * time.Millisecond) - othelloBot.LifetimeStats.Duration
 	info("delaying sending move %dms", randomDelay.Milliseconds())
 	time.Sleep(randomDelay)
 
