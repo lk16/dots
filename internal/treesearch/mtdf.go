@@ -10,6 +10,11 @@ const (
 	minHashtableDepth = 5
 )
 
+type hashtableKey struct {
+	board othello.Board
+	depth int
+}
+
 type hashtableValue struct {
 	high      int
 	low       int
@@ -22,7 +27,7 @@ type Mtdf struct {
 	high      int
 	low       int
 	depth     int
-	hashtable map[othello.Board]hashtableValue
+	hashtable map[hashtableKey]hashtableValue
 	stats     Stats
 	heuristic func(othello.Board) int
 	sorter    Pvs
@@ -32,7 +37,7 @@ type Mtdf struct {
 func NewMtdf(heuristic func(othello.Board) int) *Mtdf {
 	return &Mtdf{
 		heuristic: heuristic,
-		hashtable: make(map[othello.Board]hashtableValue, 100000),
+		hashtable: make(map[hashtableKey]hashtableValue, 100000),
 		sorter:    *NewPvs(nil, heuristic),
 	}
 }
@@ -142,7 +147,10 @@ func (mtdf *Mtdf) search(alpha int) int {
 
 	mtdf.stats.Nodes++
 
-	key := mtdf.board.Normalize()
+	key := hashtableKey{
+		board: mtdf.board.Normalize(),
+		depth: mtdf.depth,
+	}
 
 	entry, ok := mtdf.hashtable[key]
 
@@ -178,8 +186,9 @@ func (mtdf *Mtdf) search(alpha int) int {
 	}
 
 	for i := range children {
-		children[i].Heur = mtdf.sorter.Search(children[i].Board, MinHeuristic, MaxHeuristic, 2)
+		children[i].Heur = mtdf.sorter.Search(children[i].Board, MinHeuristic, MaxHeuristic, mtdf.depth/4)
 	}
+
 	sort.Slice(children, func(i, j int) bool {
 		return children[i].Heur > children[j].Heur
 	})

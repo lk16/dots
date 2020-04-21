@@ -1,13 +1,14 @@
 package treesearch
 
 import (
+	"io/ioutil"
 	"math/rand"
 	"testing"
 
 	"github.com/lk16/dots/internal/othello"
 )
 
-var dummyInt int
+var dummyBoard *othello.Board
 
 func BenchmarkMtdf(b *testing.B) {
 	rand.Seed(0)
@@ -23,10 +24,11 @@ func BenchmarkMtdf(b *testing.B) {
 		boards = append(boards, *othello.NewXotBoard())
 	}
 
-	mtdf := NewMtdf(Squared)
+	bot := NewBot(ioutil.Discard, 12, 18, NewMtdf(Squared))
 
 	for i := 0; i < b.N; i++ {
-		dummyInt = mtdf.Search(boards[i%10], MinHeuristic, MaxHeuristic, 12)
+		board := *othello.NewXotBoard()
+		dummyBoard, _ = bot.DoMove(board)
 	}
 
 }

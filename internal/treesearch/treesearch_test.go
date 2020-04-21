@@ -158,9 +158,13 @@ func TestTreeSearch(t *testing.T) {
 
 	internal := func(t *testing.T, depth int, board othello.Board, minimax, mtdf, pvs Searcher) {
 
-		minimaxResult := minimax.Search(board, MinHeuristic, MaxHeuristic, depth)
 		mtdfResult := mtdf.Search(board, MinHeuristic, MaxHeuristic, depth)
 		pvsResult := pvs.Search(board, MinHeuristic, MaxHeuristic, depth)
+
+		minimaxResult := pvsResult
+		if depth <= 4 {
+			minimaxResult = minimax.Search(board, MinHeuristic, MaxHeuristic, depth)
+		}
 
 		if minimaxResult != mtdfResult || minimaxResult != pvsResult {
 			msg := "Found inconsistent tree search results:\n"
@@ -181,7 +185,8 @@ func TestTreeSearch(t *testing.T) {
 	pvs := NewPvs(nil, Squared)
 
 	for i := 0; i < 100; i++ {
-		for discs := 4; discs < 64; discs++ {
+		fmt.Printf("\rRunning: %2d%%", i)
+		for discs := 48; discs < 64; discs++ {
 
 			board, err := othello.NewRandomBoard(discs)
 			if err != nil {
@@ -196,11 +201,12 @@ func TestTreeSearch(t *testing.T) {
 
 			testedBoards[normalized] = struct{}{}
 
-			for depth := 0; depth < 4; depth++ {
+			for depth := 0; depth < 11; depth++ {
 				internal(t, depth, *board, minimax, mtdf, pvs)
 			}
 		}
 	}
+	fmt.Printf("\nDone\n")
 }
 
 func TestTreeSearchExact(t *testing.T) {
