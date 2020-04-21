@@ -51,12 +51,15 @@ func TestFormatBigNumber(t *testing.T) {
 
 // MiniMax implements the minimax tree search algorithm
 type MiniMax struct {
-	stats Stats
+	stats     Stats
+	heuristic func(othello.Board) int
 }
 
 // NewMinimax returns a new MiniMax
-func NewMinimax() *MiniMax {
-	return &MiniMax{}
+func NewMinimax(heuristic func(othello.Board) int) *MiniMax {
+	return &MiniMax{
+		heuristic: heuristic,
+	}
 }
 
 // Name returns the tree search algorithm name
@@ -106,7 +109,7 @@ func (minimax *MiniMax) search(board othello.Board, depth int, maxPlayer bool) i
 	minimax.stats.Nodes++
 
 	if depth == 0 {
-		heur := FastHeuristic(board)
+		heur := minimax.heuristic(board)
 		if !maxPlayer {
 			heur = -heur
 		}
@@ -174,9 +177,9 @@ func TestTreeSearch(t *testing.T) {
 	rand.Seed(0)
 	testedBoards := make(map[othello.Board]struct{})
 
-	minimax := NewMinimax()
-	mtdf := NewMtdf()
-	pvs := NewPvs()
+	minimax := NewMinimax(Squared)
+	mtdf := NewMtdf(Squared)
+	pvs := NewPvs(Squared)
 
 	for i := 0; i < 10; i++ {
 		for discs := 4; discs < 64; discs++ {
@@ -224,9 +227,9 @@ func TestTreeSearchExact(t *testing.T) {
 	rand.Seed(0)
 	testedBoards := make(map[othello.Board]struct{})
 
-	minimax := NewMinimax()
-	mtdf := NewMtdf()
-	pvs := NewPvs()
+	minimax := NewMinimax(Squared)
+	mtdf := NewMtdf(Squared)
+	pvs := NewPvs(Squared)
 
 	for i := 0; i < 20; i++ {
 		for discs := 56; discs < 64; discs++ {

@@ -8,14 +8,17 @@ import (
 
 // Pvs implements the principal variation search algorithm
 type Pvs struct {
-	stats   Stats
-	sortPvs *Pvs
+	stats     Stats
+	sortPvs   *Pvs
+	heuristic func(othello.Board) int
 }
 
 // NewPvs returns a new Pvs
-func NewPvs() *Pvs {
+func NewPvs(heuristic func(othello.Board) int) *Pvs {
 	return &Pvs{
-		sortPvs: &Pvs{}}
+		sortPvs:   &Pvs{},
+		heuristic: heuristic,
+	}
 }
 
 // Name returns the name of the tree search algorithm
@@ -126,7 +129,7 @@ func (pvs *Pvs) searchNoSort(board *othello.Board, alpha, beta, depth int) int {
 	pvs.stats.Nodes++
 
 	if depth == 0 {
-		return FastHeuristic(*board)
+		return pvs.heuristic(*board)
 	}
 
 	gen := othello.NewUnsortedChildGenerator(board)
@@ -212,7 +215,7 @@ func (pvs *Pvs) searchNullWindowNoSort(board *othello.Board, alpha, depth int) i
 	pvs.stats.Nodes++
 
 	if depth == 0 {
-		return FastHeuristic(*board)
+		return pvs.heuristic(*board)
 	}
 
 	gen := othello.NewUnsortedChildGenerator(board)

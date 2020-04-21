@@ -21,12 +21,15 @@ type Mtdf struct {
 	low       int
 	hashtable map[hashtableKey]bounds
 	stats     Stats
+	heuristic func(othello.Board) int
 }
 
 // NewMtdf returns a new Mtdf
-func NewMtdf() *Mtdf {
+func NewMtdf(heuristic func(othello.Board) int) *Mtdf {
 	return &Mtdf{
-		hashtable: make(map[hashtableKey]bounds, 100000)}
+		hashtable: make(map[hashtableKey]bounds, 100000),
+		heuristic: heuristic,
+	}
 }
 
 // Name returns the tree search algorithm name
@@ -79,7 +82,7 @@ func (mtdf *Mtdf) slideWindow(depth int) int {
 
 	var step int
 	if depth < mtdf.board.CountEmpties() {
-		f = FastHeuristic(mtdf.board)
+		f = mtdf.heuristic(mtdf.board)
 		step = 1
 	} else {
 		f = 0
@@ -180,7 +183,7 @@ func (mtdf *Mtdf) search(alpha, depth int) int {
 	mtdf.stats.Nodes++
 
 	if depth == 0 {
-		return mtdf.polish(FastHeuristic(mtdf.board), alpha)
+		return mtdf.polish(mtdf.heuristic(mtdf.board), alpha)
 	}
 
 	if depth > 4 {

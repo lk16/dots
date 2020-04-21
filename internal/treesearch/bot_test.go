@@ -18,7 +18,7 @@ func TestNewBot(t *testing.T) {
 	writer := &bytes.Buffer{}
 	searchDepth := 7
 	exactDepth := 14
-	searcher := NewPvs()
+	searcher := NewPvs(Squared)
 
 	bot := NewBot(writer, searchDepth, exactDepth, searcher)
 

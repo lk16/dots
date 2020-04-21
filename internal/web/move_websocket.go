@@ -141,7 +141,7 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 
 		for i := range analyzedChildren {
 
-			bot := treesearch.NewPvs()
+			bot := treesearch.NewPvs(treesearch.Squared)
 
 			if mws.getAnalyzedBoard() != board {
 				return
@@ -218,7 +218,7 @@ func (mws *moveWebSocket) handlebotMoveRequest(request interface{}) error {
 }
 
 func (mws *moveWebSocket) sendBotMoveReply(board othello.Board, turn int) {
-	bot := treesearch.NewBot(os.Stdout, 8, 14, treesearch.NewPvs())
+	bot := treesearch.NewBot(os.Stdout, 8, 14, treesearch.NewPvs(treesearch.Squared))
 
 	bestMove, err := bot.DoMove(board)
 	if err != nil {
