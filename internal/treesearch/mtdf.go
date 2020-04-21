@@ -8,9 +8,10 @@ const (
 	minHashtableDepth = 5
 )
 
-type bounds struct {
-	high int
-	low  int
+type hashtableValue struct {
+	high      int
+	low       int
+	bestChild othello.Board
 }
 
 // Mtdf implements the mtdf tree search algorithm
@@ -19,7 +20,7 @@ type Mtdf struct {
 	high      int
 	low       int
 	depth     int
-	hashtable map[othello.Board]bounds
+	hashtable map[othello.Board]hashtableValue
 	stats     Stats
 	heuristic func(othello.Board) int
 }
@@ -28,7 +29,7 @@ type Mtdf struct {
 func NewMtdf(heuristic func(othello.Board) int) *Mtdf {
 	return &Mtdf{
 		heuristic: heuristic,
-		hashtable: make(map[othello.Board]bounds, 100000),
+		hashtable: make(map[othello.Board]hashtableValue, 100000),
 	}
 }
 
@@ -129,54 +130,30 @@ func (mtdf *Mtdf) handleNoMoves(alpha int) int {
 	return heur
 }
 
-func (mtdf *Mtdf) checkHashTable(alpha int) (int, bool) {
-	key := mtdf.board.Normalize()
-
-	entry, ok := mtdf.hashtable[key]
-	if ok {
-		if entry.high <= alpha {
-			return alpha, true
-		}
-		if entry.low >= alpha+1 {
-			return alpha + 1, true
-		}
-	}
-	return 0, false
-}
-
-func (mtdf *Mtdf) updateHashTable(alpha, heur int) {
-	key := mtdf.board.Normalize()
-
-	entry, ok := mtdf.hashtable[key]
-
-	if !ok {
-		entry = bounds{
-			high: MaxHeuristic,
-			low:  MinHeuristic}
-	}
-
-	if heur == alpha {
-		if alpha < entry.high {
-			entry.high = alpha
-		}
-	} else {
-		if alpha+1 > entry.low {
-			entry.low = alpha + 1
-		}
-	}
-
-	mtdf.hashtable[key] = entry
-}
-
 func (mtdf *Mtdf) search(alpha int) int {
+
 	if mtdf.depth < minHashtableDepth {
 		return mtdf.searchNoHashtable(alpha)
 	}
 
 	mtdf.stats.Nodes++
 
-	if heur, ok := mtdf.checkHashTable(alpha); ok {
-		return heur
+	key := mtdf.board.Normalize()
+
+	entry, ok := mtdf.hashtable[key]
+
+	if ok {
+		if entry.high <= alpha {
+			return alpha
+		}
+		if entry.low >= alpha+1 {
+			return alpha + 1
+		}
+	} else {
+		entry = hashtableValue{
+			high: MaxHeuristic,
+			low:  MinHeuristic,
+		}
 	}
 
 	gen := othello.NewChildGenerator(&mtdf.board)
@@ -196,7 +173,17 @@ func (mtdf *Mtdf) search(alpha int) int {
 	}
 	mtdf.depth++
 
-	mtdf.updateHashTable(alpha, heur)
+	if heur == alpha {
+		if alpha < entry.high {
+			entry.high = alpha
+		}
+	} else {
+		if alpha+1 > entry.low {
+			entry.low = alpha + 1
+		}
+	}
+
+	mtdf.hashtable[key] = entry
 
 	return heur
 }
