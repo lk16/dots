@@ -8,11 +8,6 @@ const (
 	minHashtableDepth = 5
 )
 
-type hashtableKey struct {
-	board othello.Board
-	depth int
-}
-
 type bounds struct {
 	high int
 	low  int
@@ -24,7 +19,7 @@ type Mtdf struct {
 	high      int
 	low       int
 	depth     int
-	hashtable map[hashtableKey]bounds
+	hashtable map[othello.Board]bounds
 	stats     Stats
 	heuristic func(othello.Board) int
 }
@@ -32,8 +27,8 @@ type Mtdf struct {
 // NewMtdf returns a new Mtdf
 func NewMtdf(heuristic func(othello.Board) int) *Mtdf {
 	return &Mtdf{
-		hashtable: make(map[hashtableKey]bounds, 100000),
 		heuristic: heuristic,
+		hashtable: make(map[othello.Board]bounds, 100000),
 	}
 }
 
@@ -82,7 +77,6 @@ func (mtdf *Mtdf) ExactSearch(board othello.Board, alpha, beta int) int {
 }
 
 func (mtdf *Mtdf) slideWindow() int {
-
 	var f int
 
 	var step int
@@ -121,7 +115,6 @@ func (mtdf *Mtdf) slideWindow() int {
 }
 
 func (mtdf *Mtdf) handleNoMoves(alpha int) int {
-
 	if mtdf.board.OpponentMoves() == 0 {
 		heur := ExactScoreFactor * mtdf.board.ExactScore()
 		if heur > alpha {
@@ -137,9 +130,7 @@ func (mtdf *Mtdf) handleNoMoves(alpha int) int {
 }
 
 func (mtdf *Mtdf) checkHashTable(alpha int) (int, bool) {
-	key := hashtableKey{
-		board: mtdf.board.Normalize(),
-		depth: mtdf.depth}
+	key := mtdf.board.Normalize()
 
 	entry, ok := mtdf.hashtable[key]
 	if ok {
@@ -154,9 +145,7 @@ func (mtdf *Mtdf) checkHashTable(alpha int) (int, bool) {
 }
 
 func (mtdf *Mtdf) updateHashTable(alpha, heur int) {
-	key := hashtableKey{
-		board: mtdf.board.Normalize(),
-		depth: mtdf.depth}
+	key := mtdf.board.Normalize()
 
 	entry, ok := mtdf.hashtable[key]
 
