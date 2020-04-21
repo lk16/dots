@@ -4,6 +4,10 @@ import (
 	"github.com/lk16/dots/internal/othello"
 )
 
+const (
+	minHashtableDepth = 5
+)
+
 type hashtableKey struct {
 	board othello.Board
 	depth int
@@ -173,7 +177,7 @@ func (mtdf *Mtdf) updateHashTable(alpha, depth, heur int) {
 
 func (mtdf *Mtdf) search(alpha, depth int) int {
 
-	if depth <= 4 {
+	if depth < minHashtableDepth {
 		return mtdf.searchNoHashtable(alpha, depth)
 	}
 
