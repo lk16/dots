@@ -26,6 +26,6 @@ func BenchmarkMtdf(b *testing.B) {
 	mtdf := NewMtdf(Squared)
 
 	for i := 0; i < b.N; i++ {
-		dummyInt = mtdf.Search(boards[i%10], MinHeuristic, MaxHeuristic, 10)
+		dummyInt = mtdf.Search(boards[i%10], MinHeuristic, MaxHeuristic, 12)
 	}
 }
