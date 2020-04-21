@@ -28,4 +28,5 @@ func BenchmarkMtdf(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		dummyInt = mtdf.Search(boards[i%10], MinHeuristic, MaxHeuristic, 12)
 	}
+
 }

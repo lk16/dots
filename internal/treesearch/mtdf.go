@@ -1,6 +1,8 @@
 package treesearch
 
 import (
+	"sort"
+
 	"github.com/lk16/dots/internal/othello"
 )
 
@@ -23,6 +25,7 @@ type Mtdf struct {
 	hashtable map[othello.Board]hashtableValue
 	stats     Stats
 	heuristic func(othello.Board) int
+	sorter    Pvs
 }
 
 // NewMtdf returns a new Mtdf
@@ -30,6 +33,7 @@ func NewMtdf(heuristic func(othello.Board) int) *Mtdf {
 	return &Mtdf{
 		heuristic: heuristic,
 		hashtable: make(map[othello.Board]hashtableValue, 100000),
+		sorter:    *NewPvs(nil, heuristic),
 	}
 }
 
@@ -156,21 +160,31 @@ func (mtdf *Mtdf) search(alpha int) int {
 		}
 	}
 
-	gen := othello.NewChildGenerator(&mtdf.board)
-	if !gen.HasMoves() {
+	children := mtdf.board.GetSortableChildren()
+
+	if len(children) == 0 {
 		return mtdf.handleNoMoves(alpha)
 	}
 
+	for i := range children {
+		children[i].Heur = mtdf.sorter.Search(children[i].Board, MinHeuristic, MaxHeuristic, 2)
+	}
+	sort.Slice(children, func(i, j int) bool {
+		return children[i].Heur > children[j].Heur
+	})
+
 	heur := alpha
 	mtdf.depth--
-	for gen.Next() {
+	parent := mtdf.board
+	for _, child := range children {
+		mtdf.board = child.Board
 		childHeur := -mtdf.search(-(alpha + 1))
 		if childHeur > alpha {
-			gen.RestoreParent()
 			heur = alpha + 1
 			break
 		}
 	}
+	mtdf.board = parent
 	mtdf.depth++
 
 	if heur == alpha {
