@@ -113,16 +113,13 @@ func (mtdf *Mtdf) slideWindow(depth int) int {
 	return mtdf.high
 }
 
-func (mtdf *Mtdf) polish(heur, alpha int) int {
-	if heur > alpha {
-		return alpha + 1
-	}
-	return alpha
-}
-
 func (mtdf *Mtdf) handleNoMoves(alpha, depth int) int {
 	if mtdf.board.OpponentMoves() == 0 {
-		return mtdf.polish(ExactScoreFactor*mtdf.board.ExactScore(), alpha)
+		heur := ExactScoreFactor * mtdf.board.ExactScore()
+		if heur > alpha {
+			return alpha + 1
+		}
+		return alpha
 	}
 
 	mtdf.board.SwitchTurn()
@@ -178,7 +175,11 @@ func (mtdf *Mtdf) search(alpha, depth int) int {
 	mtdf.stats.Nodes++
 
 	if depth == 0 {
-		return mtdf.polish(mtdf.heuristic(mtdf.board), alpha)
+		heur := mtdf.heuristic(mtdf.board)
+		if heur > alpha {
+			return alpha + 1
+		}
+		return alpha
 	}
 
 	if depth > 4 {

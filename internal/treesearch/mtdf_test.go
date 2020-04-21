@@ -14,7 +14,7 @@ func BenchmarkMtdf(b *testing.B) {
 
 	var boards []othello.Board
 
-	if err := othello.LoadXot(); err != nil {
+	if err := othello.LoadXotBoards(); err != nil {
 		b.Error(err)
 		b.FailNow()
 	}
@@ -23,7 +23,7 @@ func BenchmarkMtdf(b *testing.B) {
 		boards = append(boards, *othello.NewXotBoard())
 	}
 
-	mtdf := NewMtdf()
+	mtdf := NewMtdf(Squared)
 
 	for i := 0; i < b.N; i++ {
 		dummyInt = mtdf.Search(boards[i%10], MinHeuristic, MaxHeuristic, 10)
