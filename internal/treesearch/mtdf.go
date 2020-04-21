@@ -172,20 +172,15 @@ func (mtdf *Mtdf) updateHashTable(alpha, depth, heur int) {
 }
 
 func (mtdf *Mtdf) search(alpha, depth int) int {
-	mtdf.stats.Nodes++
 
-	if depth == 0 {
-		heur := mtdf.heuristic(mtdf.board)
-		if heur > alpha {
-			return alpha + 1
-		}
-		return alpha
+	if depth <= 4 {
+		return mtdf.searchNoHashtable(alpha, depth)
 	}
 
-	if depth > 4 {
-		if heur, ok := mtdf.checkHashTable(alpha, depth); ok {
-			return heur
-		}
+	mtdf.stats.Nodes++
+
+	if heur, ok := mtdf.checkHashTable(alpha, depth); ok {
+		return heur
 	}
 
 	gen := othello.NewChildGenerator(&mtdf.board)
@@ -203,8 +198,48 @@ func (mtdf *Mtdf) search(alpha, depth int) int {
 		}
 	}
 
-	if depth > 4 {
-		mtdf.updateHashTable(alpha, depth, heur)
+	mtdf.updateHashTable(alpha, depth, heur)
+
+	return heur
+}
+
+func (mtdf *Mtdf) searchNoHashtable(alpha, depth int) int {
+
+	mtdf.stats.Nodes++
+
+	if depth == 0 {
+		heur := mtdf.heuristic(mtdf.board)
+		if heur > alpha {
+			return alpha + 1
+		}
+		return alpha
+	}
+
+	gen := othello.NewChildGenerator(&mtdf.board)
+
+	if !gen.HasMoves() {
+		if mtdf.board.OpponentMoves() == 0 {
+			heur := ExactScoreFactor * mtdf.board.ExactScore()
+			if heur > alpha {
+				return alpha + 1
+			}
+			return alpha
+		}
+
+		mtdf.board.SwitchTurn()
+		heur := -mtdf.searchNoHashtable(-(alpha + 1), depth)
+		mtdf.board.SwitchTurn()
+		return heur
+	}
+
+	heur := alpha
+	for gen.Next() {
+		childHeur := -mtdf.searchNoHashtable(-(alpha + 1), depth-1)
+		if childHeur > alpha {
+			gen.RestoreParent()
+			heur = alpha + 1
+			break
+		}
 	}
 
 	return heur
