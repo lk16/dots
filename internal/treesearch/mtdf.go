@@ -23,6 +23,7 @@ type Mtdf struct {
 	board     othello.Board
 	high      int
 	low       int
+	depth     int
 	hashtable map[hashtableKey]bounds
 	stats     Stats
 	heuristic func(othello.Board) int
@@ -69,7 +70,8 @@ func (mtdf *Mtdf) Search(board othello.Board, alpha, beta, depth int) int {
 
 	mtdf.board = board
 	mtdf.stats.StartClock()
-	heuristic := mtdf.slideWindow(depth)
+	mtdf.depth = depth
+	heuristic := mtdf.slideWindow()
 	mtdf.stats.StopClock()
 	return heuristic
 }
@@ -79,12 +81,13 @@ func (mtdf *Mtdf) ExactSearch(board othello.Board, alpha, beta int) int {
 	return mtdf.Search(board, alpha, beta, 60) / ExactScoreFactor
 }
 
-func (mtdf *Mtdf) slideWindow(depth int) int {
+func (mtdf *Mtdf) slideWindow() int {
+
 	var f int
 
 	var step int
-	if depth < mtdf.board.CountEmpties() {
-		f = mtdf.heuristic(mtdf.board)
+	if mtdf.depth < mtdf.board.CountEmpties() {
+		f = FastHeuristic(mtdf.board)
 		step = 1
 	} else {
 		f = 0
@@ -103,7 +106,7 @@ func (mtdf *Mtdf) slideWindow(depth int) int {
 	}
 
 	for mtdf.high-mtdf.low >= step {
-		var bound = -mtdf.search(-(f + 1), depth)
+		var bound = -mtdf.search(-(f + 1))
 
 		if f == bound {
 			f -= step
@@ -117,7 +120,8 @@ func (mtdf *Mtdf) slideWindow(depth int) int {
 	return mtdf.high
 }
 
-func (mtdf *Mtdf) handleNoMoves(alpha, depth int) int {
+func (mtdf *Mtdf) handleNoMoves(alpha int) int {
+
 	if mtdf.board.OpponentMoves() == 0 {
 		heur := ExactScoreFactor * mtdf.board.ExactScore()
 		if heur > alpha {
@@ -127,15 +131,15 @@ func (mtdf *Mtdf) handleNoMoves(alpha, depth int) int {
 	}
 
 	mtdf.board.SwitchTurn()
-	heur := -mtdf.search(-(alpha + 1), depth)
+	heur := -mtdf.search(-(alpha + 1))
 	mtdf.board.SwitchTurn()
 	return heur
 }
 
-func (mtdf *Mtdf) checkHashTable(alpha, depth int) (int, bool) {
+func (mtdf *Mtdf) checkHashTable(alpha int) (int, bool) {
 	key := hashtableKey{
 		board: mtdf.board.Normalize(),
-		depth: depth}
+		depth: mtdf.depth}
 
 	entry, ok := mtdf.hashtable[key]
 	if ok {
@@ -149,10 +153,10 @@ func (mtdf *Mtdf) checkHashTable(alpha, depth int) (int, bool) {
 	return 0, false
 }
 
-func (mtdf *Mtdf) updateHashTable(alpha, depth, heur int) {
+func (mtdf *Mtdf) updateHashTable(alpha, heur int) {
 	key := hashtableKey{
 		board: mtdf.board.Normalize(),
-		depth: depth}
+		depth: mtdf.depth}
 
 	entry, ok := mtdf.hashtable[key]
 
@@ -175,43 +179,43 @@ func (mtdf *Mtdf) updateHashTable(alpha, depth, heur int) {
 	mtdf.hashtable[key] = entry
 }
 
-func (mtdf *Mtdf) search(alpha, depth int) int {
-
-	if depth < minHashtableDepth {
-		return mtdf.searchNoHashtable(alpha, depth)
+func (mtdf *Mtdf) search(alpha int) int {
+	if mtdf.depth < minHashtableDepth {
+		return mtdf.searchNoHashtable(alpha)
 	}
 
 	mtdf.stats.Nodes++
 
-	if heur, ok := mtdf.checkHashTable(alpha, depth); ok {
+	if heur, ok := mtdf.checkHashTable(alpha); ok {
 		return heur
 	}
 
 	gen := othello.NewChildGenerator(&mtdf.board)
 	if !gen.HasMoves() {
-		return mtdf.handleNoMoves(alpha, depth)
+		return mtdf.handleNoMoves(alpha)
 	}
 
 	heur := alpha
+	mtdf.depth--
 	for gen.Next() {
-		childHeur := -mtdf.search(-(alpha + 1), depth-1)
+		childHeur := -mtdf.search(-(alpha + 1))
 		if childHeur > alpha {
 			gen.RestoreParent()
 			heur = alpha + 1
 			break
 		}
 	}
+	mtdf.depth++
 
-	mtdf.updateHashTable(alpha, depth, heur)
+	mtdf.updateHashTable(alpha, heur)
 
 	return heur
 }
 
-func (mtdf *Mtdf) searchNoHashtable(alpha, depth int) int {
-
+func (mtdf *Mtdf) searchNoHashtable(alpha int) int {
 	mtdf.stats.Nodes++
 
-	if depth == 0 {
+	if mtdf.depth == 0 {
 		heur := mtdf.heuristic(mtdf.board)
 		if heur > alpha {
 			return alpha + 1
@@ -231,20 +235,22 @@ func (mtdf *Mtdf) searchNoHashtable(alpha, depth int) int {
 		}
 
 		mtdf.board.SwitchTurn()
-		heur := -mtdf.searchNoHashtable(-(alpha + 1), depth)
+		heur := -mtdf.searchNoHashtable(-(alpha + 1))
 		mtdf.board.SwitchTurn()
 		return heur
 	}
 
 	heur := alpha
+	mtdf.depth--
 	for gen.Next() {
-		childHeur := -mtdf.searchNoHashtable(-(alpha + 1), depth-1)
+		childHeur := -mtdf.searchNoHashtable(-(alpha + 1))
 		if childHeur > alpha {
 			gen.RestoreParent()
 			heur = alpha + 1
 			break
 		}
 	}
+	mtdf.depth++
 
 	return heur
 }
