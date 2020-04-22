@@ -817,11 +817,19 @@ func BenchmarkStableDiscs(b *testing.B) {
 		panic("loading xot boards failed: " + err.Error())
 	}
 
-	for i := 0; i < b.N; i++ {
-		discs := 14 + rand.Intn(19)
+	var boards []Board
+
+	for i := 0; i < 10000; i++ {
+		discs := 40 + (b.N % 15)
 		board, err := NewRandomBoard(discs)
 		assert.Nil(b, err)
+		boards = append(boards, *board)
+	}
 
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		board := boards[i%len(boards)]
 		dummyBitSet = stableDiscs(board.me, board.opp)
 	}
 	b.StopTimer()
