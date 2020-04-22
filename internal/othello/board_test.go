@@ -3,6 +3,7 @@ package othello
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"math/rand"
 	"testing"
 
@@ -772,4 +773,56 @@ func TestBoardChildGenHasMoves(t *testing.T) {
 
 	// full board should not have moves
 	assert.False(t, gen.HasMoves())
+}
+
+func TestBoardStableDiscs(t *testing.T) {
+
+	for board := range genTestBoards() {
+		b := board
+
+		children := b.GetChildren()
+
+		if len(children) == 0 {
+			continue
+		}
+
+		unflippedMe := ^BitSet(0)
+		unflippedOpp := ^BitSet(0)
+
+		for _, child := range children {
+			child.SwitchTurn()
+			unflippedMe &= child.me
+			unflippedOpp &= child.opp
+		}
+
+		stable := stableDiscs(b.me, b.opp)
+		stableMe := stable & b.me
+		stableOpp := stable & b.opp
+
+		assert.Equal(t, stableMe, stableMe&unflippedMe)
+		assert.Equal(t, stableOpp, stableOpp&unflippedOpp)
+
+		if t.Failed() {
+			log.Printf("board:\n%s", board)
+			log.Printf("unflipped:\n%s", NewCustomBoard(unflippedMe, unflippedOpp))
+			log.Printf("stable:\n%s", NewCustomBoard(stableMe, stableOpp))
+			t.FailNow()
+		}
+	}
+}
+
+func BenchmarkStableDiscs(b *testing.B) {
+	rand.Seed(0)
+	if err := LoadXotBoards(); err != nil {
+		panic("loading xot boards failed: " + err.Error())
+	}
+
+	for i := 0; i < b.N; i++ {
+		discs := 14 + rand.Intn(19)
+		board, err := NewRandomBoard(discs)
+		assert.Nil(b, err)
+
+		dummyBitSet = stableDiscs(board.me, board.opp)
+	}
+	b.StopTimer()
 }

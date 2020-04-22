@@ -549,3 +549,66 @@ func (gen *ChildGenerator) Next() bool {
 func (gen *ChildGenerator) RestoreParent() {
 	gen.child.UndoMove(gen.lastMove, gen.lastFlipped)
 }
+
+func stableDiscs(me, opp BitSet) BitSet {
+
+	any := me | opp
+
+	stable := any & cornerMask
+
+	if stable == 0 {
+		return 0
+	}
+
+	sides := []BitSet{
+		0x00000000000000FF,
+		0xFF00000000000000,
+		0x8080808080808080,
+		0x0101010101010101,
+	}
+
+	for _, side := range sides {
+		if any&side == side {
+			stable |= side
+		}
+	}
+
+	for {
+		horStable := any & 0xFF000000000000FF
+		horStable |= me & ((stable & me) << 8)
+		horStable |= me & ((stable & me) >> 8)
+		horStable |= opp & ((stable & opp) << 8)
+		horStable |= opp & ((stable & opp) >> 8)
+		horStable |= any & ((stable & any) << 8) & ((stable & any) >> 8)
+
+		verStable := any & 0x8181818181818181
+		verStable |= me & ((stable & me) << 1)
+		verStable |= me & ((stable & me) >> 1)
+		verStable |= opp & ((stable & opp) << 1)
+		verStable |= opp & ((stable & opp) >> 1)
+		verStable |= any & ((stable & any) << 1) & ((stable & any) >> 1)
+
+		diaRightDownStable := any & 0xFF818181818181FF
+		diaRightDownStable |= me & ((stable & me) << 9)
+		diaRightDownStable |= me & ((stable & me) >> 9)
+		diaRightDownStable |= opp & ((stable & opp) << 9)
+		diaRightDownStable |= opp & ((stable & opp) >> 9)
+		diaRightDownStable |= any & ((stable & any) << 9) & ((stable & any) >> 9)
+
+		diaLeftDownStable := any & 0xFF818181818181FF
+		diaLeftDownStable |= me & ((stable & me) << 7)
+		diaLeftDownStable |= me & ((stable & me) >> 7)
+		diaLeftDownStable |= opp & ((stable & opp) << 7)
+		diaLeftDownStable |= opp & ((stable & opp) >> 7)
+		diaLeftDownStable |= any & ((stable & any) << 7) & ((stable & any) >> 7)
+
+		newStable := horStable & verStable & diaLeftDownStable & diaRightDownStable
+
+		if stable == newStable {
+			break
+		}
+		stable = newStable
+	}
+	return stable
+
+}
