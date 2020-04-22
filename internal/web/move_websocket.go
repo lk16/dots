@@ -139,6 +139,7 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 		})
 
 		for i := range analyzedChildren {
+
 			if mws.getAnalyzedBoard() != board {
 				return
 			}
@@ -211,6 +212,7 @@ func (mws *moveWebSocket) handlebotMoveRequest(arg interface{}) error {
 }
 
 func (mws *moveWebSocket) sendBotMoveReply(board othello.Board, turn int) {
+
 	bestMove, err := mws.bot.DoMove(board)
 	if err != nil {
 		log.Printf("sendBotMoveReply(): %s", err)
