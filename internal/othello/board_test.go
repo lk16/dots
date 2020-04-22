@@ -795,7 +795,7 @@ func TestBoardStableDiscs(t *testing.T) {
 			unflippedOpp &= child.opp
 		}
 
-		stable := stableDiscs(b.me, b.opp)
+		stable := b.StableDiscs()
 		stableMe := stable & b.me
 		stableOpp := stable & b.opp
 
@@ -830,7 +830,7 @@ func BenchmarkStableDiscs(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		board := boards[i%len(boards)]
-		dummyBitSet = stableDiscs(board.me, board.opp)
+		dummyBitSet = board.StableDiscs()
 	}
 	b.StopTimer()
 }

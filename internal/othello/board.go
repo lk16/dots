@@ -550,6 +550,11 @@ func (gen *ChildGenerator) RestoreParent() {
 	gen.child.UndoMove(gen.lastMove, gen.lastFlipped)
 }
 
+// StableDiscs returns a bitset of discs that can never be flipped
+func (board Board) StableDiscs() BitSet {
+	return stableDiscs(board.me, board.opp)
+}
+
 func stableDiscs(me, opp BitSet) BitSet {
 
 	any := me | opp
