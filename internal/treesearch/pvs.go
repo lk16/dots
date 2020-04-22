@@ -16,7 +16,9 @@ type Pvs struct {
 // NewPvs returns a new Pvs
 func NewPvs(heuristic func(othello.Board) int) *Pvs {
 	return &Pvs{
-		sortPvs:   &Pvs{},
+		sortPvs: &Pvs{
+			heuristic: heuristic,
+		},
 		heuristic: heuristic,
 	}
 }
