@@ -32,7 +32,7 @@ func NewBot(writer io.Writer, searchDepth, exactDepth int, searcher Searcher) *B
 		searcher:    searcher}
 }
 
-func (bot *Bot) write(format string, args ...interface{}) {
+func (bot *Bot) writef(format string, args ...interface{}) {
 	formatted := fmt.Sprintf(format, args...)
 	_, err := bot.writer.Write([]byte(formatted))
 	if err != nil {
@@ -53,7 +53,7 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 	afterwards := children[0].Board
 
 	if len(children) == 1 {
-		bot.write("Only one move. Skipping evaluation.\n")
+		bot.writef("Only one move. Skipping evaluation.\n")
 		return &afterwards, nil
 	}
 
@@ -64,10 +64,10 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 
 	if isExact {
 		depth = emptiesCount
-		bot.write("Searching for exact solution at depth %d\n", depth)
+		bot.writef("Searching for exact solution at depth %d\n", depth)
 	} else {
 		depth = bot.searchDepth
-		bot.write("Searching with heuristic at depth %d\n", depth)
+		bot.writef("Searching with heuristic at depth %d\n", depth)
 
 		if depth > 6 {
 			alpha := MinHeuristic
@@ -84,7 +84,7 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 	}
 
 	sortStats := bot.searcher.GetStats()
-	bot.write("\n\n%12s %63s\n\n", "Sorting:", sortStats.String())
+	bot.writef("\n\n%12s %63s\n\n", "Sorting:", sortStats.String())
 	bot.searcher.ResetStats()
 
 	totalStats := sortStats
@@ -114,14 +114,14 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 		if heur > alpha {
 			alpha = heur
 			afterwards = child.Board
-			bot.write("Child %2d/%2d: %8d%55s\n", i+1, len(children), heur, childStats.String())
+			bot.writef("Child %2d/%2d: %8d%55s\n", i+1, len(children), heur, childStats.String())
 		} else {
-			bot.write("Child %2d/%2d: %8s%55s\n", i+1, len(children),
+			bot.writef("Child %2d/%2d: %8s%55s\n", i+1, len(children),
 				fmt.Sprintf("≤ %d", heur), childStats.String())
 		}
 	}
 
-	bot.write("\n%12s %63s\n\n\n", "Total:", totalStats.String())
+	bot.writef("\n%12s %63s\n\n\n", "Total:", totalStats.String())
 	bot.LifetimeStats.Add(totalStats)
 
 	return &afterwards, nil

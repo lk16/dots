@@ -1,3 +1,4 @@
+// Package othello contains the implementation of the othello rules including boards and computing available moves.
 package othello
 
 import (

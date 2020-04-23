@@ -94,7 +94,7 @@ func TestBoardGetMoveField(t *testing.T) {
 	assert.True(t, ok)
 	assert.Equal(t, 19, moveID)
 
-	moveID, ok = parent.GetMoveField(parent)
+	_, ok = parent.GetMoveField(parent)
 	assert.False(t, ok)
 }
 

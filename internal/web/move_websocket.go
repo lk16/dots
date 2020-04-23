@@ -175,14 +175,14 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 	}
 }
 
-func (mws *moveWebSocket) handleAnalyzeMoveRequest(request interface{}) (err error) {
+func (mws *moveWebSocket) handleAnalyzeMoveRequest(arg interface{}) (err error) {
 
-	analyzeMoveRequest, ok := request.(analyzeMoveRequest)
+	request, ok := arg.(analyzeMoveRequest)
 	if !ok {
 		return fmt.Errorf("unexpected type %T in handler, expected analyzeMoveRequest", request)
 	}
 
-	board, turn, err := analyzeMoveRequest.State.getBoard()
+	board, turn, err := request.State.getBoard()
 	if err != nil {
 		return err
 	}
@@ -193,14 +193,14 @@ func (mws *moveWebSocket) handleAnalyzeMoveRequest(request interface{}) (err err
 	return nil
 }
 
-func (mws *moveWebSocket) handlebotMoveRequest(request interface{}) error {
+func (mws *moveWebSocket) handlebotMoveRequest(arg interface{}) error {
 
-	botMoveRequest, ok := request.(botMoveRequest)
+	request, ok := arg.(botMoveRequest)
 	if !ok {
 		return fmt.Errorf("unexpected type %T in handler, expected botMoveRequest", request)
 	}
 
-	board, _, err := botMoveRequest.State.getBoard()
+	board, _, err := request.State.getBoard()
 	if err != nil {
 		return err
 	}
@@ -211,7 +211,7 @@ func (mws *moveWebSocket) handlebotMoveRequest(request interface{}) error {
 
 	mws.killAnalysis()
 
-	turn := botMoveRequest.State.Turn
+	turn := request.State.Turn
 	go mws.sendBotMoveReply(*board, turn)
 
 	return nil

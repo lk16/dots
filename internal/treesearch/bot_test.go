@@ -41,7 +41,7 @@ func TestBotWrite(t *testing.T) {
 	t.Run("OK", func(t *testing.T) {
 		var buff bytes.Buffer
 		bot := &Bot{writer: &buff}
-		bot.write("%s %d", "foo", 3)
+		bot.writef("%s %d", "foo", 3)
 
 		assert.Equal(t, "foo 3", buff.String())
 	})
@@ -52,7 +52,7 @@ func TestBotWrite(t *testing.T) {
 		defer log.SetOutput(os.Stderr)
 
 		bot := &Bot{writer: &failWriter{}}
-		bot.write("%s %d", "foo", 3)
+		bot.writef("%s %d", "foo", 3)
 
 		assert.Contains(t, logBuff.String(), "Bot write() error:")
 	})

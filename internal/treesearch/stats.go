@@ -20,7 +20,7 @@ func (s *Stats) StartClock() {
 }
 
 func (s *Stats) StopClock() {
-	s.Duration += time.Now().Sub(s.StartTime)
+	s.Duration += time.Since(s.StartTime)
 }
 
 func (s *Stats) NodesPerSecond() uint64 {
