@@ -1,6 +1,7 @@
 package treesearch
 
 import (
+	"log"
 	"sort"
 
 	"github.com/lk16/dots/internal/othello"
@@ -11,11 +12,13 @@ type Pvs struct {
 	stats     Stats
 	sortPvs   *Pvs
 	heuristic func(othello.Board) int
+	cache     Cacher
 }
 
 // NewPvs returns a new Pvs
-func NewPvs(heuristic func(othello.Board) int) *Pvs {
+func NewPvs(cache Cacher, heuristic func(othello.Board) int) *Pvs {
 	return &Pvs{
+		cache: cache,
 		sortPvs: &Pvs{
 			heuristic: heuristic,
 		},
@@ -53,6 +56,31 @@ func (pvs *Pvs) ResetStats() {
 
 // Search searches for the the best move up to a certain depth
 func (pvs *Pvs) Search(board othello.Board, alpha, beta, depth int) int {
+	cacheKey := CacheKey{board: board.Normalize(), depth: depth}
+	var cacheValue CacheValue
+
+	if pvs.cache != nil {
+		var ok bool
+		if cacheValue, ok = pvs.cache.Lookup(cacheKey); ok {
+			if cacheValue.alpha > alpha {
+				alpha = cacheValue.alpha
+			}
+
+			if cacheValue.beta < beta {
+				beta = cacheValue.beta
+			}
+
+			if alpha >= beta {
+				return alpha
+			}
+		} else {
+			cacheValue = CacheValue{
+				alpha: MinHeuristic,
+				beta:  MaxHeuristic,
+			}
+		}
+	}
+
 	pvs.stats.StartClock()
 
 	var heur int
@@ -70,6 +98,19 @@ func (pvs *Pvs) Search(board othello.Board, alpha, beta, depth int) int {
 
 	if heur > beta {
 		heur = beta
+	}
+
+	if pvs.cache != nil {
+		if heur > cacheValue.alpha {
+			cacheValue.alpha = heur
+		}
+		if heur < cacheValue.beta {
+			cacheValue.beta = heur
+		}
+
+		if err := pvs.cache.Save(cacheKey, cacheValue); err != nil {
+			log.Printf("warning: saving cache value failed: %s", err.Error())
+		}
 	}
 
 	return heur

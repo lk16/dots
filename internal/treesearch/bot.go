@@ -39,6 +39,11 @@ func (bot *Bot) writef(format string, args ...interface{}) {
 	}
 }
 
+// Searcher returns the searcher of a bot
+func (bot *Bot) Searcher() Searcher {
+	return bot.searcher
+}
+
 // DoMove computes the best child of a Board
 func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 	children := board.GetSortableChildren()

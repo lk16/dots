@@ -19,17 +19,22 @@ type moveWebSocket struct {
 	writeLock         sync.Mutex
 	analyzedBoard     othello.Board
 	analyzedBoardLock sync.Mutex
+	bot               *treesearch.Bot
 }
 
-func newMoveWebSocket(w http.ResponseWriter, r *http.Request) (*moveWebSocket, error) {
+func newMoveWebSocket(w http.ResponseWriter, r *http.Request, cacher treesearch.Cacher) (*moveWebSocket, error) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("upgrade error: %s", err)
 		return nil, err
 	}
 
+	searcher := treesearch.NewPvs(cacher, treesearch.Squared)
+
 	mws := &moveWebSocket{
-		ws: ws}
+		ws:  ws,
+		bot: treesearch.NewBot(os.Stdout, 10, 16, searcher),
+	}
 
 	return mws, nil
 }
@@ -128,23 +133,29 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 				Move:      move}}
 	}
 
+	searcher := treesearch.NewPvs(nil, treesearch.Squared)
+
 	for depth := 4; depth <= board.CountEmpties(); depth++ {
 		sort.Slice(analyzedChildren, func(i, j int) bool {
 			return analyzedChildren[i].analysis.Heuristic > analyzedChildren[j].analysis.Heuristic
 		})
 
 		for i := range analyzedChildren {
-			bot := treesearch.NewPvs(treesearch.Squared)
-
 			if mws.getAnalyzedBoard() != board {
 				return
 			}
 
 			analysis := analyzeMoveReply{
-				Board:     evaluated,
-				Depth:     depth,
-				Move:      analyzedChildren[i].analysis.Move,
-				Heuristic: bot.Search(analyzedChildren[i].child, treesearch.MinHeuristic, treesearch.MaxHeuristic, depth)}
+				Board: evaluated,
+				Depth: depth,
+				Move:  analyzedChildren[i].analysis.Move,
+				Heuristic: searcher.Search(
+					analyzedChildren[i].child,
+					treesearch.MinHeuristic,
+					treesearch.MaxHeuristic,
+					depth,
+				),
+			}
 
 			message := newWsMessage(&analysis)
 
@@ -205,9 +216,7 @@ func (mws *moveWebSocket) handlebotMoveRequest(arg interface{}) error {
 }
 
 func (mws *moveWebSocket) sendBotMoveReply(board othello.Board, turn int) {
-	bot := treesearch.NewBot(os.Stdout, 8, 14, treesearch.NewPvs(treesearch.Squared))
-
-	bestMove, err := bot.DoMove(board)
+	bestMove, err := mws.bot.DoMove(board)
 	if err != nil {
 		log.Printf("sendBotMoveReply(): %s", err)
 		return

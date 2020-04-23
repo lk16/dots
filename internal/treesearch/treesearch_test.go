@@ -179,7 +179,7 @@ func TestTreeSearch(t *testing.T) {
 
 	minimax := NewMinimax(Squared)
 	mtdf := NewMtdf(Squared)
-	pvs := NewPvs(Squared)
+	pvs := NewPvs(nil, Squared)
 
 	for i := 0; i < 10; i++ {
 		for discs := 4; discs < 64; discs++ {
@@ -229,7 +229,7 @@ func TestTreeSearchExact(t *testing.T) {
 
 	minimax := NewMinimax(Squared)
 	mtdf := NewMtdf(Squared)
-	pvs := NewPvs(Squared)
+	pvs := NewPvs(nil, Squared)
 
 	for i := 0; i < 20; i++ {
 		for discs := 56; discs < 64; discs++ {

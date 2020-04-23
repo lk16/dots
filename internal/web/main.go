@@ -20,8 +20,12 @@ const (
 
 var upgrader = websocket.Upgrader{}
 
-func ws(w http.ResponseWriter, r *http.Request) {
-	mws, err := newMoveWebSocket(w, r)
+type wsHandler struct {
+	cacher treesearch.Cacher
+}
+
+func (handler *wsHandler) handle(w http.ResponseWriter, r *http.Request) {
+	mws, err := newMoveWebSocket(w, r, handler.cacher)
 	if err != nil {
 		log.Printf("error creating MoveWebSocket: %s", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -122,7 +126,10 @@ func (logger logger) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 // Main initializes and runs the dots webserver
 func Main() {
-	http.HandleFunc("/ws", ws)
+	cacher := treesearch.NewMemoryCache()
+	wsHandler := &wsHandler{cacher: cacher}
+	http.HandleFunc("/ws", wsHandler.handle)
+
 	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("internal/web/static"))))
 	http.HandleFunc("/svg/field", svgField)
 	http.HandleFunc("/svg/icon", svgIcon)
