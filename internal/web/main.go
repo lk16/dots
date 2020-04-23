@@ -10,9 +10,6 @@ import (
 	svg "github.com/ajstarks/svgo"
 	"github.com/gorilla/websocket"
 	"github.com/lk16/dots/internal/treesearch"
-
-	// register profiling handlers
-	_ "net/http/pprof"
 )
 
 var upgrader = websocket.Upgrader{}
