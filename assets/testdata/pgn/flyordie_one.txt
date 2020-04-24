@@ -1,0 +1,20 @@
+[Event "Online game"]
+[Site "www.flyordie.com"]
+[Date "2019.04.09"]
+[Round "2"]
+[White "gavilann59"]
+[Black "LK16"]
+[Result "29-35"]
+[WhiteRating "302"]
+[WhiteTime "R0:09:24"]
+[BlackRating "377"]
+[BlackTime "R0:07:51"]
+[Termination "normal"]
+[TimeControl "600"]
+[UTCDate "2019.04.09"]
+
+1. e6 d6 2. c5 b6 3. b5 b4 4. a5 f6 5. c4 c3 6. d3 c6 7. a4 d2 8. f5 f3 9. e3 f2
+10. c2 g4 11. d1 f4 12. g3 e2 13. e1 a6 14. d7 a3 15. b3 e7 16. f1 h3 17. e8 c7
+18. c8 d8 19. g5 h4 20. g6 f7 21. h5 h6 22. f8 c1 23. b1 g2 24. b2 g7 25. h8 g8
+26. h7 a1 27. a2 g1 28. b8 a8 29. h2 h1 30. a7 b7 29-35
+
