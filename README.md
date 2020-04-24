@@ -43,12 +43,15 @@ golangci-lint run
     - [ ] clean and merge
 
 - [ ] cleaning
-    - [ ] fix comments that got corrupted by search/replace
-    - [ ] go linting
+    - [ ] merge board code into one file
+    - [ ] make board.Me and board.Opp public
     - [ ] clean board tests:
         - [ ] drop "log" import
         - [ ] redo genTestBoards()
+    - [ ] move bitset out of othello package or drop completely?
     - [ ] cleaner error handling
+        - [ ] use `github.com/pkg/errors` everywhere
+        - [ ] get rid of `fmt.Errorf()`
     - [ ] list features of this project on top of README
 
 - [ ] bot

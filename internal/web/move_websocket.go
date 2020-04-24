@@ -234,7 +234,7 @@ func (mws *moveWebSocket) handleAnalyzeStopRequest(_ interface{}) error {
 }
 
 func (mws *moveWebSocket) sendGetXotReply() {
-	if err := othello.LoadXot(); err != nil {
+	if err := othello.LoadXotBoards(); err != nil {
 		log.Printf("error loading xot boards: %s", err.Error())
 		return
 	}

@@ -1,13 +1,13 @@
 package treesearch
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"log"
 	"sort"
 
 	"github.com/lk16/dots/internal/othello"
+	"github.com/pkg/errors"
 )
 
 // Bot is a bot that uses a Heuristic for choosing its moves
