@@ -80,10 +80,11 @@ func (bot *Bot) findBestChild(board othello.Board) othello.Board {
 	bot.writef("Searching with heuristic at depth %d\n", depth)
 
 	if depth > 6 {
+		sortAlpha := MinHeuristic
 		for i := range children {
-			children[i].Heur = bot.searcher.Search(children[i].Board, alpha, MaxHeuristic, 6)
-			if children[i].Heur > alpha {
-				alpha = children[i].Heur
+			children[i].Heur = bot.searcher.Search(children[i].Board, sortAlpha, MaxHeuristic, 6)
+			if children[i].Heur > sortAlpha {
+				sortAlpha = children[i].Heur
 			}
 		}
 		sort.Slice(children, func(i, j int) bool {
