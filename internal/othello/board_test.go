@@ -3,7 +3,6 @@ package othello
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"math/rand"
 	"testing"
 
@@ -65,7 +64,7 @@ func genTestBoards() chan Board {
 			for discs := 4; discs <= 64; discs++ {
 				board, err := NewRandomBoard(discs)
 				if err != nil {
-					log.Printf("genTestBoards() breaking: %s", err)
+					panic(err.Error())
 				}
 				ch <- *board
 			}
@@ -707,7 +706,7 @@ func TestLoadXotBoards(t *testing.T) {
 
 		err := LoadXotBoards()
 
-		assert.Contains(t, err.Error(), "processing xot file failed")
+		assert.Contains(t, err.Error(), "invalid syntax")
 		assert.Equal(t, 0, len(xotBoards))
 	})
 
@@ -718,7 +717,7 @@ func TestLoadXotBoards(t *testing.T) {
 
 		err := LoadXotBoards()
 
-		assert.Contains(t, err.Error(), "processing xot file failed")
+		assert.Contains(t, err.Error(), "invalid syntax")
 		assert.Equal(t, 0, len(xotBoards))
 	})
 }

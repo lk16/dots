@@ -28,11 +28,6 @@ var (
 	xotDataPath = "/app/assets/xot.json"
 )
 
-type xotBoardModel struct {
-	Me  string `json:"me"`
-	Opp string `json:"opp"`
-}
-
 // Board represents the state of an othello othello game.
 // It does not keep track which discs are white or black.
 // Instead it keeps track which discs are owned by the player to move.
@@ -88,6 +83,35 @@ func NewRandomBoard(discs int) (*Board, error) {
 	}
 
 	return board, nil
+}
+
+// UnmarshalJSON loads a board from JSON data
+func (board *Board) UnmarshalJSON(bytes []byte) error {
+	type boardModel struct {
+		Me  string `json:"me"`
+		Opp string `json:"opp"`
+	}
+
+	var (
+		model   boardModel
+		err     error
+		me, opp uint64
+	)
+
+	if err = json.Unmarshal(bytes, &model); err != nil {
+		return err
+	}
+
+	if me, err = strconv.ParseUint(model.Me, 0, 64); err != nil {
+		return err
+	}
+
+	if opp, err = strconv.ParseUint(model.Opp, 0, 64); err != nil {
+		return err
+	}
+
+	*board = *NewCustomBoard(BitSet(me), BitSet(opp))
+	return nil
 }
 
 // GetSortableChildren returns a slice with all children of a Board
@@ -861,24 +885,11 @@ func LoadXotBoards() error {
 		return errors.Wrap(err, "failed to load xot file")
 	}
 
-	var xotModels []xotBoardModel
-	if err = json.Unmarshal(bytes, &xotModels); err != nil {
+	if err = json.Unmarshal(bytes, &xotBoards); err != nil {
+		// json.Unmarshal may set xotBoards to a non-empty slice when it returns an error
+		xotBoards = nil
+
 		return errors.Wrap(err, "failed to parse xot file")
-	}
-
-	for _, xotModel := range xotModels {
-		var me, opp uint64
-
-		if me, err = strconv.ParseUint(xotModel.Me, 0, 64); err != nil {
-			return errors.Wrap(err, "processing xot file failed")
-		}
-
-		if opp, err = strconv.ParseUint(xotModel.Opp, 0, 64); err != nil {
-			return errors.Wrap(err, "processing xot file failed")
-		}
-
-		board := *NewCustomBoard(BitSet(me), BitSet(opp))
-		xotBoards = append(xotBoards, board)
 	}
 
 	return nil
