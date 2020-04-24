@@ -30,9 +30,8 @@ func (err PGNParseError) Error() string {
 
 // GamePlayer has details on a Player as found in PGNs
 type GamePlayer struct {
-	Name        string
-	Rating      int
-	ResultDiscs int
+	Name   string
+	Rating int
 }
 
 // Game represents an entire othello game
@@ -81,7 +80,7 @@ func fieldToIndex(field string) (uint, bool) {
 	col := field[0] - 'a'
 	row := field[1] - '1'
 
-	if row < 0 || row > 7 || col < 0 || col > 7 {
+	if row > 7 || col > 7 {
 		return 0, false
 	}
 
@@ -106,7 +105,6 @@ func newPgnParser(bytes []byte) *pgnParser {
 }
 
 func (parser *pgnParser) parse() ([]Game, error) {
-
 	var (
 		games []Game
 		game  *Game
@@ -114,7 +112,6 @@ func (parser *pgnParser) parse() ([]Game, error) {
 	)
 
 	for parser.offset < len(parser.lines) {
-
 		line := parser.lines[parser.offset]
 
 		if len(line) == 0 {
@@ -156,11 +153,9 @@ func (parser *pgnParser) parseGame() (*Game, error) {
 	}
 
 	return game, nil
-
 }
 
 func (parser *pgnParser) parseAttributes() (*Game, error) {
-
 	var game Game
 
 	for parser.offset < len(parser.lines) {
@@ -189,51 +184,8 @@ func (parser *pgnParser) parseAttributes() (*Game, error) {
 		key := matches[1]
 		value := matches[2]
 
-		switch key {
-		case "Site":
-			game.Site = value
-		case "Date":
-			date, err := time.Parse("2006.01.02", value)
-			if err != nil {
-				pgnErr := &PGNParseError{
-					LineNumber: parser.offset,
-					Message:    err.Error(),
-				}
-				return nil, pgnErr
-			}
-
-			game.Date = date
-		case "Black":
-			game.Black.Name = value
-		case "White":
-			game.White.Name = value
-
-		case "BlackElo":
-			rating, err := strconv.Atoi(value)
-			if err != nil {
-				pgnErr := &PGNParseError{
-					LineNumber: parser.offset,
-					Message:    err.Error(),
-				}
-				return nil, pgnErr
-			}
-			game.Black.Rating = rating
-
-		case "WhiteElo":
-			rating, err := strconv.Atoi(value)
-			if err != nil {
-				pgnErr := &PGNParseError{
-					LineNumber: parser.offset,
-					Message:    err.Error(),
-				}
-				return nil, pgnErr
-			}
-			game.White.Rating = rating
-
-		case "Variant":
-			if value == "xot" {
-				game.Xot = true
-			}
+		if err := parser.parseAttribute(&game, key, value); err != nil {
+			return nil, err
 		}
 
 		parser.offset++
@@ -242,15 +194,63 @@ func (parser *pgnParser) parseAttributes() (*Game, error) {
 	return &game, nil
 }
 
-func (parser *pgnParser) parseMoves(game *Game) error {
+func (parser *pgnParser) parseAttribute(game *Game, key, value string) error {
+	switch key {
+	case "Site":
+		game.Site = value
+	case "Date":
+		date, err := time.Parse("2006.01.02", value)
+		if err != nil {
+			pgnErr := &PGNParseError{
+				LineNumber: parser.offset,
+				Message:    fmt.Sprintf("date parsing failed: %s", err.Error()),
+			}
+			return pgnErr
+		}
 
+		game.Date = date
+	case "Black":
+		game.Black.Name = value
+	case "White":
+		game.White.Name = value
+
+	case "BlackRating":
+		fallthrough
+	case "BlackElo":
+		rating, err := strconv.Atoi(value)
+		if err != nil {
+			pgnErr := &PGNParseError{
+				LineNumber: parser.offset,
+				Message:    fmt.Sprintf("failed to parse black rating: %s", err.Error()),
+			}
+			return pgnErr
+		}
+		game.Black.Rating = rating
+
+	case "WhiteRating":
+		fallthrough
+	case "WhiteElo":
+		rating, err := strconv.Atoi(value)
+		if err != nil {
+			pgnErr := &PGNParseError{
+				LineNumber: parser.offset,
+				Message:    fmt.Sprintf("failed to parse white rating: %s", err.Error()),
+			}
+			return pgnErr
+		}
+		game.White.Rating = rating
+
+	case "Variant":
+		if value == "xot" {
+			game.Xot = true
+		}
+	}
+	return nil
+}
+
+func (parser *pgnParser) parseMoves(game *Game) error {
 	for parser.offset < len(parser.lines) {
 		line := parser.lines[parser.offset]
-
-		if len(line) == 0 {
-			parser.offset++
-			continue
-		}
 
 		for _, moveField := range strings.Split(line, " ") {
 			if strings.HasSuffix(moveField, ".") {
@@ -273,18 +273,11 @@ func (parser *pgnParser) parseMoves(game *Game) error {
 				return discCountErr
 			}
 
-			blackDiscs, err := strconv.Atoi(matches[1])
-			if err != nil {
-				return discCountErr
-			}
+			// TODO process final dics count
 
-			whiteDiscs, err := strconv.Atoi(matches[2])
-			if err != nil {
-				return discCountErr
-			}
-
-			game.Black.ResultDiscs = blackDiscs
-			game.White.ResultDiscs = whiteDiscs
+			// final disc counts indicate the end of the game
+			parser.offset++
+			return nil
 		}
 
 		parser.offset++

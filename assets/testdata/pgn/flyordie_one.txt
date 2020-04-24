@@ -1,20 +1,20 @@
 [Event "Online game"]
 [Site "www.flyordie.com"]
-[Date "2019.04.09"]
-[Round "2"]
-[White "gavilann59"]
-[Black "LK16"]
-[Result "29-35"]
-[WhiteRating "302"]
-[WhiteTime "R0:09:24"]
-[BlackRating "377"]
-[BlackTime "R0:07:51"]
+[Date "2019.04.14"]
+[Round "1"]
+[White "LK16"]
+[Black "wattego"]
+[Result "10-54"]
+[WhiteRating "325"]
+[WhiteTime "R0:08:19"]
+[BlackRating "155"]
+[BlackTime "R0:08:24"]
 [Termination "normal"]
 [TimeControl "600"]
-[UTCDate "2019.04.09"]
+[UTCDate "2019.04.14"]
 
-1. e6 d6 2. c5 b6 3. b5 b4 4. a5 f6 5. c4 c3 6. d3 c6 7. a4 d2 8. f5 f3 9. e3 f2
-10. c2 g4 11. d1 f4 12. g3 e2 13. e1 a6 14. d7 a3 15. b3 e7 16. f1 h3 17. e8 c7
-18. c8 d8 19. g5 h4 20. g6 f7 21. h5 h6 22. f8 c1 23. b1 g2 24. b2 g7 25. h8 g8
-26. h7 a1 27. a2 g1 28. b8 a8 29. h2 h1 30. a7 b7 29-35
+1. f5 d6 2. c5 f4 3. e3 c6 4. d3 f6 5. e6 d7 6. g4 c4 7. e7 c3 8. c8 f7 9. g5 g6
+10. c7 d8 11. b4 h4 12. h6 h3 13. h7 b3 14. b5 d2 15. e2 g3 16. f3 h5 17. h2 c2
+18. a3 e1 19. f2 f1 20. b6 a6 21. a4 b8 22. e8 f8 23. g7 b7 24. d1 g2 25. a7 a8
+26. g1 a5 27. -- c1 28. b1 g8 29. b2 h1 30. -- a1 31. -- a2 32. -- h8 10-54
 

@@ -1,0 +1,14 @@
+[Event "?"]
+[Site "PlayOK"]
+[Date "2020.04.23"]
+[Round "-"]
+[Black "lk16"]
+[White "pizzandsprite"]
+[Result "17-47"]
+[Time "19:12:45"]
+[Variant "xot"]
+[TimeControl "60"]
+[BlackElo "1558"]
+[WhiteElo "1346"]
+
+1. f5 d6 2. c4 f4 3. f3 g5 4. c6 a1 17-47
