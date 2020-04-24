@@ -10,8 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const xotTestDataFolder = "/app/assets/testdata/xot/"
-
 // Test othello generator
 func genTestBoards() chan Board {
 	ch := make(chan Board)
@@ -662,24 +660,15 @@ func TestLoadXotBoards(t *testing.T) {
 		assert.Equal(t, 1, len(xotBoards))
 	})
 
-	xotDataPathCopy := xotDataPath
+	assetsPathCopy := assetsPath
 
 	restoreXotDataPath := func() {
-		xotDataPath = xotDataPathCopy
+		assetsPath = assetsPathCopy
 	}
-
-	t.Run("CustomPath", func(t *testing.T) {
-		xotBoards = nil
-		xotDataPath = xotTestDataFolder + "valid.json"
-		defer restoreXotDataPath()
-
-		assert.Nil(t, LoadXotBoards())
-		assert.Equal(t, 1, len(xotBoards))
-	})
 
 	t.Run("FileNotFound", func(t *testing.T) {
 		xotBoards = nil
-		xotDataPath = xotTestDataFolder + "nonexistent.json"
+		assetsPath = "/nonexistent/"
 		defer restoreXotDataPath()
 
 		err := LoadXotBoards()
@@ -690,34 +679,12 @@ func TestLoadXotBoards(t *testing.T) {
 
 	t.Run("InvalidJSON", func(t *testing.T) {
 		xotBoards = nil
-		xotDataPath = xotTestDataFolder + "invalid.json"
+		assetsPath += "testdata/xot/broken/"
 		defer restoreXotDataPath()
 
 		err := LoadXotBoards()
 
 		assert.Contains(t, err.Error(), "failed to parse xot file")
-		assert.Equal(t, 0, len(xotBoards))
-	})
-
-	t.Run("BrokenMeField", func(t *testing.T) {
-		xotBoards = nil
-		xotDataPath = xotTestDataFolder + "broken_me_field.json"
-		defer restoreXotDataPath()
-
-		err := LoadXotBoards()
-
-		assert.Contains(t, err.Error(), "invalid syntax")
-		assert.Equal(t, 0, len(xotBoards))
-	})
-
-	t.Run("BrokenOppField", func(t *testing.T) {
-		xotBoards = nil
-		xotDataPath = xotTestDataFolder + "broken_opp_field.json"
-		defer restoreXotDataPath()
-
-		err := LoadXotBoards()
-
-		assert.Contains(t, err.Error(), "invalid syntax")
 		assert.Equal(t, 0, len(xotBoards))
 	})
 }

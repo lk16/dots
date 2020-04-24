@@ -224,6 +224,10 @@ issues:
       linters:
         - funlen
 
+    - path: internal/othello/board.go
+      text: "Potential file inclusion via variable"
+      linters:
+        - gosec
 
 
   # Independently from option `exclude` we use default exclude patterns,

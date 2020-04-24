@@ -16,8 +16,9 @@ WORKDIR /app
 
 ADD . .
 
-# Build the Go app
 ENV CGO_ENABLED 0
+ENV DOTS_ASSETS_PATH /app/assets/
+
 RUN go install ./cmd/dots
 
 # Run the executable

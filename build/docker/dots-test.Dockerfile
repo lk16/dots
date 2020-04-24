@@ -13,6 +13,8 @@ ADD . .
 RUN go mod download
 
 ENV CGO_ENABLED 0
+ENV DOTS_ASSETS_PATH /app/assets/
+
 RUN go install ./cmd/dots/main.go && \
 golangci-lint run ./... && \
 go test -coverprofile=coverage.out ./internal/...

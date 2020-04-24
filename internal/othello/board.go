@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/rand"
+	"os"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -24,8 +25,8 @@ var (
 	// ErrInvalidDiscAmount is used when an unexpected amount of discs is requested
 	ErrInvalidDiscAmount = errors.New("cannot create board with requested amount of discs")
 
-	xotBoards   []Board
-	xotDataPath = "/app/assets/xot.json"
+	xotBoards  []Board
+	assetsPath = os.Getenv("DOTS_ASSETS_PATH")
 )
 
 // Board represents the state of an othello othello game.
@@ -880,6 +881,8 @@ func LoadXotBoards() error {
 
 	var bytes []byte
 	var err error
+
+	xotDataPath := assetsPath + "xot.json"
 
 	if bytes, err = ioutil.ReadFile(xotDataPath); err != nil {
 		return errors.Wrap(err, "failed to load xot file")
