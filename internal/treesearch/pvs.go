@@ -127,7 +127,7 @@ func (pvs *Pvs) searchNoSort(board *othello.Board, alpha, beta, depth int) int {
 		return pvs.heuristic(*board)
 	}
 
-	gen := othello.NewUnsortedChildGenerator(board)
+	gen := othello.NewChildGenerator(board)
 
 	if !gen.HasMoves() {
 		if board.OpponentMoves() == 0 {
@@ -204,7 +204,7 @@ func (pvs *Pvs) searchNullWindowNoSort(board *othello.Board, alpha, depth int) i
 		return pvs.heuristic(*board)
 	}
 
-	gen := othello.NewUnsortedChildGenerator(board)
+	gen := othello.NewChildGenerator(board)
 
 	if !gen.HasMoves() {
 		if board.OpponentMoves() == 0 {
@@ -314,7 +314,7 @@ func (pvs *Pvs) searchExactNullWindow(board *othello.Board, alpha int) int {
 func (pvs *Pvs) searchExactNoSort(board *othello.Board, alpha, beta int) int {
 	pvs.stats.Nodes++
 
-	gen := othello.NewUnsortedChildGenerator(board)
+	gen := othello.NewChildGenerator(board)
 
 	if !gen.HasMoves() {
 		if board.OpponentMoves() == 0 {
@@ -352,7 +352,7 @@ func (pvs *Pvs) searchExactNoSort(board *othello.Board, alpha, beta int) int {
 func (pvs *Pvs) searchExactNullWindowNoSort(board *othello.Board, alpha int) int {
 	pvs.stats.Nodes++
 
-	gen := othello.NewUnsortedChildGenerator(board)
+	gen := othello.NewChildGenerator(board)
 
 	if !gen.HasMoves() {
 		if board.OpponentMoves() == 0 {

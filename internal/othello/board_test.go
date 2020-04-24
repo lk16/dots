@@ -757,3 +757,53 @@ func TestBoardGetSortableChildren(t *testing.T) {
 	}
 
 }
+
+func TestBoardChildGenNext(t *testing.T) {
+
+	for b := range genTestBoards() {
+
+		// create copy to silence warnings
+		board := b
+
+		children := board.GetChildren()
+
+		clone := board
+		gen := NewChildGenerator(&clone)
+
+		var generatedChildren []Board
+
+		for gen.Next() {
+			generatedChildren = append(generatedChildren, clone)
+		}
+
+		// parent state should be restored
+		assert.Equal(t, board, clone)
+
+		assert.ElementsMatch(t, children, generatedChildren)
+	}
+}
+
+func TestBoardChildGenRestoreParent(t *testing.T) {
+	board := NewBoard()
+	gen := NewChildGenerator(board)
+	gen.Next()
+	gen.RestoreParent()
+
+	assert.Equal(t, *NewBoard(), *board)
+}
+
+func TestBoardChildGenHasMoves(t *testing.T) {
+	board := NewBoard()
+	gen := NewChildGenerator(board)
+
+	// the start board should have moves
+	assert.True(t, gen.HasMoves())
+
+	board, err := NewRandomBoard(64)
+	assert.Nil(t, err)
+
+	gen = NewChildGenerator(board)
+
+	// full board should not have moves
+	assert.False(t, gen.HasMoves())
+}

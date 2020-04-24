@@ -893,3 +893,50 @@ func NewXotBoard() *Board {
 
 	return &xotBoards[rand.Intn(len(xotBoards))]
 }
+
+// ChildGenerator generates children of a board in no particular order
+type ChildGenerator struct {
+	movesLeft   BitSet
+	lastMove    BitSet
+	lastFlipped BitSet
+	child       *Board
+}
+
+// NewChildGenerator returns an child generator for a parent Board.
+// Generated children are not sorted
+func NewChildGenerator(board *Board) ChildGenerator {
+	return ChildGenerator{
+		movesLeft:   board.Moves(),
+		lastMove:    0,
+		lastFlipped: 0,
+		child:       board,
+	}
+}
+
+// HasMoves returns whether the parent Board has moves
+func (gen *ChildGenerator) HasMoves() bool {
+	return gen.movesLeft != 0
+}
+
+// Next attempts to generate a child of a Board
+// After generating all children the parent state is restored
+// The returned value indicates if more children are available.
+func (gen *ChildGenerator) Next() bool {
+	if gen.lastFlipped != 0 {
+		gen.RestoreParent()
+	}
+
+	if gen.movesLeft == 0 {
+		return false
+	}
+
+	gen.lastMove = gen.movesLeft & (-gen.movesLeft)
+	gen.lastFlipped = gen.child.DoMove(gen.lastMove)
+	gen.movesLeft &^= gen.lastMove
+	return true
+}
+
+// RestoreParent restores the parent state
+func (gen *ChildGenerator) RestoreParent() {
+	gen.child.UndoMove(gen.lastMove, gen.lastFlipped)
+}

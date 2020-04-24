@@ -187,7 +187,7 @@ func (mtdf *Mtdf) search(alpha, depth int) int {
 		}
 	}
 
-	gen := othello.NewUnsortedChildGenerator(&mtdf.board)
+	gen := othello.NewChildGenerator(&mtdf.board)
 	if !gen.HasMoves() {
 		return mtdf.handleNoMoves(alpha, depth)
 	}
