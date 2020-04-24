@@ -40,6 +40,12 @@ type Board struct {
 	me, opp BitSet
 }
 
+// SortableBoard is a board with associated heuristic estimation suitable for sorting
+type SortableBoard struct {
+	Board Board
+	Heur  int
+}
+
 // NewBoard returns a Board representing the initial state
 func NewBoard() *Board {
 	return &Board{
@@ -82,6 +88,23 @@ func NewRandomBoard(discs int) (*Board, error) {
 	}
 
 	return board, nil
+}
+
+// GetSortableChildren returns a slice with all children of a Board
+// such that they can easily be sorted
+func (board Board) GetSortableChildren() []SortableBoard {
+	moves := board.Moves()
+	children := make([]SortableBoard, moves.Count())
+
+	for i := range children {
+		moveBit := moves & (-moves)
+		moves &^= moveBit
+
+		children[i].Board = board
+		children[i].Board.DoMove(moveBit)
+		children[i].Heur = 0
+	}
+	return children
 }
 
 // GetMoveField computes the index of the move given a child and a parent
