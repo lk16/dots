@@ -51,7 +51,6 @@ func (pvs *Pvs) ResetStats() {
 
 // Search searches for the the best move up to a certain depth
 func (pvs *Pvs) Search(board othello.Board, alpha, beta, depth int) int {
-
 	pvs.stats.StartClock()
 
 	var heur int
@@ -75,7 +74,6 @@ func (pvs *Pvs) Search(board othello.Board, alpha, beta, depth int) int {
 }
 
 func (pvs *Pvs) search(board *othello.Board, alpha, beta, depth int) int {
-
 	if depth <= 7 || pvs.sortPvs == nil || beta-alpha == 1 {
 		return pvs.searchNoSort(board, alpha, beta, depth)
 	}
@@ -85,7 +83,6 @@ func (pvs *Pvs) search(board *othello.Board, alpha, beta, depth int) int {
 	children := board.GetSortableChildren()
 
 	if len(children) == 0 {
-
 		if board.OpponentMoves() == 0 {
 			return ExactScoreFactor * board.ExactScore()
 		}
@@ -102,7 +99,6 @@ func (pvs *Pvs) search(board *othello.Board, alpha, beta, depth int) int {
 	})
 
 	for i, child := range children {
-
 		var heur int
 		if i == 0 {
 			heur = -pvs.search(&child.Board, -beta, -alpha, depth-1)
@@ -118,14 +114,11 @@ func (pvs *Pvs) search(board *othello.Board, alpha, beta, depth int) int {
 		if heur > alpha {
 			alpha = heur
 		}
-
 	}
-
 	return alpha
 }
 
 func (pvs *Pvs) searchNoSort(board *othello.Board, alpha, beta, depth int) int {
-
 	pvs.stats.Nodes++
 
 	if depth == 0 {
@@ -135,7 +128,6 @@ func (pvs *Pvs) searchNoSort(board *othello.Board, alpha, beta, depth int) int {
 	gen := othello.NewUnsortedChildGenerator(board)
 
 	if !gen.HasMoves() {
-
 		if board.OpponentMoves() == 0 {
 			return ExactScoreFactor * board.ExactScore()
 		}
@@ -147,7 +139,6 @@ func (pvs *Pvs) searchNoSort(board *othello.Board, alpha, beta, depth int) int {
 	}
 
 	for i := 0; gen.Next(); i++ {
-
 		var heur int
 		if i == 0 {
 			heur = -pvs.searchNoSort(board, -beta, -alpha, depth-1)
@@ -164,14 +155,11 @@ func (pvs *Pvs) searchNoSort(board *othello.Board, alpha, beta, depth int) int {
 		if heur > alpha {
 			alpha = heur
 		}
-
 	}
-
 	return alpha
 }
 
 func (pvs *Pvs) searchNullWindow(board *othello.Board, alpha, depth int) int {
-
 	if depth <= 7 || pvs.sortPvs == nil {
 		return pvs.searchNullWindowNoSort(board, alpha, depth)
 	}
@@ -181,7 +169,6 @@ func (pvs *Pvs) searchNullWindow(board *othello.Board, alpha, depth int) int {
 	children := board.GetSortableChildren()
 
 	if len(children) == 0 {
-
 		if board.OpponentMoves() == 0 {
 			return ExactScoreFactor * board.ExactScore()
 		}
@@ -200,18 +187,15 @@ func (pvs *Pvs) searchNullWindow(board *othello.Board, alpha, depth int) int {
 	})
 
 	for _, child := range children {
-
 		heur := -pvs.searchNullWindow(&child.Board, -(alpha + 1), depth-1)
 		if heur > alpha {
 			return alpha + 1
 		}
 	}
-
 	return alpha
 }
 
 func (pvs *Pvs) searchNullWindowNoSort(board *othello.Board, alpha, depth int) int {
-
 	pvs.stats.Nodes++
 
 	if depth == 0 {
@@ -221,7 +205,6 @@ func (pvs *Pvs) searchNullWindowNoSort(board *othello.Board, alpha, depth int) i
 	gen := othello.NewUnsortedChildGenerator(board)
 
 	if !gen.HasMoves() {
-
 		if board.OpponentMoves() == 0 {
 			return ExactScoreFactor * board.ExactScore()
 		}
@@ -233,19 +216,16 @@ func (pvs *Pvs) searchNullWindowNoSort(board *othello.Board, alpha, depth int) i
 	}
 
 	for i := 0; gen.Next(); i++ {
-
 		heur := -pvs.searchNullWindowNoSort(board, -(alpha + 1), depth-1)
 		if heur > alpha {
 			gen.RestoreParent()
 			return alpha + 1
 		}
 	}
-
 	return alpha
 }
 
 func (pvs *Pvs) searchExact(board *othello.Board, alpha, beta int) int {
-
 	if board.CountEmpties() < 10 || beta-alpha == 1 {
 		return pvs.searchExactNoSort(board, alpha, beta)
 	}
@@ -255,7 +235,6 @@ func (pvs *Pvs) searchExact(board *othello.Board, alpha, beta int) int {
 	children := board.GetSortableChildren()
 
 	if len(children) == 0 {
-
 		if board.OpponentMoves() == 0 {
 			return board.ExactScore()
 		}
@@ -274,7 +253,6 @@ func (pvs *Pvs) searchExact(board *othello.Board, alpha, beta int) int {
 	})
 
 	for i, child := range children {
-
 		var heur int
 		if i == 0 {
 			heur = -pvs.searchExact(&child.Board, -beta, -alpha)
@@ -284,20 +262,18 @@ func (pvs *Pvs) searchExact(board *othello.Board, alpha, beta int) int {
 				heur = -pvs.searchExact(&child.Board, -beta, -heur)
 			}
 		}
+
 		if heur >= beta {
 			return beta
 		}
 		if heur > alpha {
 			alpha = heur
 		}
-
 	}
-
 	return alpha
 }
 
 func (pvs *Pvs) searchExactNullWindow(board *othello.Board, alpha int) int {
-
 	if board.CountEmpties() < 10 {
 		return pvs.searchExactNullWindowNoSort(board, alpha)
 	}
@@ -307,7 +283,6 @@ func (pvs *Pvs) searchExactNullWindow(board *othello.Board, alpha int) int {
 	children := board.GetSortableChildren()
 
 	if len(children) == 0 {
-
 		if board.OpponentMoves() == 0 {
 			return board.ExactScore()
 		}
@@ -326,24 +301,20 @@ func (pvs *Pvs) searchExactNullWindow(board *othello.Board, alpha int) int {
 	})
 
 	for _, child := range children {
-
 		heur := -pvs.searchExactNullWindow(&child.Board, -(alpha + 1))
 		if heur > alpha {
 			return alpha + 1
 		}
 	}
-
 	return alpha
 }
 
 func (pvs *Pvs) searchExactNoSort(board *othello.Board, alpha, beta int) int {
-
 	pvs.stats.Nodes++
 
 	gen := othello.NewUnsortedChildGenerator(board)
 
 	if !gen.HasMoves() {
-
 		if board.OpponentMoves() == 0 {
 			return board.ExactScore()
 		}
@@ -355,7 +326,6 @@ func (pvs *Pvs) searchExactNoSort(board *othello.Board, alpha, beta int) int {
 	}
 
 	for i := 0; gen.Next(); i++ {
-
 		var heur int
 		if i == 0 {
 			heur = -pvs.searchExactNoSort(board, -beta, -alpha)
@@ -365,6 +335,7 @@ func (pvs *Pvs) searchExactNoSort(board *othello.Board, alpha, beta int) int {
 				heur = -pvs.searchExactNoSort(board, -beta, -heur)
 			}
 		}
+
 		if heur >= beta {
 			gen.RestoreParent()
 			return beta
@@ -372,20 +343,16 @@ func (pvs *Pvs) searchExactNoSort(board *othello.Board, alpha, beta int) int {
 		if heur > alpha {
 			alpha = heur
 		}
-
 	}
-
 	return alpha
 }
 
 func (pvs *Pvs) searchExactNullWindowNoSort(board *othello.Board, alpha int) int {
-
 	pvs.stats.Nodes++
 
 	gen := othello.NewUnsortedChildGenerator(board)
 
 	if !gen.HasMoves() {
-
 		if board.OpponentMoves() == 0 {
 			return board.ExactScore()
 		}
@@ -397,13 +364,11 @@ func (pvs *Pvs) searchExactNullWindowNoSort(board *othello.Board, alpha int) int
 	}
 
 	for gen.Next() {
-
 		heur := -pvs.searchExactNullWindowNoSort(board, -(alpha + 1))
 		if heur > alpha {
 			gen.RestoreParent()
 			return alpha + 1
 		}
 	}
-
 	return alpha
 }

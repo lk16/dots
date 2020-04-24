@@ -22,7 +22,6 @@ type xotBoardModel struct {
 // LoadXot loads the xot boards into memory.
 // When calling this again after a successful call, this function does nothing.
 func LoadXot() error {
-
 	if len(xotBoards) != 0 {
 		return nil
 	}
@@ -40,7 +39,6 @@ func LoadXot() error {
 	}
 
 	for _, xotModel := range xotModels {
-
 		var me, opp uint64
 
 		if me, err = strconv.ParseUint(xotModel.Me, 0, 64); err != nil {
@@ -61,7 +59,6 @@ func LoadXot() error {
 // NewXotBoard returns a random xot board
 // http://berg.earthlingz.de/xot/aboutxot.php?lang=en
 func NewXotBoard() *Board {
-
 	if len(xotBoards) == 0 {
 		panic("xot boards are not loaded")
 	}

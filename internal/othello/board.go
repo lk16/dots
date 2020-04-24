@@ -44,7 +44,6 @@ func NewCustomBoard(me, opp BitSet) (board *Board) {
 
 // NewRandomBoard returns a random Board with a given number of discs
 func NewRandomBoard(discs int) (*Board, error) {
-
 	if discs < 4 || discs > 64 {
 		return nil, ErrInvalidDiscAmount
 	}
@@ -53,7 +52,6 @@ func NewRandomBoard(discs int) (*Board, error) {
 	skips := 0
 
 	for board.CountDiscs() != discs {
-
 		if skips == 2 {
 			// Stuck. Try again.
 			board = NewBoard()
@@ -85,7 +83,6 @@ func (board Board) GetMoveField(child Board) (int, bool) {
 
 // Normalize returns a normalized othello with regards to symmetry
 func (board Board) Normalize() Board {
-
 	mirrorHor := func(bitset BitSet) BitSet {
 		result := bitset
 		result = (result&0x00000000FFFFFFFF)<<32 | (result&0xFFFFFFFF00000000)>>32
@@ -194,7 +191,6 @@ func (board Board) Normalize() Board {
 
 // String returns an ASCII-art string representation of a board
 func (board Board) String() string {
-
 	buffer := new(bytes.Buffer)
 	_, _ = buffer.WriteString("+-a-b-c-d-e-f-g-h-+\n")
 
@@ -237,7 +233,6 @@ func (board Board) OpponentMoves() BitSet {
 }
 
 func moves(me, opp BitSet) BitSet {
-
 	// this function is a modified version of code from Edax
 	mask := opp & 0x7E7E7E7E7E7E7E7E
 
@@ -295,7 +290,6 @@ func moves(me, opp BitSet) BitSet {
 
 // DoMove does a move and returns the flipped discs
 func (board *Board) DoMove(moveBit BitSet) BitSet {
-
 	var flipped BitSet
 
 	switch moveBit {
@@ -677,7 +671,6 @@ func (board *Board) DoMove(moveBit BitSet) BitSet {
 
 // GetChildren returns a slice with all children of a Board
 func (board Board) GetChildren() []Board {
-
 	moves := board.Moves()
 	children := make([]Board, moves.Count())
 
@@ -739,7 +732,6 @@ func (board Board) CsquareCountDifference() int {
 }
 
 func potentialMoves(me, opp BitSet) BitSet {
-
 	const (
 		leftMask  = 0x7F7F7F7F7F7F7F7F
 		rightMask = 0xFEFEFEFEFEFEFEFE
@@ -774,7 +766,6 @@ func (board Board) CountEmpties() int {
 
 // ExactScore returns the final score of a Board
 func (board Board) ExactScore() int {
-
 	meCount := board.me.Count()
 	oppCount := board.opp.Count()
 

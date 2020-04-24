@@ -22,7 +22,6 @@ type moveWebSocket struct {
 }
 
 func newMoveWebSocket(w http.ResponseWriter, r *http.Request) (*moveWebSocket, error) {
-
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("upgrade error: %s", err)
@@ -52,7 +51,6 @@ func (mws *moveWebSocket) killAnalysis() {
 }
 
 func (mws *moveWebSocket) send(message *wsMessage) error {
-
 	if message == nil {
 		return nil
 	}
@@ -105,7 +103,6 @@ func (mws *moveWebSocket) loop() {
 }
 
 func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
-
 	type analyzedChild struct {
 		child    othello.Board
 		analysis analyzeMoveReply
@@ -116,7 +113,6 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 	evaluated := newBoardState(board, turn)
 
 	for i := range analyzedChildren {
-
 		move, ok := board.GetMoveField(children[i])
 		if !ok {
 			// TODO handle better
@@ -132,15 +128,12 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 				Move:      move}}
 	}
 
-	depth := 4
-
-	for depth <= board.CountEmpties() {
+	for depth := 4; depth <= board.CountEmpties(); depth++ {
 		sort.Slice(analyzedChildren, func(i, j int) bool {
 			return analyzedChildren[i].analysis.Heuristic > analyzedChildren[j].analysis.Heuristic
 		})
 
 		for i := range analyzedChildren {
-
 			bot := treesearch.NewPvs(treesearch.Squared)
 
 			if mws.getAnalyzedBoard() != board {
@@ -163,20 +156,15 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 			if err != nil {
 				if err != websocket.ErrCloseSent {
 					log.Printf("Unexpected write error %T: %s", err, err)
-
 				}
 				return
 			}
-
 			analyzedChildren[i].analysis = analysis
 		}
-
-		depth++
 	}
 }
 
 func (mws *moveWebSocket) handleAnalyzeMoveRequest(arg interface{}) (err error) {
-
 	request, ok := arg.(analyzeMoveRequest)
 	if !ok {
 		return fmt.Errorf("unexpected type %T in handler, expected analyzeMoveRequest", request)
@@ -194,7 +182,6 @@ func (mws *moveWebSocket) handleAnalyzeMoveRequest(arg interface{}) (err error) 
 }
 
 func (mws *moveWebSocket) handlebotMoveRequest(arg interface{}) error {
-
 	request, ok := arg.(botMoveRequest)
 	if !ok {
 		return fmt.Errorf("unexpected type %T in handler, expected botMoveRequest", request)
@@ -270,7 +257,6 @@ func (mws *moveWebSocket) handleGetXotEvent(_ interface{}) error {
 }
 
 func (mws *moveWebSocket) handleMessage(message wsMessage) error {
-
 	handlerMap := map[string]func(interface{}) error{
 		"bot_move_request":     mws.handlebotMoveRequest,
 		"analyze_move_request": mws.handleAnalyzeMoveRequest,

@@ -10,13 +10,12 @@ type UnsortedChildGenerator struct {
 
 // NewUnsortedChildGenerator returns a child generator for a parent Board
 func NewUnsortedChildGenerator(board *Board) UnsortedChildGenerator {
-
 	return UnsortedChildGenerator{
 		movesLeft:   board.Moves(),
 		lastMove:    0,
 		lastFlipped: 0,
-		child:       board}
-
+		child:       board,
+	}
 }
 
 // HasMoves returns whether the parent Board has moves
@@ -28,7 +27,6 @@ func (gen *UnsortedChildGenerator) HasMoves() bool {
 // After generating all children the parent state is restored
 // If no children are left, false is returned. Otherwise true is returned.
 func (gen *UnsortedChildGenerator) Next() bool {
-
 	if gen.lastFlipped != 0 {
 		gen.RestoreParent()
 	}

@@ -56,7 +56,6 @@ func (mtdf *Mtdf) ClearHashTable() {
 
 // Search searches for the the best move up to a certain depth
 func (mtdf *Mtdf) Search(board othello.Board, alpha, beta, depth int) int {
-
 	mtdf.low = alpha
 	mtdf.high = beta
 
@@ -77,7 +76,6 @@ func (mtdf *Mtdf) ExactSearch(board othello.Board, alpha, beta int) int {
 }
 
 func (mtdf *Mtdf) slideWindow(depth int) int {
-
 	var f int
 
 	var step int
@@ -123,7 +121,6 @@ func (mtdf *Mtdf) polish(heur, alpha int) int {
 }
 
 func (mtdf *Mtdf) handleNoMoves(alpha, depth int) int {
-
 	if mtdf.board.OpponentMoves() == 0 {
 		return mtdf.polish(ExactScoreFactor*mtdf.board.ExactScore(), alpha)
 	}
@@ -152,7 +149,6 @@ func (mtdf *Mtdf) checkHashTable(alpha, depth int) (int, bool) {
 }
 
 func (mtdf *Mtdf) updateHashTable(alpha, depth, heur int) {
-
 	key := hashtableKey{
 		board: mtdf.board.Normalize(),
 		depth: depth}
@@ -179,7 +175,6 @@ func (mtdf *Mtdf) updateHashTable(alpha, depth, heur int) {
 }
 
 func (mtdf *Mtdf) search(alpha, depth int) int {
-
 	mtdf.stats.Nodes++
 
 	if depth == 0 {

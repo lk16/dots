@@ -1,3 +1,4 @@
+// Package web contains all code for the frontend to work
 package web
 
 import (
@@ -10,6 +11,11 @@ import (
 	svg "github.com/ajstarks/svgo"
 	"github.com/gorilla/websocket"
 	"github.com/lk16/dots/internal/treesearch"
+)
+
+const (
+	white = "white"
+	black = "black"
 )
 
 var upgrader = websocket.Upgrader{}
@@ -37,7 +43,6 @@ func root(w http.ResponseWriter, _ *http.Request) {
 }
 
 func svgField(w http.ResponseWriter, r *http.Request) {
-
 	w.Header().Set("Content-Type", "image/svg+xml")
 	size := 64
 
@@ -67,27 +72,27 @@ func svgField(w http.ResponseWriter, r *http.Request) {
 		textStyleAttrs = append(textStyleAttrs, []string{
 			"font-size='40'",
 			"font-weight='bold'"}...)
-		if textColor == "white" {
+		if textColor == white {
 			textStyleAttrs = append(textStyleAttrs, "fill='white'")
 		}
 	} else {
 		textStyleAttrs = append(textStyleAttrs, "font-size='25'")
-		if disc == "black" || textColor == "white" {
+		if disc == black || textColor == white {
 			textStyleAttrs = append(textStyleAttrs, "fill='white'")
 		}
 	}
 
 	switch disc {
-	case "white":
+	case white:
 		canvas.Circle(size/2, size/2, 25, "fill='white'")
-	case "black":
+	case black:
 		canvas.Circle(size/2, size/2, 25, "fill='black'")
 	}
 
 	switch move {
-	case "white":
+	case white:
 		canvas.Circle(size/2, size/2, 6, "fill='white'")
-	case "black":
+	case black:
 		canvas.Circle(size/2, size/2, 6, "fill='black'")
 	}
 

@@ -7,7 +7,6 @@ import (
 // Squared is a heuristic taken from a similar project with that name
 // see http://github.com/lk16/squared
 func Squared(board othello.Board) int {
-
 	cornerDiff := board.CornerCountDifference()
 
 	meMoves := board.Moves().Count()

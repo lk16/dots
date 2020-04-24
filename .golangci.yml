@@ -13,7 +13,7 @@ run:
   issues-exit-code: 1
 
   # include test files or not, default is true
-  tests: true
+  tests: false
 
   # list of build tags, all linters use it. Default is empty list.
   build-tags: []
@@ -59,7 +59,7 @@ linters-settings:
   errcheck:
     # report about not checking of errors in type assetions: `a := b.(MyStruct)`;
     # default is false: such cases aren't reported by default.
-    check-type-assertions: false
+    check-type-assertions: true
 
     # report about assignment of errors to blank identifier: `num, _ := strconv.Atoi(numStr)`;
     # default is false: such cases aren't reported by default.
@@ -208,36 +208,23 @@ issues:
 
   # Excluding configuration per-path and per-linter
   exclude-rules:
-    # Exclude some linters from running on tests files.
-    - path: _test\.go
+
+    - path: \.go
+      text: "(should have a package comment, unless it's in another file for this package)"
+      linters:
+        - golint
+
+    - path: internal/othello/board.go
+      text: "cyclomatic complexity \\d* of func `\\(\\*Board\\)\\.DoMove` is high"
       linters:
         - gocyclo
-        - errcheck
-        - dupl
-        - gosec
 
-    # Ease some gocritic warnings on test files.
-    - path: _test\.go
-      text: "(unnamedResult|exitAfterDefer)"
+    - path: internal/othello/board.go
+      text: "Function '(Normalize|moves|DoMove)' (is too long|has too many statements)"
       linters:
-        - gocritic
+        - funlen
 
-    # Exclude known linters from partially hard-vendored code,
-    # which is impossible to exclude via "nolint" comments.
-    - path: internal/hmac/
-      text: "weak cryptographic primitive"
-      linters:
-        - gosec
-    - path: internal/hmac/
-      text: "Write\\` is not checked"
-      linters:
-        - errcheck
 
-    # Ease linting on benchmarking code.
-    - path: cmd/stun-bench/
-      linters:
-        - gosec
-        - errcheck
 
   # Independently from option `exclude` we use default exclude patterns,
   # it can be disabled by this option. To list all

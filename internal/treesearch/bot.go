@@ -24,7 +24,6 @@ var ErrNoMoves = errors.New("no moves possible")
 
 // NewBot creates a new Bot
 func NewBot(writer io.Writer, searchDepth, exactDepth int, searcher Searcher) *Bot {
-
 	return &Bot{
 		searchDepth: searchDepth,
 		exactDepth:  exactDepth,
@@ -42,7 +41,6 @@ func (bot *Bot) writef(format string, args ...interface{}) {
 
 // DoMove computes the best child of a Board
 func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
-
 	children := board.GetSortableChildren()
 
 	if len(children) == 0 {
@@ -58,29 +56,39 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 	}
 
 	emptiesCount := board.CountEmpties()
-	isExact := bot.exactDepth >= emptiesCount
 
-	var depth int
+	var bestChild othello.Board
 
-	if isExact {
-		depth = emptiesCount
-		bot.writef("Searching for exact solution at depth %d\n", depth)
+	if emptiesCount > bot.exactDepth {
+		bestChild = bot.findBestChild(board)
 	} else {
-		depth = bot.searchDepth
-		bot.writef("Searching with heuristic at depth %d\n", depth)
+		bestChild = bot.findBestChildExact(board)
+	}
 
-		if depth > 6 {
-			alpha := MinHeuristic
-			for i := range children {
-				children[i].Heur = bot.searcher.Search(children[i].Board, alpha, MaxHeuristic, 6)
-				if children[i].Heur > alpha {
-					alpha = children[i].Heur
-				}
+	return &bestChild, nil
+}
+
+func (bot *Bot) findBestChild(board othello.Board) othello.Board {
+	var (
+		depth     = bot.searchDepth
+		alpha     = MinHeuristic
+		beta      = MaxHeuristic
+		bestChild othello.Board
+	)
+
+	children := board.GetSortableChildren()
+	bot.writef("Searching with heuristic at depth %d\n", depth)
+
+	if depth > 6 {
+		for i := range children {
+			children[i].Heur = bot.searcher.Search(children[i].Board, alpha, MaxHeuristic, 6)
+			if children[i].Heur > alpha {
+				alpha = children[i].Heur
 			}
-			sort.Slice(children, func(i, j int) bool {
-				return children[i].Heur > children[j].Heur
-			})
 		}
+		sort.Slice(children, func(i, j int) bool {
+			return children[i].Heur > children[j].Heur
+		})
 	}
 
 	sortStats := bot.searcher.GetStats()
@@ -89,31 +97,17 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 
 	totalStats := sortStats
 
-	var alpha, beta int
-
-	if isExact {
-		alpha = MinScore
-		beta = MaxScore
-	} else {
-		alpha = MinHeuristic
-		beta = MaxHeuristic
-	}
+	bestChild = children[0].Board
 
 	for i, child := range children {
-
-		var heur int
-		if isExact {
-			heur = bot.searcher.ExactSearch(child.Board, alpha, beta)
-		} else {
-			heur = bot.searcher.Search(child.Board, alpha, beta, bot.searchDepth)
-		}
+		heur := bot.searcher.Search(child.Board, alpha, beta, bot.searchDepth)
 
 		childStats := bot.searcher.GetStats()
 		bot.searcher.ResetStats()
 		totalStats.Add(childStats)
 		if heur > alpha {
 			alpha = heur
-			afterwards = child.Board
+			bestChild = child.Board
 			bot.writef("Child %2d/%2d: %8d%55s\n", i+1, len(children), heur, childStats.String())
 		} else {
 			bot.writef("Child %2d/%2d: %8s%55s\n", i+1, len(children),
@@ -124,5 +118,42 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 	bot.writef("\n%12s %63s\n\n\n", "Total:", totalStats.String())
 	bot.LifetimeStats.Add(totalStats)
 
-	return &afterwards, nil
+	return bestChild
+}
+
+func (bot *Bot) findBestChildExact(board othello.Board) othello.Board {
+	var (
+		alpha      = MinScore
+		beta       = MaxScore
+		depth      = board.CountEmpties()
+		totalStats = NewStats()
+	)
+
+	bot.writef("Searching for exact solution at depth %d\n", depth)
+	bot.searcher.ResetStats()
+
+	children := board.GetChildren()
+
+	bestChild := children[0]
+
+	for i, child := range children {
+		heur := bot.searcher.ExactSearch(child, alpha, beta)
+
+		childStats := bot.searcher.GetStats()
+		bot.searcher.ResetStats()
+		totalStats.Add(childStats)
+		if heur > alpha {
+			alpha = heur
+			bestChild = child
+			bot.writef("Child %2d/%2d: %8d%55s\n", i+1, len(children), heur, childStats.String())
+		} else {
+			bot.writef("Child %2d/%2d: %8s%55s\n", i+1, len(children),
+				fmt.Sprintf("≤ %d", heur), childStats.String())
+		}
+	}
+
+	bot.writef("\n%12s %63s\n\n\n", "Total:", totalStats.String())
+	bot.LifetimeStats.Add(totalStats)
+
+	return bestChild
 }

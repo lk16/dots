@@ -16,9 +16,7 @@ func (bs BitSet) String() string {
 
 	for y := 0; y < 8; y++ {
 		_, _ = buffer.WriteString(fmt.Sprintf("%d ", y+1))
-
 		for x := 0; x < 8; x++ {
-
 			f := uint(y*8 + x)
 
 			if bs.Test(f) {
@@ -26,7 +24,6 @@ func (bs BitSet) String() string {
 			} else {
 				_, _ = buffer.WriteString("- ")
 			}
-
 		}
 		_, _ = buffer.WriteString("|\n")
 	}

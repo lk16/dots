@@ -9,7 +9,6 @@ type SortableBoard struct {
 // GetSortableChildren returns a slice with all children of a Board
 // such that they can easily be sorted
 func (board Board) GetSortableChildren() []SortableBoard {
-
 	moves := board.Moves()
 	children := make([]SortableBoard, moves.Count())
 

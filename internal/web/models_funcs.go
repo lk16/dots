@@ -26,7 +26,6 @@ func (reply xotReply) GetEventName() string {
 }
 
 func (m *wsMessage) UnmarshalJSON(data []byte) error {
-
 	// alias to prevent infinite recursion
 	type alias wsMessage
 	var aliased alias
@@ -38,7 +37,6 @@ func (m *wsMessage) UnmarshalJSON(data []byte) error {
 	m.Event = aliased.Event
 
 	switch m.Event {
-
 	case "bot_move_request":
 		wrapper := struct {
 			Data botMoveRequest `json:"data"`
@@ -73,7 +71,6 @@ func (m *wsMessage) UnmarshalJSON(data []byte) error {
 }
 
 func newBoardState(board othello.Board, turn int) boardState {
-
 	me := make([]int, 0)
 	opp := make([]int, 0)
 
@@ -100,7 +97,6 @@ func newBoardState(board othello.Board, turn int) boardState {
 }
 
 func (s *boardState) getBoard() (*othello.Board, int, error) {
-
 	white := othello.BitSet(0)
 	black := othello.BitSet(0)
 
