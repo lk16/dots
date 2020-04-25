@@ -229,6 +229,12 @@ issues:
       linters:
         - gosec
 
+    - path: internal/othello/board_faster_move.go
+      text: "lines are duplicate of|line is \\d* characters"
+      linters:
+        - dupl
+        - lll
+
 
   # Independently from option `exclude` we use default exclude patterns,
   # it can be disabled by this option. To list all
