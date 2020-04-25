@@ -1087,58 +1087,6 @@ func flipC4(P, O uint64) uint64 {
 }
 
 /**
- * Compute flipped discs when playing on square D4.
- *
- * @param P player's disc pattern.
- * @param O opponent's disc pattern.
- * @return flipped disc pattern.
- */
-func flipD4(P, O uint64) uint64 {
-	var outflankh, outflankv, outflankd7, outflankd9 uint64
-	var flipped uint64
-
-	outflankv = uint64(outflank3[((O&0x0008080808080800)*0x0020408102040810)>>57]) & (((P & 0x0808080808080808) * 0x0020408102040810) >> 56)
-	flipped = flippedV3[outflankv] & 0x0008080808080800
-
-	outflankh = uint64(outflank3[(O>>25)&0x3f]) & (P >> 24)
-	flipped |= flippedH3[outflankh] & 0x00000000ff000000
-
-	outflankd7 = uint64(outflank3[((O&0x0000020408102000)*0x0101010101010101)>>57]) & (((P & 0x0001020408102040) * 0x0101010101010101) >> 56)
-	flipped |= flippedH3[outflankd7] & 0x0000020408102000
-
-	outflankd9 = uint64(outflank3[((O&0x0040201008040200)*0x0101010101010101)>>57]) & (((P & 0x8040201008040201) * 0x0101010101010101) >> 56)
-	flipped |= flippedH3[outflankd9] & 0x0040201008040200
-
-	return flipped
-}
-
-/**
- * Compute flipped discs when playing on square E3.
- *
- * @param P player's disc pattern.
- * @param O opponent's disc pattern.
- * @return flipped disc pattern.
- */
-func flipE4(P, O uint64) uint64 {
-	var outflankh, outflankv, outflankd7, outflankd9 uint64
-	var flipped uint64
-
-	outflankv = uint64(outflank3[((O&0x0010101010101000)*0x0010204081020408)>>57]) & (((P & 0x1010101010101010) * 0x0010204081020408) >> 56)
-	flipped = flippedV3[outflankv] & 0x0010101010101000
-
-	outflankh = uint64(outflank4[(O>>25)&0x3f]) & (P >> 24)
-	flipped |= flippedH4[outflankh] & 0x00000000ff000000
-
-	outflankd7 = uint64(outflank4[((O&0x0002040810204000)*0x0101010101010101)>>57]) & (((P & 0x0102040810204080) * 0x0101010101010101) >> 56)
-	flipped |= flippedH4[outflankd7] & 0x0002040810204000
-
-	outflankd9 = uint64(outflank4[((O&0x0000402010080400)*0x0101010101010101)>>57]) & (((P & 0x0080402010080402) * 0x0101010101010101) >> 56)
-	flipped |= flippedH4[outflankd9] & 0x0000402010080400
-
-	return flipped
-}
-
-/**
  * Compute flipped discs when playing on square F4.
  *
  * @param P player's disc pattern.
@@ -1288,58 +1236,6 @@ func flipC5(P, O uint64) uint64 {
 	flipped |= flippedH2[outflankh] & 0x000000ff00000000
 
 	flipped |= (((P << 9) & 0x0000000002000000) | ((P >> 7) & 0x0000020000000000)) & O
-
-	return flipped
-}
-
-/**
- * Compute flipped discs when playing on square D5.
- *
- * @param P player's disc pattern.
- * @param O opponent's disc pattern.
- * @return flipped disc pattern.
- */
-func flipD5(P, O uint64) uint64 {
-	var outflankh, outflankv, outflankd7, outflankd9 uint64
-	var flipped uint64
-
-	outflankv = uint64(outflank4[((O&0x0008080808080800)*0x0020408102040810)>>57]) & (((P & 0x0808080808080808) * 0x0020408102040810) >> 56)
-	flipped = flippedV4[outflankv] & 0x0008080808080800
-
-	outflankh = uint64(outflank3[(O>>33)&0x3f]) & (P >> 32)
-	flipped |= flippedH3[outflankh] & 0x000000ff00000000
-
-	outflankd7 = uint64(outflank3[((O&0x0002040810204000)*0x0101010101010101)>>57]) & (((P & 0x0102040810204080) * 0x0101010101010101) >> 56)
-	flipped |= flippedH3[outflankd7] & 0x0002040810204000
-
-	outflankd9 = uint64(outflank3[((O&0x0020100804020000)*0x0101010101010101)>>57]) & (((P & 0x4020100804020100) * 0x0101010101010101) >> 56)
-	flipped |= flippedH3[outflankd9] & 0x0020100804020000
-
-	return flipped
-}
-
-/**
- * Compute flipped discs when playing on square E5.
- *
- * @param P player's disc pattern.
- * @param O opponent's disc pattern.
- * @return flipped disc pattern.
- */
-func flipE5(P, O uint64) uint64 {
-	var outflankh, outflankv, outflankd7, outflankd9 uint64
-	var flipped uint64
-
-	outflankv = uint64(outflank4[((O&0x0010101010101000)*0x0010204081020408)>>57]) & (((P & 0x1010101010101010) * 0x0010204081020408) >> 56)
-	flipped = flippedV4[outflankv] & 0x0010101010101000
-
-	outflankh = uint64(outflank4[(O>>33)&0x3f]) & (P >> 32)
-	flipped |= flippedH4[outflankh] & 0x000000ff00000000
-
-	outflankd7 = uint64(outflank4[((O&0x0004081020400000)*0x0101010101010101)>>57]) & (((P & 0x0204081020408000) * 0x0101010101010101) >> 56)
-	flipped |= flippedH4[outflankd7] & 0x0004081020400000
-
-	outflankd9 = uint64(outflank4[((O&0x0040201008040200)*0x0101010101010101)>>57]) & (((P & 0x8040201008040201) * 0x0101010101010101) >> 56)
-	flipped |= flippedH4[outflankd9] & 0x0040201008040200
 
 	return flipped
 }
@@ -1985,6 +1881,12 @@ func flipH8(P, O uint64) uint64 {
 	return flipped
 }
 
+func flipNone(P, O uint64) uint64 {
+	_ = P
+	_ = 0
+	return 0
+}
+
 /** Array of functions to compute flipped discs */
 var flip = [64]func(uint64, uint64) uint64{
 	flipA1, flipB1, flipC1, flipD1,
@@ -1993,10 +1895,10 @@ var flip = [64]func(uint64, uint64) uint64{
 	flipE2, flipF2, flipG2, flipH2,
 	flipA3, flipB3, flipC3, flipD3,
 	flipE3, flipF3, flipG3, flipH3,
-	flipA4, flipB4, flipC4, flipD4,
-	flipE4, flipF4, flipG4, flipH4,
-	flipA5, flipB5, flipC5, flipD5,
-	flipE5, flipF5, flipG5, flipH5,
+	flipA4, flipB4, flipC4, flipNone,
+	flipNone, flipF4, flipG4, flipH4,
+	flipA5, flipB5, flipC5, flipNone,
+	flipNone, flipF5, flipG5, flipH5,
 	flipA6, flipB6, flipC6, flipD6,
 	flipE6, flipF6, flipG6, flipH6,
 	flipA7, flipB7, flipC7, flipD7,
@@ -2005,8 +1907,8 @@ var flip = [64]func(uint64, uint64) uint64{
 	flipE8, flipF8, flipG8, flipH8,
 }
 
-// DoMoveFaster does a move and returns the flipped discs
-func (board *Board) DoMoveFaster(moveBit BitSet) BitSet {
+// DoMove does a move and returns the flipped discs
+func (board *Board) DoMove(moveBit BitSet) BitSet {
 	moveID := bits.TrailingZeros64(uint64(moveBit))
 
 	flipped := BitSet(flip[moveID](uint64(board.Me()), uint64(board.Opp())))
