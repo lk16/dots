@@ -1,6 +1,7 @@
 package treesearch
 
 import (
+	"log"
 	"sort"
 
 	"github.com/lk16/dots/internal/othello"
@@ -10,34 +11,23 @@ const (
 	minHashtableDepth = 5
 )
 
-type hashtableKey struct {
-	board othello.Board
-	depth int
-}
-
-type hashtableValue struct {
-	high      int
-	low       int
-	bestChild othello.Board
-}
-
 // Mtdf implements the mtdf tree search algorithm
 type Mtdf struct {
 	board     othello.Board
 	high      int
 	low       int
 	depth     int
-	hashtable map[hashtableKey]hashtableValue
+	cache     Cacher
 	stats     Stats
 	heuristic func(othello.Board) int
 	sorter    Pvs
 }
 
 // NewMtdf returns a new Mtdf
-func NewMtdf(heuristic func(othello.Board) int) *Mtdf {
+func NewMtdf(cache Cacher, heuristic func(othello.Board) int) *Mtdf {
 	return &Mtdf{
 		heuristic: heuristic,
-		hashtable: make(map[hashtableKey]hashtableValue, 100000),
+		cache:     cache,
 		sorter:    *NewPvs(nil, heuristic),
 	}
 }
@@ -55,13 +45,6 @@ func (mtdf Mtdf) GetStats() Stats {
 // ResetStats resets the statistics for the latest search to zeroes
 func (mtdf *Mtdf) ResetStats() {
 	mtdf.stats.Reset()
-}
-
-// ClearHashTable clears the Mtdf hash table
-func (mtdf *Mtdf) ClearHashTable() {
-	for key := range mtdf.hashtable {
-		delete(mtdf.hashtable, key)
-	}
 }
 
 // Search searches for the the best move up to a certain depth
@@ -144,38 +127,28 @@ func (mtdf *Mtdf) search(alpha int) int {
 		return mtdf.searchNoHashtable(alpha)
 	}
 
+	cacheKey := CacheKey{board: mtdf.board.Normalize(), depth: mtdf.depth}
+	var cacheValue CacheValue
+
+	if mtdf.cache != nil {
+		var ok bool
+		if cacheValue, ok = mtdf.cache.Lookup(cacheKey); ok {
+			if cacheValue.alpha > alpha {
+				return alpha + 1
+			}
+
+			if cacheValue.beta < alpha+1 {
+				return alpha
+			}
+		} else {
+			cacheValue = CacheValue{
+				alpha: MinHeuristic,
+				beta:  MaxHeuristic,
+			}
+		}
+	}
+
 	mtdf.stats.Nodes++
-
-	key := hashtableKey{
-		board: mtdf.board.Normalize(),
-		depth: mtdf.depth,
-	}
-
-	entry, ok := mtdf.hashtable[key]
-
-	if ok {
-		if entry.high <= alpha {
-			return alpha
-		}
-		if entry.low >= alpha+1 {
-			return alpha + 1
-		}
-
-		mtdf.depth--
-		parent := mtdf.board
-		mtdf.board = entry.bestChild
-		childHeur := -mtdf.search(-(alpha + 1))
-		mtdf.board = parent
-		mtdf.depth++
-		if childHeur > alpha {
-			return alpha + 1
-		}
-	} else {
-		entry = hashtableValue{
-			high: MaxHeuristic,
-			low:  MinHeuristic,
-		}
-	}
 
 	children := mtdf.board.GetSortableChildren()
 
@@ -194,31 +167,29 @@ func (mtdf *Mtdf) search(alpha int) int {
 	heur := alpha
 	mtdf.depth--
 	parent := mtdf.board
-	bestChild := children[0].Board
 	for _, child := range children {
 		mtdf.board = child.Board
 		childHeur := -mtdf.search(-(alpha + 1))
 		if childHeur > alpha {
 			heur = alpha + 1
-			bestChild = child.Board
 			break
 		}
 	}
 	mtdf.board = parent
 	mtdf.depth++
 
-	if heur == alpha {
-		if alpha < entry.high {
-			entry.high = alpha
+	if mtdf.cache != nil {
+		if heur > cacheValue.alpha {
+			cacheValue.alpha = heur
 		}
-	} else {
-		if alpha+1 > entry.low {
-			entry.low = alpha + 1
+		if heur < cacheValue.beta {
+			cacheValue.beta = heur
+		}
+
+		if err := mtdf.cache.Save(cacheKey, cacheValue); err != nil {
+			log.Printf("warning: saving cache value failed: %s", err.Error())
 		}
 	}
-	entry.bestChild = bestChild
-
-	mtdf.hashtable[key] = entry
 
 	return heur
 }

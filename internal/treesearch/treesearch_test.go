@@ -181,7 +181,7 @@ func TestTreeSearch(t *testing.T) {
 	testedBoards := make(map[othello.Board]struct{})
 
 	minimax := NewMinimax(Squared)
-	mtdf := NewMtdf(Squared)
+	mtdf := NewMtdf(nil, Squared)
 	pvs := NewPvs(nil, Squared)
 
 	for i := 0; i < 100; i++ {
@@ -233,7 +233,7 @@ func TestTreeSearchExact(t *testing.T) {
 	testedBoards := make(map[othello.Board]struct{})
 
 	minimax := NewMinimax(Squared)
-	mtdf := NewMtdf(Squared)
+	mtdf := NewMtdf(nil, Squared)
 	pvs := NewPvs(nil, Squared)
 
 	for i := 0; i < 20; i++ {

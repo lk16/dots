@@ -236,7 +236,7 @@ issues:
         - lll
 
     - path: internal/treesearch/mtdf.go
-      text: "Function 'search' has too many statements"
+      text: "Function 'search' is too long"
       linters:
         - funlen
 

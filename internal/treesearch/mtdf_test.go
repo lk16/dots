@@ -24,7 +24,7 @@ func BenchmarkMtdf(b *testing.B) {
 		boards = append(boards, *othello.NewXotBoard())
 	}
 
-	bot := NewBot(ioutil.Discard, 12, 18, NewMtdf(Squared))
+	bot := NewBot(ioutil.Discard, 12, 18, NewMtdf(nil, Squared))
 
 	for i := 0; i < b.N; i++ {
 		board := *othello.NewXotBoard()
