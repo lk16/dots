@@ -133,8 +133,6 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 				Move:      move}}
 	}
 
-	searcher := treesearch.NewPvs(nil, treesearch.Squared)
-
 	for depth := 4; depth <= board.CountEmpties(); depth++ {
 		sort.Slice(analyzedChildren, func(i, j int) bool {
 			return analyzedChildren[i].analysis.Heuristic > analyzedChildren[j].analysis.Heuristic
@@ -149,7 +147,7 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 				Board: evaluated,
 				Depth: depth,
 				Move:  analyzedChildren[i].analysis.Move,
-				Heuristic: searcher.Search(
+				Heuristic: mws.bot.Searcher().Search(
 					analyzedChildren[i].child,
 					treesearch.MinHeuristic,
 					treesearch.MaxHeuristic,
@@ -157,14 +155,11 @@ func (mws *moveWebSocket) analyze(board othello.Board, turn int) {
 				),
 			}
 
-			message := newWsMessage(&analysis)
-
 			if mws.getAnalyzedBoard() != board {
 				return
 			}
 
-			err := mws.send(message)
-			if err != nil {
+			if err := mws.send(newWsMessage(&analysis)); err != nil {
 				if err != websocket.ErrCloseSent {
 					log.Printf("Unexpected write error %T: %s", err, err)
 				}
