@@ -179,11 +179,14 @@ func (mtdf *Mtdf) search(alpha int) int {
 	mtdf.depth++
 
 	if mtdf.cache != nil {
-		if heur > cacheValue.alpha {
-			cacheValue.alpha = heur
-		}
-		if heur < cacheValue.beta {
-			cacheValue.beta = heur
+		if heur == alpha {
+			if heur < cacheValue.beta {
+				cacheValue.beta = heur
+			}
+		} else {
+			if heur > cacheValue.alpha {
+				cacheValue.alpha = heur
+			}
 		}
 
 		if err := mtdf.cache.Save(cacheKey, cacheValue); err != nil {

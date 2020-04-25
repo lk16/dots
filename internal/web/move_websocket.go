@@ -29,7 +29,7 @@ func newMoveWebSocket(w http.ResponseWriter, r *http.Request, cacher treesearch.
 		return nil, err
 	}
 
-	searcher := treesearch.NewPvs(cacher, treesearch.Squared)
+	searcher := treesearch.NewMtdf(cacher, treesearch.Squared)
 
 	mws := &moveWebSocket{
 		ws:  ws,
