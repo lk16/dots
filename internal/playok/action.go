@@ -41,7 +41,7 @@ func (bot *Bot) takeAction() error {
 	var seatID int
 
 	othelloBot := treesearch.NewBot(log.Writer(), 12, 18,
-		treesearch.NewPvs(
+		treesearch.NewMtdf(
 			treesearch.NewMemoryCache(),
 			treesearch.FastHeuristic))
 
@@ -203,7 +203,7 @@ func (bot *Bot) computeAndSendMove(othelloBot *treesearch.Bot) (int, error) {
 		return 0, errors.New("GetMoveField failed")
 	}
 
-	randomDelay := (time.Duration(300+rand.Intn(300)+rand.Intn(300)) * time.Millisecond) - othelloBot.LifetimeStats.Duration
+	randomDelay := (time.Duration(300+rand.Intn(300)+rand.Intn(300)) * time.Millisecond)
 	info("delaying sending move %dms", randomDelay.Milliseconds())
 	time.Sleep(randomDelay)
 
@@ -325,7 +325,7 @@ func (bot *Bot) awaitFindOnePlayerTable() int {
 
 		for _, ID := range tableIDs {
 			table := bot.playok.tables[ID]
-			if !table.xot && table.countPlayers() == 1 {
+			if table.rated && table.timeLimit > 1 && table.countPlayers() == 1 {
 				foundTableID = ID
 				break
 			}

@@ -53,6 +53,10 @@ func (cacher *MemoryCache) Save(key CacheKey, value CacheValue) error {
 	cacher.Lock()
 	defer cacher.Unlock()
 
+	if len(cacher.table) > 1000000 {
+		cacher.table = make(map[CacheKey]CacheValue, 10000)
+	}
+
 	cacher.table[key] = value
 	return nil
 }
