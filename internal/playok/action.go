@@ -40,6 +40,11 @@ func (bot *Bot) takeAction() error {
 	var tableID int
 	var seatID int
 
+	othelloBot := treesearch.NewBot(log.Writer(), 12, 18,
+		treesearch.NewPvs(
+			treesearch.NewMemoryCache(),
+			treesearch.FastHeuristic))
+
 	state := stateAwaitTablesList
 
 	for {
@@ -129,7 +134,7 @@ func (bot *Bot) takeAction() error {
 
 			info("bot is to move")
 
-			discCount, err := bot.computeAndSendMove()
+			discCount, err := bot.computeAndSendMove(othelloBot)
 			if err != nil {
 				return errors.Wrap(err, "compute and send move failed")
 			}
@@ -180,15 +185,13 @@ func (bot *Bot) awaitMoveConfirmation(discCount int) error {
 	}
 }
 
-func (bot *Bot) computeAndSendMove() (int, error) {
+func (bot *Bot) computeAndSendMove(othelloBot *treesearch.Bot) (int, error) {
 
 	info("computing move")
 
 	bot.playok.RLock()
 	board := bot.playok.currentTable.board
 	bot.playok.RUnlock()
-
-	othelloBot := treesearch.NewBot(log.Writer(), 9, 18, treesearch.NewPvs(treesearch.Better))
 
 	move, err := othelloBot.DoMove(board.Board)
 	if err != nil {
