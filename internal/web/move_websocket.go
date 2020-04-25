@@ -211,9 +211,7 @@ func (mws *moveWebSocket) handlebotMoveRequest(arg interface{}) error {
 }
 
 func (mws *moveWebSocket) sendBotMoveReply(board othello.Board, turn int) {
-	bot := treesearch.NewBot(os.Stdout, 10, 16, treesearch.NewPvs(nil, treesearch.Better))
-
-	bestMove, err := bot.DoMove(board)
+	bestMove, err := mws.bot.DoMove(board)
 	if err != nil {
 		log.Printf("sendBotMoveReply(): %s", err)
 		return

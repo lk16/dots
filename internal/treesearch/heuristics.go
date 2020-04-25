@@ -57,6 +57,13 @@ func FastHeuristic(board othello.Board) int {
 	oppPotentialMoveCount := bits.OnesCount64(uint64(oppPotentialMoves))
 
 	heur += 1 * (mePotentialMoveCount - oppPotentialMoveCount)
+
+	stable := board.StableDiscs()
+	if stable != 0 {
+		stabilityDiff := bits.OnesCount64(uint64(stable&board.Me())) - bits.OnesCount64(uint64(stable&board.Opp()))
+		heur += 7 * stabilityDiff
+	}
+
 	return heur
 }
 
