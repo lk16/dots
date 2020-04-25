@@ -1,5 +1,7 @@
 package othello
 
+import "math/bits"
+
 /*
 This source was adapted from
 https://github.com/abulmo/edax-reversi/blob/master/src/flip_carry_64.c
@@ -1871,4 +1873,18 @@ var flip = [64]func(uint64, uint64) uint64{
 	flip_E7, flip_F7, flip_G7, flip_H7,
 	flip_A8, flip_B8, flip_C8, flip_D8,
 	flip_E8, flip_F8, flip_G8, flip_H8,
+}
+
+// DoMoveFaster does a move and returns the flipped discs
+func (board *Board) DoMoveFaster(moveBit BitSet) BitSet {
+	moveID := bits.TrailingZeros64(uint64(moveBit))
+
+	flipped := BitSet(flip[moveID](uint64(board.Me()), uint64(board.Opp())))
+
+	tmp := board.me | flipped | moveBit
+
+	board.me = board.opp &^ tmp
+	board.opp = tmp
+
+	return flipped
 }
