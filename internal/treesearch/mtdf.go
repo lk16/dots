@@ -70,7 +70,7 @@ func (mtdf *Mtdf) Search(board othello.Board, alpha, beta, depth int) int {
 
 // ExactSearch searches for the best move without a depth limitation
 func (mtdf *Mtdf) ExactSearch(board othello.Board, alpha, beta int) int {
-	return mtdf.Search(board, alpha, beta, 60) / ExactScoreFactor
+	return mtdf.Search(board, alpha*ExactScoreFactor, beta*ExactScoreFactor, 60) / ExactScoreFactor
 }
 
 func (mtdf *Mtdf) slideWindow() int {
@@ -97,7 +97,13 @@ func (mtdf *Mtdf) slideWindow() int {
 	}
 
 	for mtdf.high-mtdf.low >= step {
-		var bound = -mtdf.search(-(f + 1))
+		var bound int
+
+		if mtdf.depth < mtdf.board.CountEmpties() {
+			bound = -mtdf.search(-(f + 1))
+		} else {
+			bound = -mtdf.searchNoHashtable(-(f + 1))
+		}
 
 		if f == bound {
 			f -= step
