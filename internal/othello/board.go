@@ -566,7 +566,6 @@ const (
 )
 
 func stableDiscs(me, opp BitSet) BitSet {
-
 	any := me | opp
 
 	stable := any & cornerMask
@@ -592,7 +591,6 @@ func stableDiscs(me, opp BitSet) BitSet {
 	}
 
 	for {
-
 		horStable := any & maskHorStable
 		horStable |= me & ((stable & me) << 8)
 		horStable |= me & ((stable & me) >> 8)
@@ -629,5 +627,4 @@ func stableDiscs(me, opp BitSet) BitSet {
 		stable = newStable
 	}
 	return stable
-
 }

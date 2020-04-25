@@ -62,7 +62,6 @@ func FastHeuristic(board othello.Board) int {
 
 // Better is a better heuristic than Squared
 func Better(board othello.Board) int {
-
 	cornerDiff := board.CornerCountDifference()
 
 	meMoves := board.Moves().Count()

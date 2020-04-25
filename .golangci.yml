@@ -220,7 +220,7 @@ issues:
         - gocyclo
 
     - path: internal/othello/board.go
-      text: "Function '(Normalize|moves|DoMove)' (is too long|has too many statements)"
+      text: "Function '(Normalize|moves|DoMove|stableDiscs)' (is too long|has too many statements)"
       linters:
         - funlen
 
