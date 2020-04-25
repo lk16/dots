@@ -159,7 +159,8 @@ func (mtdf *Mtdf) search(alpha int) int {
 	}
 
 	for i := range children {
-		children[i].Heur = mtdf.sorter.Search(children[i].Board, MinHeuristic, MaxHeuristic, mtdf.depth/4)
+		copy := children[i].Board
+		children[i].Heur = -mtdf.sorter.searchNoSort(&copy, MinHeuristic, MaxHeuristic, mtdf.depth/4)
 	}
 
 	sort.Slice(children, func(i, j int) bool {

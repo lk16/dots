@@ -24,7 +24,7 @@ func BenchmarkMtdf(b *testing.B) {
 		boards = append(boards, *othello.NewXotBoard())
 	}
 
-	bot := NewBot(ioutil.Discard, 12, 18, NewMtdf(nil, Squared))
+	bot := NewBot(ioutil.Discard, 12, 18, NewMtdf(nil, FastHeuristic))
 
 	for i := 0; i < b.N; i++ {
 		board := *othello.NewXotBoard()
@@ -49,7 +49,7 @@ func BenchmarkMtdfCached(b *testing.B) {
 
 	cache := NewMemoryCache()
 
-	bot := NewBot(ioutil.Discard, 12, 18, NewMtdf(cache, Squared))
+	bot := NewBot(ioutil.Discard, 12, 18, NewMtdf(cache, FastHeuristic))
 
 	for i := 0; i < b.N; i++ {
 		board := *othello.NewXotBoard()
