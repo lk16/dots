@@ -235,6 +235,11 @@ issues:
         - dupl
         - lll
 
+    - path: internal/treesearch/mtdf.go
+      text: "Function 'search' has too many statements"
+      linters:
+        - funlen
+
 
   # Independently from option `exclude` we use default exclude patterns,
   # it can be disabled by this option. To list all

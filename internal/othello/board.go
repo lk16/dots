@@ -14,13 +14,9 @@ import (
 )
 
 const (
-	cornerMask   = BitSet(1<<0 | 1<<7 | 1<<56 | 1<<63)
-	xSquareMask  = BitSet(1<<9 | 1<<14 | 1<<49 | 1<<54)
-	cSquareMask  = BitSet(1<<1 | 1<<6 | 1<<8 | 1<<15 | 1<<48 | 1<<55 | 1<<57 | 1<<62)
-	bSquareMask  = BitSet(1<<3 | 1<<4 | 1<<24 | 1<<31 | 1<<32 | 1<<39 | 1<<59 | 1<<60)
-	aSquareMask  = BitSet(1<<2 | 1<<5 | 1<<16 | 1<<23 | 1<<40 | 1<<47 | 1<<58 | 1<<61)
-	center16Mask = BitSet(0x00003C3C3C3C0000)
-	ring16Mask   = BitSet(0x003C424242423C00)
+	cornerMask  = BitSet(1<<0 | 1<<7 | 1<<56 | 1<<63)
+	xSquareMask = BitSet(1<<9 | 1<<14 | 1<<49 | 1<<54)
+	cSquareMask = BitSet(1<<1 | 1<<6 | 1<<8 | 1<<15 | 1<<48 | 1<<55 | 1<<57 | 1<<62)
 
 	startDiscsMask = BitSet(1<<27 | 1<<28 | 1<<35 | 1<<36)
 )

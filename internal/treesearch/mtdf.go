@@ -140,7 +140,6 @@ func (mtdf *Mtdf) handleNoMoves(alpha int) int {
 }
 
 func (mtdf *Mtdf) search(alpha int) int {
-
 	if mtdf.depth < minHashtableDepth {
 		return mtdf.searchNoHashtable(alpha)
 	}
@@ -171,7 +170,6 @@ func (mtdf *Mtdf) search(alpha int) int {
 		if childHeur > alpha {
 			return alpha + 1
 		}
-
 	} else {
 		entry = hashtableValue{
 			high: MaxHeuristic,
