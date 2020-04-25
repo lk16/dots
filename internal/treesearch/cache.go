@@ -56,3 +56,21 @@ func (cacher *MemoryCache) Save(key CacheKey, value CacheValue) error {
 	cacher.table[key] = value
 	return nil
 }
+
+// NoOpCache creates a no-op memory cache, it doesn't store anything, lookup always fails
+type NoOpCache struct{}
+
+var _ Cacher = (*NoOpCache)(nil)
+
+// Lookup retrieves heuristic bounds on a board
+func (cacher *NoOpCache) Lookup(key CacheKey) (CacheValue, bool) {
+	_ = key
+	return CacheValue{}, false
+}
+
+// Save stores heuristic bounds on a board
+func (cacher *NoOpCache) Save(key CacheKey, value CacheValue) error {
+	_ = key
+	_ = value
+	return nil
+}

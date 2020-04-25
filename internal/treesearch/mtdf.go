@@ -25,6 +25,10 @@ type Mtdf struct {
 
 // NewMtdf returns a new Mtdf
 func NewMtdf(cache Cacher, heuristic func(othello.Board) int) *Mtdf {
+	if cache == nil {
+		cache = &NoOpCache{}
+	}
+
 	return &Mtdf{
 		heuristic: heuristic,
 		cache:     cache,
@@ -130,21 +134,19 @@ func (mtdf *Mtdf) search(alpha int) int {
 	cacheKey := CacheKey{board: mtdf.board.Normalize(), depth: mtdf.depth}
 	var cacheValue CacheValue
 
-	if mtdf.cache != nil {
-		var ok bool
-		if cacheValue, ok = mtdf.cache.Lookup(cacheKey); ok {
-			if cacheValue.alpha > alpha {
-				return alpha + 1
-			}
+	var ok bool
+	if cacheValue, ok = mtdf.cache.Lookup(cacheKey); ok {
+		if cacheValue.alpha > alpha {
+			return alpha + 1
+		}
 
-			if cacheValue.beta < alpha+1 {
-				return alpha
-			}
-		} else {
-			cacheValue = CacheValue{
-				alpha: MinHeuristic,
-				beta:  MaxHeuristic,
-			}
+		if cacheValue.beta < alpha+1 {
+			return alpha
+		}
+	} else {
+		cacheValue = CacheValue{
+			alpha: MinHeuristic,
+			beta:  MaxHeuristic,
 		}
 	}
 
@@ -178,20 +180,18 @@ func (mtdf *Mtdf) search(alpha int) int {
 	mtdf.board = parent
 	mtdf.depth++
 
-	if mtdf.cache != nil {
-		if heur == alpha {
-			if heur < cacheValue.beta {
-				cacheValue.beta = heur
-			}
-		} else {
-			if heur > cacheValue.alpha {
-				cacheValue.alpha = heur
-			}
+	if heur == alpha {
+		if heur < cacheValue.beta {
+			cacheValue.beta = heur
 		}
+	} else {
+		if heur > cacheValue.alpha {
+			cacheValue.alpha = heur
+		}
+	}
 
-		if err := mtdf.cache.Save(cacheKey, cacheValue); err != nil {
-			log.Printf("warning: saving cache value failed: %s", err.Error())
-		}
+	if err := mtdf.cache.Save(cacheKey, cacheValue); err != nil {
+		log.Printf("warning: saving cache value failed: %s", err.Error())
 	}
 
 	return heur

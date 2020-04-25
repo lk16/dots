@@ -204,7 +204,7 @@ func TestTreeSearch(t *testing.T) {
 
 			testedBoards[normalized] = struct{}{}
 
-			for depth := 0; depth < 11; depth++ {
+			for depth := 0; depth < 8; depth++ {
 				internal(t, depth, *board, minimax, cachedMtdf, mtdf, pvs)
 			}
 		}
