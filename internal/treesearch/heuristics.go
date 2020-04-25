@@ -1,6 +1,8 @@
 package treesearch
 
 import (
+	"math/bits"
+
 	"github.com/lk16/dots/internal/othello"
 )
 
@@ -16,34 +18,44 @@ func Squared(board othello.Board) int {
 	return (3 * cornerDiff) + moveDiff
 }
 
-const cornerMask = othello.BitSet(1<<0 | 1<<7 | 1<<56 | 1<<63)
-
-func potentialMoves(me, opp othello.BitSet) othello.BitSet {
-	const (
-		leftMask  = 0x7F7F7F7F7F7F7F7F
-		rightMask = 0xFEFEFEFEFEFEFEFE
-	)
-
-	oppSurrounded := othello.BitSet(0)
-	oppSurrounded |= (opp & leftMask) << 1
-	oppSurrounded |= (opp & rightMask) >> 1
-	oppSurrounded |= (opp & leftMask) << 9
-	oppSurrounded |= (opp & rightMask) >> 9
-	oppSurrounded |= (opp & rightMask) << 7
-	oppSurrounded |= (opp & leftMask) >> 7
-
-	oppSurrounded |= opp << 8
-	oppSurrounded |= opp >> 8
-
-	oppSurrounded &^= (me | opp)
-	return oppSurrounded
-}
+const (
+	leftMask   = 0x7F7F7F7F7F7F7F7F
+	rightMask  = 0xFEFEFEFEFEFEFEFE
+	cornerMask = othello.BitSet(1<<0 | 1<<7 | 1<<56 | 1<<63)
+)
 
 // FastHeuristic is way faster by not computing all possible moves
 func FastHeuristic(board othello.Board) int {
-	heur := 5 * ((board.Me() & cornerMask).Count() - (board.Opp() & cornerMask).Count())
-	mePotentialMoveCount := potentialMoves(board.Me(), board.Opp()).Count()
-	oppPotentialMoveCount := potentialMoves(board.Opp(), board.Me()).Count()
+	me := board.Me()
+	opp := board.Opp()
+
+	heur := 5 * (bits.OnesCount64(uint64(me&cornerMask)) - bits.OnesCount64(uint64(opp&cornerMask)))
+
+	mePotentialMoves := (opp & leftMask) << 1
+	mePotentialMoves |= (opp & rightMask) >> 1
+	mePotentialMoves |= (opp & leftMask) << 9
+	mePotentialMoves |= (opp & rightMask) >> 9
+	mePotentialMoves |= (opp & rightMask) << 7
+	mePotentialMoves |= (opp & leftMask) >> 7
+	mePotentialMoves |= opp << 8
+	mePotentialMoves |= opp >> 8
+
+	mePotentialMoves &^= (me | opp)
+
+	oppPotentialMoves := (me & leftMask) << 1
+	oppPotentialMoves |= (me & rightMask) >> 1
+	oppPotentialMoves |= (me & leftMask) << 9
+	oppPotentialMoves |= (me & rightMask) >> 9
+	oppPotentialMoves |= (me & rightMask) << 7
+	oppPotentialMoves |= (me & leftMask) >> 7
+	oppPotentialMoves |= me << 8
+	oppPotentialMoves |= me >> 8
+
+	oppPotentialMoves &^= (me | opp)
+
+	mePotentialMoveCount := bits.OnesCount64(uint64(mePotentialMoves))
+	oppPotentialMoveCount := bits.OnesCount64(uint64(oppPotentialMoves))
+
 	heur += 1 * (mePotentialMoveCount - oppPotentialMoveCount)
 	return heur
 }
