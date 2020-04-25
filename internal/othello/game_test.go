@@ -41,6 +41,37 @@ func TestLoadGamesFromPGN(t *testing.T) {
 		assert.Equal(t, expectedGame, games[0])
 	})
 
+	t.Run("OKPlayokOneEndedearly", func(t *testing.T) {
+		bytes, err := ioutil.ReadFile(assetsPath + "testdata/pgn/playok_one_ended_early.txt")
+		assert.Nil(t, err)
+
+		games, err := LoadGamesFromPGN(bytes)
+		assert.Nil(t, err)
+		assert.Equal(t, 1, len(games))
+
+		expectedDate, err := time.Parse("2006.01.02", "2020.04.24")
+		assert.Nil(t, err)
+
+		expectedGame := Game{
+			Site: "PlayOK",
+			Date: expectedDate,
+			Black: GamePlayer{
+				Name:   "pizzandsprite",
+				Rating: 1438,
+			},
+			White: GamePlayer{
+				Name:   "lk16",
+				Rating: 1506,
+			},
+			Xot: true,
+		}
+
+		// tested elsewhere
+		expectedGame.Moves = games[0].Moves
+
+		assert.Equal(t, expectedGame, games[0])
+	})
+
 	t.Run("OKPlayokMany", func(t *testing.T) {
 		bytes, err := ioutil.ReadFile(assetsPath + "testdata/pgn/playok_many.txt")
 		assert.Nil(t, err)
@@ -228,28 +259,28 @@ func TestGameVerify(t *testing.T) {
 		game := &Game{
 			Moves: moves,
 		}
-		assert.True(t, game.Verify())
+		assert.Nil(t, game.Verify())
 	})
 
-	t.Run("FailPassWithMoves", func(t *testing.T) {
+	t.Run("ErrInvalidSkipTurn", func(t *testing.T) {
 		game := &Game{
 			Moves: []uint{PassMoveID},
 		}
-		assert.False(t, game.Verify())
+		assert.Equal(t, ErrInvalidSkipTurn, game.Verify())
 	})
 
-	t.Run("FailInvalidMove", func(t *testing.T) {
+	t.Run("ErrInvalidMove", func(t *testing.T) {
 		game := &Game{
 			Moves: []uint{0},
 		}
-		assert.False(t, game.Verify())
+		assert.Equal(t, ErrInvalidMove, game.Verify())
 	})
 
-	t.Run("FailGameEndWithMovesLeft", func(t *testing.T) {
+	t.Run("ErrGameEndedEarly", func(t *testing.T) {
 		game := &Game{
 			Moves: []uint{},
 		}
-		assert.False(t, game.Verify())
+		assert.Equal(t, ErrGameEndedEarly, game.Verify())
 	})
 
 }

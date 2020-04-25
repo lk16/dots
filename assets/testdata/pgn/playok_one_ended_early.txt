@@ -1,0 +1,17 @@
+[Event "?"]
+[Site "PlayOK"]
+[Date "2020.04.24"]
+[Round "-"]
+[Black "pizzandsprite"]
+[White "lk16"]
+[Result "0-64"]
+[Time "12:36:58"]
+[Variant "xot"]
+[TimeControl "60"]
+[BlackElo "1438"]
+[WhiteElo "1506"]
+
+1. f5 d6 2. c4 d3 3. c7 f4 4. e6 g6 5. e3 f6 6. c3 c5 7. b4 f3 8. g4 g5 9. c6
+e2 10. d2 e7 11. d7 c2 12. e8 b3 13. f7 a4 14. g3 f2 15. h4 h6 16. f1 h5 17. h3
+h2 18. b5 d1 19. c1 e1 20. a5 a6 21. b6 f8 22. a2 a3 23. a7 b2 24. g1 d8 25. c8
+h1 26. g2 b7 27. g8 g7 28. a1 b1 29. h8 h7 0-64

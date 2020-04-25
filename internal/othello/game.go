@@ -13,6 +13,15 @@ import (
 var (
 	pgnAttributeRegex  = regexp.MustCompile(`\[(.*) "(.*)"\]`)
 	pgnFinalScoreRegex = regexp.MustCompile(`(\d+)-(\d+)`)
+
+	// ErrInvalidSkipTurn indicates a player passed a turn while moves are available
+	ErrInvalidSkipTurn = errors.New("player skips turn while having moves")
+
+	// ErrInvalidMove indicates a player did an invalid move
+	ErrInvalidMove = errors.New("player does an invalid move")
+
+	// ErrGameEndedEarly indicates there are moves possible in the final state. Possibly a player ran out of time.
+	ErrGameEndedEarly = errors.New("game ended while moves are left")
 )
 
 const (
@@ -46,7 +55,7 @@ type Game struct {
 }
 
 // Verify checks if the sequence of moves is a valid game
-func (game Game) Verify() bool {
+func (game Game) Verify() error {
 	board := NewBoard()
 
 	for _, move := range game.Moves {
@@ -54,20 +63,23 @@ func (game Game) Verify() bool {
 
 		if move == PassMoveID {
 			if validMoves != 0 {
-				// incorrectly skipping turn
-				return false
+				return ErrInvalidSkipTurn
 			}
 			board.SwitchTurn()
 			continue
 		}
 
 		if !validMoves.Test(move) {
-			return false
+			return ErrInvalidMove
 		}
 		board.DoMove(BitSet(1 << move))
 	}
 
-	return board.Moves() == 0 && board.OpponentMoves() == 0
+	if board.Moves() != 0 || board.OpponentMoves() != 0 {
+		return ErrGameEndedEarly
+	}
+
+	return nil
 }
 
 func fieldToIndex(field string) (uint, bool) {
@@ -125,12 +137,11 @@ func (parser *pgnParser) parse() ([]Game, error) {
 			return nil, err
 		}
 
-		if ok := game.Verify(); !ok {
+		if err := game.Verify(); err != nil && err != ErrGameEndedEarly {
 			err := &PGNParseError{
 				LineNumber: parser.offset,
-				Message:    "game verification failed",
+				Message:    fmt.Sprintf("game verification failed: %s", err.Error()),
 			}
-
 			return nil, err
 		}
 
