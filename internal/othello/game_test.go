@@ -175,6 +175,14 @@ func TestLoadGamesFromPGN(t *testing.T) {
 		assert.Contains(t, err.Error(), "failed to parse white rating")
 	})
 
+	t.Run("BrokenUnexpectedFileEnd", func(t *testing.T) {
+		bytes, err := ioutil.ReadFile(assetsPath + "testdata/pgn/broken_unexpected_file_end.txt")
+		assert.Nil(t, err)
+
+		games, err := LoadGamesFromPGN(bytes)
+		assert.Nil(t, games)
+		assert.Contains(t, err.Error(), "unexpected file end")
+	})
 }
 
 func TestFieldToIndex(t *testing.T) {

@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 var (
@@ -282,5 +284,7 @@ func (parser *pgnParser) parseMoves(game *Game) error {
 
 		parser.offset++
 	}
-	return nil
+
+	// files should not end before the "discs at end of game" part
+	return errors.New("unexpected file end")
 }
