@@ -1,58 +1,69 @@
 package treesearch
 
 import (
+	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"testing"
 
 	"github.com/lk16/dots/internal/othello"
+	"github.com/stretchr/testify/assert"
 )
 
 var dummyBoard *othello.Board
 
 func BenchmarkMtdf(b *testing.B) {
+
+	assert.Nil(b, othello.LoadXotBoards())
+
 	rand.Seed(0)
 
-	var boards []othello.Board
-
-	if err := othello.LoadXotBoards(); err != nil {
-		b.Error(err)
-		b.FailNow()
+	type boardSet struct {
+		name   string
+		boards []othello.Board
 	}
 
-	for i := 0; i < 10; i++ {
-		boards = append(boards, *othello.NewXotBoard())
+	xotBoardset := boardSet{name: "Xot"}
+	for i := 0; i < 100; i++ {
+		xotBoardset.boards = append(xotBoardset.boards, *othello.NewXotBoard())
 	}
 
-	bot := NewBot(ioutil.Discard, 12, 18, NewMtdf(nil, FastHeuristic))
+	boardSets := []boardSet{xotBoardset}
 
-	for i := 0; i < b.N; i++ {
-		board := *othello.NewXotBoard()
-		dummyBoard, _ = bot.DoMove(board)
+	for depth := 20; depth <= 45; depth += 5 {
+		boardSet := boardSet{name: fmt.Sprintf("depth%d", depth)}
+		for i := 0; i < 100; i++ {
+			board, err := othello.NewRandomBoard(depth)
+			assert.Nil(b, err)
+			boardSet.boards = append(boardSet.boards, *board)
+		}
+		boardSets = append(boardSets, boardSet)
 	}
 
-}
-
-func BenchmarkMtdfCached(b *testing.B) {
-	rand.Seed(0)
-
-	var boards []othello.Board
-
-	if err := othello.LoadXotBoards(); err != nil {
-		b.Error(err)
-		b.FailNow()
+	type namedBot struct {
+		name string
+		bot  *Bot
 	}
 
-	for i := 0; i < 10; i++ {
-		boards = append(boards, *othello.NewXotBoard())
+	depth := 10
+	exactDepth := 0
+
+	namedBots := []namedBot{
+		{"NotCached", NewBot(ioutil.Discard, depth, exactDepth, NewMtdf(nil, FastHeuristic))},
+		{"Cached", NewBot(ioutil.Discard, depth, exactDepth, NewMtdf(NewMemoryCache(), FastHeuristic))},
 	}
 
-	cache := NewMemoryCache()
+	for _, boardSet := range boardSets {
+		for _, namedBot := range namedBots {
+			runName := fmt.Sprintf("%s/%s", boardSet.name, namedBot.name)
 
-	bot := NewBot(ioutil.Discard, 12, 18, NewMtdf(cache, FastHeuristic))
-
-	for i := 0; i < b.N; i++ {
-		board := *othello.NewXotBoard()
-		dummyBoard, _ = bot.DoMove(board)
+			b.Run(runName, func(b *testing.B) {
+				for i := 0; i < b.N; i++ {
+					board := *othello.NewXotBoard()
+					dummyBoard, _ = namedBot.bot.DoMove(board)
+				}
+			})
+		}
 	}
+
 }

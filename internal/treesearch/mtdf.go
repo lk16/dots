@@ -56,6 +56,10 @@ func (mtdf *Mtdf) Search(board othello.Board, alpha, beta, depth int) int {
 	mtdf.low = alpha
 	mtdf.high = beta
 
+	if cache, ok := mtdf.cache.(*MemoryCache); ok {
+		cache.Clear()
+	}
+
 	if depth >= board.CountEmpties() {
 		depth = 60
 	}
@@ -132,6 +136,38 @@ func (mtdf *Mtdf) handleNoMoves(alpha int) int {
 	return heur
 }
 
+func searchForSort(board *othello.Board, alpha, beta, depth int) int {
+
+	if depth == 0 {
+		return FastHeuristic(*board)
+	}
+
+	gen := othello.NewChildGenerator(board)
+
+	if !gen.HasMoves() {
+		if board.OpponentMoves() == 0 {
+			return ExactScoreFactor * board.ExactScore()
+		}
+
+		board.SwitchTurn()
+		heur := -searchForSort(board, -beta, -alpha, depth)
+		board.SwitchTurn()
+		return heur
+	}
+
+	for i := 0; gen.Next(); i++ {
+		heur := -searchForSort(board, -beta, -alpha, depth-1)
+		if heur >= beta {
+			gen.RestoreParent()
+			return beta
+		}
+		if heur > alpha {
+			alpha = heur
+		}
+	}
+	return alpha
+}
+
 func (mtdf *Mtdf) search(alpha int) int {
 	if mtdf.depth < minHashtableDepth {
 		return mtdf.searchNoHashtable(alpha)
@@ -166,7 +202,7 @@ func (mtdf *Mtdf) search(alpha int) int {
 
 	for i := range children {
 		copy := children[i].Board
-		children[i].Heur = -mtdf.sorter.searchNoSort(&copy, MinHeuristic, MaxHeuristic, mtdf.depth/4)
+		children[i].Heur = -searchForSort(&copy, MinHeuristic, MaxHeuristic, mtdf.depth/4)
 	}
 
 	sort.Slice(children, func(i, j int) bool {

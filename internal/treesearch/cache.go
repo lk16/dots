@@ -39,6 +39,14 @@ func NewMemoryCache() *MemoryCache {
 	}
 }
 
+// Clear empties the cache
+func (cacher *MemoryCache) Clear() {
+	cacher.Lock()
+	defer cacher.Unlock()
+
+	cacher.table = make(map[CacheKey]CacheValue, 10000)
+}
+
 // Lookup retrieves heuristic bounds on a board
 func (cacher *MemoryCache) Lookup(key CacheKey) (CacheValue, bool) {
 	cacher.Lock()
