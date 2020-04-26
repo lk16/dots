@@ -212,6 +212,9 @@ func (bot *Bot) computeAndSendMove(othelloBot *treesearch.Bot) (int, error) {
 		return 0, errors.Wrap(err, "failed to send move")
 	}
 
+	stats := othelloBot.LifetimeStats
+	info("total bot stats: %s", stats)
+
 	return move.CountDiscs(), nil
 }
 
