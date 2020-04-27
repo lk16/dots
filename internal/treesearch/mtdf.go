@@ -1,22 +1,13 @@
 package treesearch
 
 import (
-	"sync"
-
 	"github.com/lk16/dots/internal/othello"
 )
 
-var childrenPool = sync.Pool{
-	New: func() interface{} {
-		return new([32]othello.SortableBoard)
-	},
-}
-
 // Mtdf implements the mtdf tree search algorithm
 type Mtdf struct {
-	cache     Cacher
-	stats     Stats
-	heuristic func(othello.Board) int
+	cache Cacher
+	stats Stats
 }
 
 // NewMtdf returns a new Mtdf
@@ -25,9 +16,10 @@ func NewMtdf(cache Cacher, heuristic func(othello.Board) int) *Mtdf {
 		cache = &NoOpCache{}
 	}
 
+	_ = heuristic
+
 	return &Mtdf{
-		heuristic: heuristic,
-		cache:     cache,
+		cache: cache,
 	}
 }
 
@@ -77,7 +69,6 @@ func (mtdf *Mtdf) ExactSearch(board othello.Board, alpha, beta int) int {
 
 func slideWindow(board *othello.Board, alpha, beta, depth int) int {
 	f := FastHeuristic(*board)
-	step := 1
 
 	if f < alpha {
 		f = alpha
@@ -87,14 +78,14 @@ func slideWindow(board *othello.Board, alpha, beta, depth int) int {
 		f = beta
 	}
 
-	for beta-alpha >= step {
+	for alpha != beta {
 		bound := -nullWindow(board, -(f + 1), depth)
 
 		if f == bound {
-			f -= step
+			f--
 			beta = bound
 		} else {
-			f += step
+			f++
 			alpha = bound
 		}
 	}
