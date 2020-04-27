@@ -1,14 +1,9 @@
 package treesearch
 
 import (
-	"log"
 	"sync"
 
 	"github.com/lk16/dots/internal/othello"
-)
-
-const (
-	minHashtableDepth = 5
 )
 
 var childrenPool = sync.Pool{
@@ -19,14 +14,9 @@ var childrenPool = sync.Pool{
 
 // Mtdf implements the mtdf tree search algorithm
 type Mtdf struct {
-	board     othello.Board
-	high      int
-	low       int
-	depth     int
 	cache     Cacher
 	stats     Stats
 	heuristic func(othello.Board) int
-	sorter    Pvs
 }
 
 // NewMtdf returns a new Mtdf
@@ -38,7 +28,6 @@ func NewMtdf(cache Cacher, heuristic func(othello.Board) int) *Mtdf {
 	return &Mtdf{
 		heuristic: heuristic,
 		cache:     cache,
-		sorter:    *NewPvs(nil, heuristic),
 	}
 }
 
@@ -59,9 +48,6 @@ func (mtdf *Mtdf) ResetStats() {
 
 // Search searches for the the best move up to a certain depth
 func (mtdf *Mtdf) Search(board othello.Board, alpha, beta, depth int) int {
-	mtdf.low = alpha
-	mtdf.high = beta
-
 	if cache, ok := mtdf.cache.(*MemoryCache); ok {
 		cache.Clear()
 	}
@@ -70,10 +56,8 @@ func (mtdf *Mtdf) Search(board othello.Board, alpha, beta, depth int) int {
 		depth = 60
 	}
 
-	mtdf.board = board
 	mtdf.stats.StartClock()
-	mtdf.depth = depth
-	heuristic := mtdf.slideWindow()
+	heuristic := slideWindow(&board, alpha, beta, depth)
 	mtdf.stats.StopClock()
 	return heuristic
 }
@@ -83,12 +67,12 @@ func (mtdf *Mtdf) ExactSearch(board othello.Board, alpha, beta int) int {
 	return mtdf.Search(board, alpha*ExactScoreFactor, beta*ExactScoreFactor, 60) / ExactScoreFactor
 }
 
-func (mtdf *Mtdf) slideWindow() int {
+func slideWindow(board *othello.Board, alpha, beta, depth int) int {
 	var f int
 
 	var step int
-	if mtdf.depth < mtdf.board.CountEmpties() {
-		f = FastHeuristic(mtdf.board)
+	if depth < board.CountEmpties() {
+		f = Squared(*board)
 		step = 1
 	} else {
 		f = 0
@@ -98,212 +82,109 @@ func (mtdf *Mtdf) slideWindow() int {
 	// prevent odd results for exact search
 	f -= f % step
 
-	if f < mtdf.low {
-		f = mtdf.low
+	if f < alpha {
+		f = alpha
 	}
 
-	if f > mtdf.high {
-		f = mtdf.high
+	if f > beta {
+		f = beta
 	}
 
-	for mtdf.high-mtdf.low >= step {
+	for beta-alpha >= step {
 		var bound int
 
-		if mtdf.depth < mtdf.board.CountEmpties() {
-			bound = -mtdf.search(-(f + 1))
+		if depth < board.CountEmpties() {
+			bound = -nullWindow(board, -(f + 1), depth)
 		} else {
-			bound = -mtdf.searchNoHashtable(-(f + 1))
+			bound = -nullWindow(board, -(f + 1), depth)
 		}
 
 		if f == bound {
 			f -= step
-			mtdf.high = bound
+			beta = bound
 		} else {
 			f += step
-			mtdf.low = bound
+			alpha = bound
 		}
 	}
 
-	return mtdf.high
+	return beta
 }
 
-func (mtdf *Mtdf) handleNoMoves(alpha int) int {
-	if mtdf.board.OpponentMoves() == 0 {
-		heur := ExactScoreFactor * mtdf.board.ExactScore()
-		if heur > alpha {
-			return alpha + 1
-		}
-		return alpha
-	}
-
-	mtdf.board.SwitchTurn()
-	heur := -mtdf.search(-(alpha + 1))
-	mtdf.board.SwitchTurn()
-	return heur
-}
-
-func searchForSort(board *othello.Board, alpha, beta, depth int) int {
-
+func nullWindow(board *othello.Board, alpha, depth int) int {
 	if depth == 0 {
-		return FastHeuristic(*board)
-	}
-
-	gen := othello.NewChildGenerator(board)
-
-	if !gen.HasMoves() {
-		if board.OpponentMoves() == 0 {
-			return ExactScoreFactor * board.ExactScore()
-		}
-
-		board.SwitchTurn()
-		heur := -searchForSort(board, -beta, -alpha, depth)
-		board.SwitchTurn()
-		return heur
-	}
-
-	for i := 0; gen.Next(); i++ {
-		heur := -searchForSort(board, -beta, -alpha, depth-1)
-		if heur >= beta {
-			gen.RestoreParent()
-			return beta
-		}
-		if heur > alpha {
-			alpha = heur
-		}
-	}
-	return alpha
-}
-
-func (mtdf *Mtdf) search(alpha int) int {
-	if mtdf.depth < minHashtableDepth {
-		return mtdf.searchNoHashtable(alpha)
-	}
-
-	cacheKey := CacheKey{board: mtdf.board.Normalize(), depth: mtdf.depth}
-	var cacheValue CacheValue
-
-	var ok bool
-	if cacheValue, ok = mtdf.cache.Lookup(cacheKey); ok {
-		if cacheValue.alpha > alpha {
-			return alpha + 1
-		}
-
-		if cacheValue.beta < alpha+1 {
-			return alpha
-		}
-	} else {
-		cacheValue = CacheValue{
-			alpha: MinHeuristic,
-			beta:  MaxHeuristic,
-		}
-	}
-
-	mtdf.stats.Nodes++
-
-	children := childrenPool.Get().(*[32]othello.SortableBoard)
-
-	childCount := mtdf.board.PutSortableChildren(children)
-
-	if childCount == 0 {
-		return mtdf.handleNoMoves(alpha)
-	}
-
-	for i := 0; i < childCount; i++ {
-		copy := children[i].Board
-		children[i].Heur = -searchForSort(&copy, MinHeuristic, MaxHeuristic, mtdf.depth/4)
-	}
-
-	sortFunc := func(children *[32]othello.SortableBoard) {
-		for i := 0; i < childCount; i++ {
-			for j := 0; j < childCount; j++ {
-				if j <= i {
-					continue
-				}
-				if children[i].Heur < children[j].Heur {
-					children[i], children[j] = children[j], children[i]
-				}
-			}
-		}
-	}
-
-	sortFunc(children)
-
-	/*sort.Slice(children, func(i, j int) bool {
-		return children[i].Heur > children[j].Heur
-	})*/
-
-	heur := alpha
-	mtdf.depth--
-	parent := mtdf.board
-	for i := 0; i < childCount; i++ {
-		mtdf.board = children[i].Board
-		childHeur := -mtdf.search(-(alpha + 1))
-		if childHeur > alpha {
-			heur = alpha + 1
-			break
-		}
-	}
-	mtdf.board = parent
-	mtdf.depth++
-
-	if heur == alpha {
-		if heur < cacheValue.beta {
-			cacheValue.beta = heur
-		}
-	} else {
-		if heur > cacheValue.alpha {
-			cacheValue.alpha = heur
-		}
-	}
-
-	if err := mtdf.cache.Save(cacheKey, cacheValue); err != nil {
-		log.Printf("warning: saving cache value failed: %s", err.Error())
-	}
-
-	childrenPool.Put(children)
-
-	return heur
-}
-
-func (mtdf *Mtdf) searchNoHashtable(alpha int) int {
-	mtdf.stats.Nodes++
-
-	if mtdf.depth == 0 {
-		heur := mtdf.heuristic(mtdf.board)
+		heur := Squared(*board)
 		if heur > alpha {
 			return alpha + 1
 		}
 		return alpha
 	}
 
-	gen := othello.NewChildGenerator(&mtdf.board)
+	moves := board.Moves()
+	lastMove := othello.BitSet(0)
+	lastFlipped := othello.BitSet(0)
 
-	if !gen.HasMoves() {
-		if mtdf.board.OpponentMoves() == 0 {
-			heur := ExactScoreFactor * mtdf.board.ExactScore()
+	//gen := othello.NewChildGenerator(board)
+
+	if moves == 0 {
+		if board.OpponentMoves() == 0 {
+			heur := ExactScoreFactor * board.ExactScore()
 			if heur > alpha {
 				return alpha + 1
 			}
 			return alpha
 		}
 
-		mtdf.board.SwitchTurn()
-		heur := -mtdf.searchNoHashtable(-(alpha + 1))
-		mtdf.board.SwitchTurn()
+		board.SwitchTurn()
+		heur := -nullWindow(board, -(alpha + 1), depth)
+		board.SwitchTurn()
 		return heur
 	}
 
+	/*if depth > 5 {
+		bestChildHeur := MinHeuristic
+		var bestChild othello.Board
+		for gen.Next() {
+			childHeur := slideWindow(board, bestChildHeur, MaxHeuristic, 2)
+			if childHeur > bestChildHeur {
+				bestChildHeur = childHeur
+				bestChild = *board
+			}
+		}
+
+		if bestChildHeur != MinHeuristic {
+			childHeur := -nullWindow(&bestChild, -(alpha + 1), depth-1)
+			if childHeur > alpha {
+				return alpha + 1
+			}
+		}
+
+		gen = othello.NewChildGenerator(board)
+	}*/
+
 	heur := alpha
-	mtdf.depth--
-	for gen.Next() {
-		childHeur := -mtdf.searchNoHashtable(-(alpha + 1))
+	movesLeft := moves
+
+	for {
+		if lastFlipped != 0 {
+			board.UndoMove(lastMove, lastFlipped)
+		}
+
+		if movesLeft == 0 {
+			break
+		}
+
+		lastMove = movesLeft & (-movesLeft)
+		lastFlipped = board.DoMove(lastMove)
+		movesLeft &^= lastMove
+
+		childHeur := -nullWindow(board, -(alpha + 1), depth-1)
 		if childHeur > alpha {
-			gen.RestoreParent()
+			board.UndoMove(lastMove, lastFlipped)
 			heur = alpha + 1
 			break
 		}
 	}
-	mtdf.depth++
 
 	return heur
 }
