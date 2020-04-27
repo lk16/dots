@@ -121,8 +121,8 @@ func nullWindow(board *othello.Board, alpha, depth int) int {
 	}
 
 	moves := board.Moves()
-	lastMove := othello.BitSet(0)
-	lastFlipped := othello.BitSet(0)
+	moveBit := othello.BitSet(0)
+	flipped := othello.BitSet(0)
 
 	//gen := othello.NewChildGenerator(board)
 
@@ -162,29 +162,22 @@ func nullWindow(board *othello.Board, alpha, depth int) int {
 		gen = othello.NewChildGenerator(board)
 	}*/
 
-	heur := alpha
 	movesLeft := moves
 
-	for {
-		if lastFlipped != 0 {
-			board.UndoMove(lastMove, lastFlipped)
-		}
-
-		if movesLeft == 0 {
-			break
-		}
-
-		lastMove = movesLeft & (-movesLeft)
-		lastFlipped = board.DoMove(lastMove)
-		movesLeft &^= lastMove
+	for movesLeft != 0 {
+		moveBit = movesLeft & (-movesLeft)
+		flipped = board.DoMove(moveBit)
+		movesLeft &^= moveBit
 
 		childHeur := -nullWindow(board, -(alpha + 1), depth-1)
+
 		if childHeur > alpha {
-			board.UndoMove(lastMove, lastFlipped)
-			heur = alpha + 1
-			break
+			board.UndoMove(moveBit, flipped)
+			return alpha + 1
 		}
+
+		board.UndoMove(moveBit, flipped)
 	}
 
-	return heur
+	return alpha
 }
