@@ -67,12 +67,13 @@ func (mtdf *Mtdf) ExactSearch(board othello.Board, alpha, beta int) int {
 	return mtdf.Search(board, alpha*ExactScoreFactor, beta*ExactScoreFactor, 60) / ExactScoreFactor
 }
 
-func slideWindow(board *othello.Board, alpha, beta, depth int) int {
+func slideWindowExact(board *othello.Board, alpha, beta, depth int) int {
+	// TODO
 	var f int
 
 	var step int
 	if depth < board.CountEmpties() {
-		f = Squared(*board)
+		f = FastHeuristic(*board)
 		step = 1
 	} else {
 		f = 0
@@ -111,22 +112,52 @@ func slideWindow(board *othello.Board, alpha, beta, depth int) int {
 	return beta
 }
 
+func slideWindow(board *othello.Board, alpha, beta, depth int) int {
+
+	if board.CountEmpties() <= depth {
+		return slideWindowExact(board, alpha, beta, depth)
+	}
+
+	f := FastHeuristic(*board)
+	step := 1
+
+	if f < alpha {
+		f = alpha
+	}
+
+	if f > beta {
+		f = beta
+	}
+
+	for beta-alpha >= step {
+		bound := -nullWindow(board, -(f + 1), depth)
+
+		if f == bound {
+			f -= step
+			beta = bound
+		} else {
+			f += step
+			alpha = bound
+		}
+	}
+
+	return beta
+}
+
 func nullWindow(board *othello.Board, alpha, depth int) int {
 	if depth == 0 {
-		heur := Squared(*board)
+		heur := FastHeuristic(*board)
 		if heur > alpha {
 			return alpha + 1
 		}
 		return alpha
 	}
 
-	moves := board.Moves()
+	movesLeft := board.Moves()
 	moveBit := othello.BitSet(0)
 	flipped := othello.BitSet(0)
 
-	//gen := othello.NewChildGenerator(board)
-
-	if moves == 0 {
+	if movesLeft == 0 {
 		if board.OpponentMoves() == 0 {
 			heur := ExactScoreFactor * board.ExactScore()
 			if heur > alpha {
@@ -141,28 +172,37 @@ func nullWindow(board *othello.Board, alpha, depth int) int {
 		return heur
 	}
 
-	/*if depth > 5 {
+	if depth > 5 {
+		moves := movesLeft
+
 		bestChildHeur := MinHeuristic
-		var bestChild othello.Board
-		for gen.Next() {
-			childHeur := slideWindow(board, bestChildHeur, MaxHeuristic, 2)
+		var bestMoveBit othello.BitSet
+
+		for movesLeft != 0 {
+			moveBit = movesLeft & (-movesLeft)
+			flipped = board.DoMove(moveBit)
+			movesLeft &^= moveBit
+
+			childHeur := slideWindow(board, bestChildHeur, MaxHeuristic, depth/4)
 			if childHeur > bestChildHeur {
 				bestChildHeur = childHeur
-				bestChild = *board
+				bestMoveBit = moveBit
 			}
+
+			board.UndoMove(moveBit, flipped)
 		}
 
 		if bestChildHeur != MinHeuristic {
-			childHeur := -nullWindow(&bestChild, -(alpha + 1), depth-1)
+			flipped = board.DoMove(bestMoveBit)
+			childHeur := -nullWindow(board, -(alpha + 1), depth-1)
+			board.UndoMove(bestMoveBit, flipped)
 			if childHeur > alpha {
 				return alpha + 1
 			}
 		}
 
-		gen = othello.NewChildGenerator(board)
-	}*/
-
-	movesLeft := moves
+		movesLeft = moves
+	}
 
 	for movesLeft != 0 {
 		moveBit = movesLeft & (-movesLeft)

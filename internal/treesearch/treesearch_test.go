@@ -182,10 +182,10 @@ func TestTreeSearch(t *testing.T) {
 	rand.Seed(0)
 	testedBoards := make(map[othello.Board]struct{})
 
-	minimax := NewMinimax(Squared)
-	mtdf := NewMtdf(nil, Squared)
-	cachedMtdf := NewMtdf(NewMemoryCache(), Squared)
-	pvs := NewPvs(nil, Squared)
+	minimax := NewMinimax(FastHeuristic)
+	mtdf := NewMtdf(nil, FastHeuristic)
+	cachedMtdf := NewMtdf(NewMemoryCache(), FastHeuristic)
+	pvs := NewPvs(nil, FastHeuristic)
 
 	for i := 0; i < 100; i++ {
 		fmt.Printf("\rRunning: %2d%%", i)
@@ -235,9 +235,9 @@ func TestTreeSearchExact(t *testing.T) {
 	rand.Seed(0)
 	testedBoards := make(map[othello.Board]struct{})
 
-	minimax := NewMinimax(Squared)
-	mtdf := NewMtdf(nil, Squared)
-	pvs := NewPvs(nil, Squared)
+	minimax := NewMinimax(FastHeuristic)
+	mtdf := NewMtdf(nil, FastHeuristic)
+	pvs := NewPvs(nil, FastHeuristic)
 
 	for i := 0; i < 20; i++ {
 		for discs := 56; discs < 64; discs++ {

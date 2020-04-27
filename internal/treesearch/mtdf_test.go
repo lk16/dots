@@ -45,7 +45,7 @@ func BenchmarkSearch(b *testing.B) {
 		bot  *Bot
 	}
 
-	depth := 9
+	depth := 12
 	exactDepth := 0
 
 	namedBots := []namedBot{
