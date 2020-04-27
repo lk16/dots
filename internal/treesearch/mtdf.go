@@ -57,7 +57,15 @@ func (mtdf *Mtdf) Search(board othello.Board, alpha, beta, depth int) int {
 	}
 
 	mtdf.stats.StartClock()
+
+	if board.CountEmpties() <= depth {
+		// TODO
+		pvs := NewPvs(nil, FastHeuristic)
+		return ExactScoreFactor * pvs.ExactSearch(board, alpha, beta)
+	}
+
 	heuristic := slideWindow(&board, alpha, beta, depth)
+
 	mtdf.stats.StopClock()
 	return heuristic
 }
@@ -67,57 +75,7 @@ func (mtdf *Mtdf) ExactSearch(board othello.Board, alpha, beta int) int {
 	return mtdf.Search(board, alpha*ExactScoreFactor, beta*ExactScoreFactor, 60) / ExactScoreFactor
 }
 
-func slideWindowExact(board *othello.Board, alpha, beta, depth int) int {
-	// TODO
-	var f int
-
-	var step int
-	if depth < board.CountEmpties() {
-		f = FastHeuristic(*board)
-		step = 1
-	} else {
-		f = 0
-		step = 2 * ExactScoreFactor
-	}
-
-	// prevent odd results for exact search
-	f -= f % step
-
-	if f < alpha {
-		f = alpha
-	}
-
-	if f > beta {
-		f = beta
-	}
-
-	for beta-alpha >= step {
-		var bound int
-
-		if depth < board.CountEmpties() {
-			bound = -nullWindow(board, -(f + 1), depth)
-		} else {
-			bound = -nullWindow(board, -(f + 1), depth)
-		}
-
-		if f == bound {
-			f -= step
-			beta = bound
-		} else {
-			f += step
-			alpha = bound
-		}
-	}
-
-	return beta
-}
-
 func slideWindow(board *othello.Board, alpha, beta, depth int) int {
-
-	if board.CountEmpties() <= depth {
-		return slideWindowExact(board, alpha, beta, depth)
-	}
-
 	f := FastHeuristic(*board)
 	step := 1
 

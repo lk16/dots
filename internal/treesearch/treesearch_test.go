@@ -188,8 +188,8 @@ func TestTreeSearch(t *testing.T) {
 	pvs := NewPvs(nil, FastHeuristic)
 
 	for i := 0; i < 100; i++ {
-		fmt.Printf("\rRunning: %2d%%", i)
 		for discs := 48; discs < 64; discs++ {
+			fmt.Printf("\rIteration: %2d Discs: %2d", i, discs)
 
 			board, err := othello.NewRandomBoard(discs)
 			if err != nil {
