@@ -12,7 +12,7 @@ import (
 
 var dummyBoard *othello.Board
 
-func BenchmarkMtdf(b *testing.B) {
+func BenchmarkSearch(b *testing.B) {
 
 	assert.Nil(b, othello.LoadXotBoards())
 
@@ -49,8 +49,10 @@ func BenchmarkMtdf(b *testing.B) {
 	exactDepth := 0
 
 	namedBots := []namedBot{
-		{"NotCached", NewBot(ioutil.Discard, depth, exactDepth, NewMtdf(nil, FastHeuristic))},
-		{"Cached", NewBot(ioutil.Discard, depth, exactDepth, NewMtdf(NewMemoryCache(), FastHeuristic))},
+		{"MtdfNotCached", NewBot(ioutil.Discard, depth, exactDepth, NewMtdf(nil, FastHeuristic))},
+		{"MtdfCached", NewBot(ioutil.Discard, depth, exactDepth, NewMtdf(NewMemoryCache(), FastHeuristic))},
+		{"PvsNotCached", NewBot(ioutil.Discard, depth, exactDepth, NewPvs(nil, FastHeuristic))},
+		{"PvsCached", NewBot(ioutil.Discard, depth, exactDepth, NewPvs(NewMemoryCache(), FastHeuristic))},
 	}
 
 	for _, boardSet := range boardSets {
@@ -58,6 +60,9 @@ func BenchmarkMtdf(b *testing.B) {
 			runName := fmt.Sprintf("%s/%s", boardSet.name, namedBot.name)
 
 			b.Run(runName, func(b *testing.B) {
+
+				b.ReportAllocs()
+
 				for i := 0; i < b.N; i++ {
 					board := *othello.NewXotBoard()
 					dummyBoard, _ = namedBot.bot.DoMove(board)

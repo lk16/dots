@@ -2,7 +2,7 @@ package treesearch
 
 import (
 	"log"
-	"sort"
+	"sync"
 
 	"github.com/lk16/dots/internal/othello"
 )
@@ -10,6 +10,12 @@ import (
 const (
 	minHashtableDepth = 5
 )
+
+var childrenPool = sync.Pool{
+	New: func() interface{} {
+		return new([32]othello.SortableBoard)
+	},
+}
 
 // Mtdf implements the mtdf tree search algorithm
 type Mtdf struct {
@@ -194,26 +200,43 @@ func (mtdf *Mtdf) search(alpha int) int {
 
 	mtdf.stats.Nodes++
 
-	children := mtdf.board.GetSortableChildren()
+	children := childrenPool.Get().(*[32]othello.SortableBoard)
 
-	if len(children) == 0 {
+	childCount := mtdf.board.PutSortableChildren(children)
+
+	if childCount == 0 {
 		return mtdf.handleNoMoves(alpha)
 	}
 
-	for i := range children {
+	for i := 0; i < childCount; i++ {
 		copy := children[i].Board
 		children[i].Heur = -searchForSort(&copy, MinHeuristic, MaxHeuristic, mtdf.depth/4)
 	}
 
-	sort.Slice(children, func(i, j int) bool {
+	sortFunc := func(children *[32]othello.SortableBoard) {
+		for i := 0; i < childCount; i++ {
+			for j := 0; j < childCount; j++ {
+				if j <= i {
+					continue
+				}
+				if children[i].Heur < children[j].Heur {
+					children[i], children[j] = children[j], children[i]
+				}
+			}
+		}
+	}
+
+	sortFunc(children)
+
+	/*sort.Slice(children, func(i, j int) bool {
 		return children[i].Heur > children[j].Heur
-	})
+	})*/
 
 	heur := alpha
 	mtdf.depth--
 	parent := mtdf.board
-	for _, child := range children {
-		mtdf.board = child.Board
+	for i := 0; i < childCount; i++ {
+		mtdf.board = children[i].Board
 		childHeur := -mtdf.search(-(alpha + 1))
 		if childHeur > alpha {
 			heur = alpha + 1
@@ -236,6 +259,8 @@ func (mtdf *Mtdf) search(alpha int) int {
 	if err := mtdf.cache.Save(cacheKey, cacheValue); err != nil {
 		log.Printf("warning: saving cache value failed: %s", err.Error())
 	}
+
+	childrenPool.Put(children)
 
 	return heur
 }

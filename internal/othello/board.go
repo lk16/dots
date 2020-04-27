@@ -132,6 +132,25 @@ func (board Board) GetSortableChildren() []SortableBoard {
 	return children
 }
 
+// PutSortableChildren puts all children of a Board in the provided array
+// It returns the number of children
+func (board Board) PutSortableChildren(outArray *[32]SortableBoard) int {
+	moves := board.Moves()
+
+	moveCount := 0
+	for moves != 0 {
+		moveBit := moves & (-moves)
+		moves &^= moveBit
+
+		outArray[moveCount].Board = board
+		outArray[moveCount].Board.DoMove(moveBit)
+		outArray[moveCount].Heur = 0
+
+		moveCount++
+	}
+	return moveCount
+}
+
 // GetMoveField computes the index of the move given a child and a parent
 func (board Board) GetMoveField(child Board) (int, bool) {
 	moveBit := board.Me() | board.Opp() ^ (child.Me() | child.Opp())
