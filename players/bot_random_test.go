@@ -1,7 +1,7 @@
 package players
 
 import (
-	"dots/board"
+	"github.com/lk16/dots/board"
 	"testing"
 )
 

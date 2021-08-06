@@ -8,7 +8,7 @@ import (
 	"math/bits"
 	"os"
 
-	"dots/board"
+	"github.com/lk16/dots/board"
 )
 
 // CommandLine is used for command line interaction

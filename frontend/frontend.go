@@ -1,7 +1,7 @@
 package frontend
 
 import (
-	"dots/board"
+	"github.com/lk16/dots/board"
 )
 
 // Frontend is an interface for frontends of Controller
@@ -15,7 +15,6 @@ type Frontend interface {
 func Get(name string) Frontend {
 
 	frontendMap := map[string]func() Frontend{
-		"gtk": NewkGtkFrontend,
 		"cli": NewCommandLine}
 
 	if newFrontend, ok := frontendMap[name]; ok {

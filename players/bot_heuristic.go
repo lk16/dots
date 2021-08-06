@@ -6,7 +6,7 @@ import (
 	"io"
 	"time"
 
-	"dots/board"
+	"github.com/lk16/dots/board"
 )
 
 func max(x, y int) int {

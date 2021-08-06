@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
-	"dots/evolution"
-	"dots/frontend"
-	"dots/players"
+	"github.com/lk16/dots/evolution"
+	"github.com/lk16/dots/frontend"
+	"github.com/lk16/dots/players"
 
 	"runtime/pprof"
 )

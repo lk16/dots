@@ -1,8 +1,6 @@
 package evolution
 
 import (
-	"dots/board"
-	"dots/players"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -15,6 +13,9 @@ import (
 	"sort"
 	"syscall"
 	"time"
+
+	"github.com/lk16/dots/board"
+	"github.com/lk16/dots/players"
 )
 
 const (
