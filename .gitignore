@@ -6,3 +6,4 @@ pgn/
 .vscode/
 profile
 *.code-workspace
+evolution.json
