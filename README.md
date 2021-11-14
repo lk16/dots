@@ -25,5 +25,19 @@ Othello game with AI
 ### How to run tests:
 * Run `./test.sh`
 
+---
+
+# Dots Eval
+Command line tool to evaluate one position. Outputs JSON response
+
+Not available as endpoint because:
+- Denial of Service risk
+- This is a quick hack
+
+# How to use:
+```sh
+./dots-eval -me 0x301c080400 -opp 0x80a02020000 -depth 7 -exact 14
+```
+
 ### Upcoming features:
 * See [TODO](TODO.md) file
