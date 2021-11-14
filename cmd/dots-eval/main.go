@@ -13,10 +13,12 @@ import (
 	"github.com/lk16/dots/internal/treesearch"
 )
 
+// ErrorOutput is an error output model
 type ErrorOutput struct {
 	Error string `json:"error"`
 }
 
+// Output is an output model that reports success
 type Output struct {
 	BestMove int `json:"move"`
 }
@@ -49,7 +51,9 @@ func main() {
 
 	if err != nil {
 		output := ErrorOutput{Error: err.Error()}
-		json.NewEncoder(os.Stdout).Encode(output)
+		if err := json.NewEncoder(os.Stdout).Encode(output); err != nil {
+			log.Printf("Failed to write to stdout: %s", err.Error())
+		}
 		return
 	}
 
@@ -60,12 +64,16 @@ func main() {
 
 	if newDiscMask.Count() != 1 {
 		output := ErrorOutput{Error: fmt.Sprintf("disc difference of one move is %d", newDiscMask.Count())}
-		json.NewEncoder(os.Stdout).Encode(output)
+		if err := json.NewEncoder(os.Stdout).Encode(output); err != nil {
+			log.Printf("Failed to write to stdout: %s", err.Error())
+		}
 		return
 	}
 
-	best_move := newDiscMask.Lowest()
+	bestMove := newDiscMask.Lowest()
 
-	output := Output{BestMove: best_move}
-	json.NewEncoder(os.Stdout).Encode(output)
+	output := Output{BestMove: bestMove}
+	if err := json.NewEncoder(os.Stdout).Encode(output); err != nil {
+		log.Printf("Failed to write to stdout: %s", err.Error())
+	}
 }
