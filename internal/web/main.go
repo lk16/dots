@@ -2,14 +2,18 @@
 package web
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
 
 	svg "github.com/ajstarks/svgo"
 	"github.com/gorilla/websocket"
+	"github.com/lk16/dots/internal/othello"
 	"github.com/lk16/dots/internal/treesearch"
 )
 
@@ -112,6 +116,78 @@ func svgIcon(w http.ResponseWriter, _ *http.Request) {
 	canvas.End()
 }
 
+func getHeuristic(w http.ResponseWriter, r *http.Request) {
+	var (
+		me, opp       uint64
+		err           error
+		search, exact int64
+	)
+
+	w.Header().Add("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+
+	me, err = strconv.ParseUint(strings.ReplaceAll(r.URL.Query().Get("me"), "0x", ""), 16, 64)
+
+	if err != nil {
+		w.WriteHeader(400)
+		encoder.Encode(HeuristicError{Where: "me", Error: err.Error()})
+		return
+	}
+
+	opp, err = strconv.ParseUint(strings.ReplaceAll(r.URL.Query().Get("opp"), "0x", ""), 16, 64)
+
+	if err != nil {
+		w.WriteHeader(400)
+		encoder.Encode(HeuristicError{Where: "opp", Error: err.Error()})
+		return
+	}
+
+	search, err = strconv.ParseInt(r.URL.Query().Get("search"), 10, 64)
+
+	if err != nil {
+		w.WriteHeader(400)
+		encoder.Encode(HeuristicError{Where: "search", Error: err.Error()})
+		return
+	}
+
+	exact, err = strconv.ParseInt(r.URL.Query().Get("exact"), 10, 64)
+
+	if err != nil {
+		w.WriteHeader(400)
+		encoder.Encode(HeuristicError{Where: "exact", Error: err.Error()})
+		return
+	}
+
+	board := othello.NewCustomBoard(othello.BitSet(me), othello.BitSet(opp))
+
+	bot := treesearch.NewBot(os.Stdout, int(search), int(exact), treesearch.NewPvs(treesearch.Squared))
+
+	bestChild, heur, err := bot.DoMove(*board)
+
+	if err != nil {
+		w.WriteHeader(400)
+		encoder.Encode(HeuristicError{Where: "do_move", Error: err.Error()})
+		return
+	}
+
+	discsBefore := board.Me() | board.Opp()
+	discsAfter := bestChild.Me() | bestChild.Opp()
+
+	newDiscMask := discsBefore ^ discsAfter
+	bestMove := newDiscMask.Lowest()
+
+	response := HeuristicResponse{
+		Me:        me,
+		Opp:       opp,
+		Search:    uint64(search),
+		Exact:     uint64(exact),
+		BestMove:  bestMove,
+		Heuristic: heur,
+	}
+
+	encoder.Encode(response)
+}
+
 // TODO replace by something better
 type logger struct{}
 
@@ -126,6 +202,7 @@ func Main() {
 	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("internal/web/static"))))
 	http.HandleFunc("/svg/field", svgField)
 	http.HandleFunc("/svg/icon", svgIcon)
+	http.HandleFunc("/heuristic", getHeuristic)
 	http.HandleFunc("/", root)
 	addr := "0.0.0.0:8080"
 	log.Printf("Server running at %s", addr)

@@ -40,11 +40,11 @@ func (bot *Bot) writef(format string, args ...interface{}) {
 }
 
 // DoMove computes the best child of a Board
-func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
+func (bot *Bot) DoMove(board othello.Board) (*othello.Board, int, error) {
 	children := board.GetSortableChildren()
 
 	if len(children) == 0 {
-		return nil, ErrNoMoves
+		return nil, 0, ErrNoMoves
 	}
 
 	// prevent returning empty Board when bot cannot prevent losing all discs
@@ -52,23 +52,24 @@ func (bot *Bot) DoMove(board othello.Board) (*othello.Board, error) {
 
 	if len(children) == 1 {
 		bot.writef("Only one move. Skipping evaluation.\n")
-		return &afterwards, nil
+		return &afterwards, 0, nil
 	}
 
 	emptiesCount := board.CountEmpties()
 
 	var bestChild othello.Board
+	var heur int
 
 	if emptiesCount > bot.exactDepth {
-		bestChild = bot.findBestChild(board)
+		bestChild, heur = bot.findBestChild(board)
 	} else {
-		bestChild = bot.findBestChildExact(board)
+		bestChild, heur = bot.findBestChildExact(board)
 	}
 
-	return &bestChild, nil
+	return &bestChild, heur, nil
 }
 
-func (bot *Bot) findBestChild(board othello.Board) othello.Board {
+func (bot *Bot) findBestChild(board othello.Board) (othello.Board, int) {
 	var (
 		depth     = bot.searchDepth
 		alpha     = MinHeuristic
@@ -119,10 +120,10 @@ func (bot *Bot) findBestChild(board othello.Board) othello.Board {
 	bot.writef("\n%12s %63s\n\n\n", "Total:", totalStats.String())
 	bot.LifetimeStats.Add(totalStats)
 
-	return bestChild
+	return bestChild, alpha
 }
 
-func (bot *Bot) findBestChildExact(board othello.Board) othello.Board {
+func (bot *Bot) findBestChildExact(board othello.Board) (othello.Board, int) {
 	var (
 		alpha      = MinScore
 		beta       = MaxScore
@@ -156,5 +157,5 @@ func (bot *Bot) findBestChildExact(board othello.Board) othello.Board {
 	bot.writef("\n%12s %63s\n\n\n", "Total:", totalStats.String())
 	bot.LifetimeStats.Add(totalStats)
 
-	return bestChild
+	return bestChild, alpha
 }

@@ -37,3 +37,17 @@ type analyzeMoveReply struct {
 type xotReply struct {
 	State boardState `json:"state"`
 }
+
+type HeuristicResponse struct {
+	Me        uint64 `json:"me"`
+	Opp       uint64 `json:"opp"`
+	Search    uint64 `json:"search"`
+	Exact     uint64 `json:"exact"`
+	BestMove  int    `json:"bestmove"`
+	Heuristic int    `json:"heuristic"`
+}
+
+type HeuristicError struct {
+	Where string `json:"where"`
+	Error string `json:"error"`
+}
